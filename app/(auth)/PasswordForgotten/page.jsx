@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+
 import Image from "next/image";
 
 const page = () => {
-  const [showPassword, setShowPassword] = useState(false);
+ 
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center bg-gradient-to-br from-green-50 to-white relative">
@@ -37,11 +36,10 @@ const page = () => {
 
           <div className="mb-8">
             <h1 className="text-xl font-medium text-gray-800 mb-1">
-              Bienvenue chez GreenMetric 👋
+              Password forgotten 👋
             </h1>
             <p className="text-sm text-gray-600">
-              Connectez-vous à votre compte GreenMetric pour continuer.
-            </p>
+            Entrez votre e-mail pour le processus de vérification, nous vous enverrons un code à 4 chiffres à votre e-mail.            </p>
           </div>
 
           <form className="">
@@ -56,43 +54,13 @@ const page = () => {
               />
             </div>
 
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Mot de passe <span className="text-red-600 font-bold">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Tapez votre mot de passe"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                >
-                  {showPassword ? (
-                    <EyeOffIcon size={20} />
-                  ) : (
-                    <EyeIcon size={20} />
-                  )}
-                </button>
-              </div>
-              <a
-                href="/PasswordForgotten"
-                className="text-xs text-gray-500 
-                underline mt-2 " 
-              >
-                Mot de passe oublié ?
-              </a>
-            </div>
-
+     
             <button
               type="submit"
               className="w-full primary-clr-bg text-white font-medium py-2
                rounded-md  mt-10 transition-colors"
             >
-              S&apos;authentifier
+              Envoyer une instruction de réinitialisation
             </button>
 
             <p className="text-sm text-gray-600 text-center mt-1">
@@ -108,7 +76,7 @@ const page = () => {
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-full max-w-sm">
               <img
-                src="/Auth illustrations/Login illustration.png"
+                src="/Auth illustrations/Forgot password.png"
                 alt="Login illustration"
                 className="w-full h-auto"
               />
