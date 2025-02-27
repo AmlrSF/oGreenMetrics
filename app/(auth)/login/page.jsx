@@ -2,10 +2,45 @@
 
 import { useState } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { Toaster } from "react-hot-toast";
+import axios from "axios";
 import Image from "next/image";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const page = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const { push } = useRouter();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+  
+    const payload = { email, mot_de_passe: password };
+    console.log(payload);
+  
+    try {
+      const response = await axios.post("http://localhost:4000/login", payload, {
+        withCredentials: true, // Ensures cookies are sent with the request
+      });
+  
+      console.log("Login successful:", response.data);
+  
+      if (response.data?.user) {
+
+        toast.success("Login successful!");
+        //router.push("/dashboard");
+      } else {
+        toast.error(response.data?.error || "Login failed. Please try again.");
+      }
+  
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred during login. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center bg-gradient-to-br from-green-50 to-white relative">
@@ -23,16 +58,12 @@ const page = () => {
         alt="shape 2"
         className="absolute top-0 right-0  "
       />
-
+      
       <div className="bg-white z-20 p-8 rounded-lg shadow-lg w-full max-w-4xl flex gap-8 items-center">
+        <Toaster position="top-right" />
         <div className="flex-1 space-y-6">
           <div className="flex items-center  mb-8">
-            <Image
-              src="/logo.png"
-              width={150}
-              height={150}
-              alt="logo"
-            />
+            <Image src="/logo.png" width={150} height={150} alt="logo" />
           </div>
 
           <div className="mb-8">
@@ -44,13 +75,16 @@ const page = () => {
             </p>
           </div>
 
-          <form className="">
+          <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label className="block text-sm text-gray-700 mb-1">
                 Adresse e-mail <span className="text-red-600 font-bold">*</span>
               </label>
               <input
                 type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Tapez votre adresse email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               />
@@ -64,6 +98,9 @@ const page = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Tapez votre mot de passe"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                 />
                 <button
@@ -81,7 +118,7 @@ const page = () => {
               <a
                 href="/PasswordForgotten"
                 className="text-xs text-gray-500 
-                underline mt-2 " 
+                underline mt-2 "
               >
                 Mot de passe oublié ?
               </a>
