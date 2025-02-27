@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IconEye, IconEyeOff } from '@tabler/icons-react'; // Using Tabler icons instead of Lucide
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import Image from "next/image";
 
 const page = () => {
