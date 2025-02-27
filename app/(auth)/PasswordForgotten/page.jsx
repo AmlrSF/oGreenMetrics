@@ -1,11 +1,8 @@
 "use client";
 
-
 import Image from "next/image";
 
 const page = () => {
- 
-
   return (
     <div className="min-h-screen bg-white flex items-center justify-center bg-gradient-to-br from-green-50 to-white relative">
       <Image
@@ -13,19 +10,19 @@ const page = () => {
         width={250}
         height={420}
         alt="Shape 1"
-        className="absolute bottom-0 left-0  "
+        className="absolute bottom-0 left-0"
       />
       <Image
         src="/Auth illustrations/shape2.png"
         width={250}
         height={420}
         alt="shape 2"
-        className="absolute top-0 right-0  "
+        className="absolute top-0 right-0"
       />
 
       <div className="bg-white z-20 p-8 rounded-lg shadow-lg w-full max-w-4xl flex gap-8 items-center">
         <div className="flex-1 space-y-6">
-          <div className="flex items-center  mb-8">
+          <div className="flex items-center mb-8">
             <Image
               src="/logo.png"
               width={150}
@@ -39,33 +36,34 @@ const page = () => {
               Password forgotten 👋
             </h1>
             <p className="text-sm text-gray-600">
-            Entrez votre e-mail pour le processus de vérification, nous vous enverrons un code à 4 chiffres à votre e-mail.            </p>
+              Entrez votre e-mail pour le processus de vérification, nous vous enverrons un code à 4 chiffres à votre e-mail.
+            </p>
           </div>
 
           <form className="">
             <div className="mb-5">
-              <label className="block text-sm text-gray-700 mb-1">
+              <div className="form-label">
                 Adresse e-mail <span className="text-red-600 font-bold">*</span>
-              </label>
+              </div>
+              {/* Tabler input */}
               <input
                 type="email"
+                className="form-control"
                 placeholder="Tapez votre adresse email"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               />
             </div>
 
-     
+            {/* Tabler button */}
             <button
               type="submit"
-              className="w-full primary-clr-bg text-white font-medium py-2
-               rounded-md  mt-10 transition-colors"
+              className="btn btn-primary w-full mt-10"
             >
               Envoyer une instruction de réinitialisation
             </button>
 
             <p className="text-sm text-gray-600 text-center mt-1">
               Vous n&apos;avez pas de compte ?{" "}
-              <a href="#" className="primary-clr hover:underline">
+              <a href="#" className="text-primary hover:underline">
                 Inscrivez-vous maintenant
               </a>
             </p>
