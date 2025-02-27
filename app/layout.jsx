@@ -1,4 +1,7 @@
 import "../styles/globals.css";
+import '@tabler/core/dist/css/tabler.min.css';
+import "../styles/tabler-overrides.css";
+
 import { Montserrat } from "next/font/google";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
