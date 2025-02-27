@@ -28,15 +28,16 @@ const Page = () => {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Login failed");
- 
-      router.push("/");  
+      
+      router.push("/Dashboard");  
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center bg-gradient-to-br from-green-50 to-white relative">
+    <div className="min-h-screen bg-white flex items-center justify-center bg-gradient-to-br p-4
+     from-green-50 to-white relative">
       <Image
         src="/Auth illustrations/shape1.png"
         width={250}

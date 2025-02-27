@@ -31,7 +31,7 @@ const page = () => {
               height={150}
               alt="logo"
             />
-          </div>z
+          </div>
 
           <div className="mb-8">
             <h1 className="text-xl font-medium text-gray-800 mb-1">
