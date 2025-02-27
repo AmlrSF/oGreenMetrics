@@ -9,12 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+
     "@tabler/core": "^1.0.0",
     "@tabler/icons-react": "^3.30.0",
+
+    "axios": "^1.8.1",
+
     "lucide-react": "^0.476.0",
     "next": "15.1.7",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

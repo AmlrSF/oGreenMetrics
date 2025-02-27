@@ -22,14 +22,16 @@ const page = () => {
 
       <div className="bg-white z-20 p-8 rounded-lg shadow-lg w-full max-w-4xl flex gap-8 items-center">
         <div className="flex-1 space-y-6">
+ 
           <div className="flex items-center mb-8">
+ 
             <Image
               src="/logo.png"
               width={150}
               height={150}
               alt="logo"
             />
-          </div>
+          </div>z
 
           <div className="mb-8">
             <h1 className="text-xl font-medium text-gray-800 mb-1">
