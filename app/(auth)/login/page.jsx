@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
 import Image from "next/image";
@@ -10,11 +10,26 @@ const Page = () => {
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [error, setError] = useState("");
+  const [alertMessage, setAlertMessage] = useState(""); // For alert messages
+  const [alertType, setAlertType] = useState(""); // To determine success or error alert
+  const [showAlert, setShowAlert] = useState(false); // Control alert visibility
   const router = useRouter();
+
+  useEffect(() => {
+    if (showAlert) {
+      const timer = setTimeout(() => {
+        setShowAlert(false);
+      }, 3000); // Alert disappears after 3 seconds
+
+      // Cleanup the timer when component unmounts or alert changes
+      return () => clearTimeout(timer);
+    }
+  }, [showAlert]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setAlertMessage("");
 
     try {
       const response = await fetch("http://localhost:4000/login", {
@@ -27,11 +42,23 @@ const Page = () => {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Login failed");
- 
-      router.push("/");  
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      setAlertMessage("Login Successful!");  // Set success message
+      setAlertType("alert-success");  // Use success alert
+      setShowAlert(true);  // Show the alert
+      setTimeout(() => {
+        router.push("/");  // Redirect after a short delay
+      }, 1500);
+      
     } catch (err) {
       setError(err.message);
+
+      setAlertMessage(err.message.includes("wrong password") ? "Incorrect password." : "Incorrect password.");
+      setAlertType("alert-danger");  // Use danger alert
+      setShowAlert(true);  // Show the alert
     }
   };
 
@@ -68,7 +95,17 @@ const Page = () => {
               </p>
             </div>
 
-            {error && <p className="text-red-500">{error}</p>}
+            {/* Display Alert Message */}
+            {showAlert && (
+              <div className={`alert ${alertType} d-flex justify-between align-center`}>
+                <span>{alertMessage}</span>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowAlert(false)}  // Close alert on click
+                />
+              </div>
+            )}
 
             <form onSubmit={handleSubmit}>
               <div className="mb-5">
