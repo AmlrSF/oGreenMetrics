@@ -5,13 +5,13 @@ import Image from "next/image";
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [accountType, setAccountType] = useState("regular");
+  const [accountType, setAccountType] = useState("régulier");
   const [formData, setFormData] = useState({
     prenom: "",
     nom: "",
     email: "",
     mot_de_passe: "",
-    role: "regular", // Default for regular user
+    role: "régulier", // Default for régulier user
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -88,11 +88,11 @@ const SignupPage = () => {
               <button
                 type="button"
                 className={`flex items-center px-4 py-2 rounded-lg ${
-                  accountType === "regular"
+                  accountType === "régulier"
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-500"
                 }`}
-                onClick={() => setAccountType("regular")}
+                onClick={() => setAccountType("régulier")}
               >
                 <svg
                   className="w-5 h-5 mr-2"

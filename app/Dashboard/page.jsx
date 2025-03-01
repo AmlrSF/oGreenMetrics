@@ -2,7 +2,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div>secret niiga</div>
+    <div>secret</div>
   )
 }
 
