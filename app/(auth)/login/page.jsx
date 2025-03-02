@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
+import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Image from "next/image";
 
 const Page = () => {
@@ -22,28 +24,38 @@ const Page = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",  
+        credentials: "include",
         body: JSON.stringify({ email, mot_de_passe: motDePasse }),
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Login failed");
-      
-      router.push("/Dashboard");  
+      if (data.user) {
+        toast.success("User logged successfully!");
+        router.push("/Dashboard");
+        
+      } else {
+        toast.error(data.error);
+      }
+
+
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center bg-gradient-to-br p-4
-     from-green-50 to-white relative">
+    <div
+      className="min-h-screen bg-white  flex items-center justify-center bg-gradient-to-br p-4
+     from-green-50 to-white relative"
+    >
+      <Toaster position="top-right" />
       <Image
         src="/Auth illustrations/shape1.png"
         width={250}
         height={420}
         alt="Shape 1"
         className="absolute bottom-0 left-0"
+        style={{ width: "auto", height: "auto" }}
       />
       <Image
         src="/Auth illustrations/shape2.png"
@@ -51,17 +63,24 @@ const Page = () => {
         height={420}
         alt="Shape 2"
         className="absolute top-0 right-0"
+        style={{ width: "auto", height: "auto" }}
       />
 
       <div className="card w-full max-w-4xl">
         <div className="card-body p-8 flex gap-8 items-center">
           <div className="flex-1 space-y-2">
             <div className="flex items-center mb-8">
-              <Image src="/logo.png" width={150} height={150} alt="logo" />
+              <Image
+                src="/logo.png"
+                width={150}
+                height={150}
+                alt="logo"
+                style={{ width: "auto", height: "auto" }}
+              />
             </div>
 
             <div className="mb-8">
-              <h1 className="text-xl font-medium text-gray-800 mb-1">
+              <h1 className="text-xl font-medium text-gray-800 mb-1s">
                 Bienvenue chez GreenMetric 👋
               </h1>
               <p className="text-muted">
@@ -104,7 +123,11 @@ const Page = () => {
                     className="btn btn-outline-secondary"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                    {showPassword ? (
+                      <IconEyeOff size={20} />
+                    ) : (
+                      <IconEye size={20} />
+                    )}
                   </button>
                 </div>
                 <div className="mt-2">
@@ -114,12 +137,15 @@ const Page = () => {
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary w-full mt-10">
+              <button type="submit" className="p-3 rounded-lg text-white font-medium hover:bg-primary-clr
+              btn-primary w-full mt-10">
                 S&apos;authentifier
               </button>
 
               <div className="text-center mt-3">
-                <span className="text-muted">Vous n&apos;avez pas de compte ? </span>
+                <span className="text-muted">
+                  Vous n&apos;avez pas de compte ?{" "}
+                </span>
                 <a href="/register" className="text-primary">
                   Inscrivez-vous maintenant
                 </a>

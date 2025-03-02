@@ -1,10 +1,63 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 const page = () => {
+
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false); 
+   const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    
+    if (!email) {
+      setErrorMessage("Please enter your email");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+   
+      const response = await fetch("http://localhost:4000/forgetPassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      console.log(data)
+
+      if(data?.CreatedpasswordResetOTP){
+        localStorage.setItem("email", email); 
+        toast.success("OTP sent, check your mailbox");
+        router.push("/OTP");
+      }else{
+        toast.error(data?.message);
+      }
+
+    
+    } catch (error) {
+      console.error("Error during OTP request:", error);
+      setErrorMessage("An error occurred while sending OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center bg-gradient-to-br from-green-50 to-white relative">
+    <div className="min-h-screen bg-white flex items-center justify-center
+    p-4 bg-gradient-to-br from-green-50 to-white relative">
+      <Toaster position="top-right" />
       <Image
         src="/Auth illustrations/shape1.png"
         width={250}
@@ -42,30 +95,32 @@ const page = () => {
             </p>
           </div>
 
-          <form className="">
+          <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <div className="form-label">
                 Adresse e-mail <span className="text-red-600 font-bold">*</span>
               </div>
-              {/* Tabler input */}
               <input
                 type="email"
                 className="form-control"
                 placeholder="Tapez votre adresse email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} 
+                required
               />
             </div>
 
-            {/* Tabler button */}
             <button
               type="submit"
-              className="btn btn-primary w-full mt-10"
+              className="p-3 rounded-lg text-white font-medium hover:bg-primary-clr btn-primary w-full mt-10"
+              disabled={loading} 
             >
-              Envoyer une instruction de réinitialisation
+              {loading ? "Envoi en cours..." : "Envoyer une instruction de réinitialisation"}
             </button>
 
             <p className="text-sm text-gray-600 text-center mt-1">
               Vous n&apos;avez pas de compte ?{" "}
-              <a href="#" className="text-primary hover:underline">
+              <a href="/register" className="text-primary hover:underline">
                 Inscrivez-vous maintenant
               </a>
             </p>

@@ -1,14 +1,30 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 
-const Page = () => {
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+import { useEffect, useState, useRef } from "react";
+import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+const OTPVerificationPage = () => {
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState(["", "", "", ""]);
   const [canResend, setCanResend] = useState(false);
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(60);
+  const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const inputRefs = useRef([]);
+  const router = useRouter();
 
   useEffect(() => {
+    const savedEmail = localStorage.getItem("email");
+    if (!savedEmail) {
+      router.push('/login');
+    }else{
+      setEmail(savedEmail);
+      setIsSuccess(true)
+    }
+
     if (timer > 0) {
       const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
       return () => clearInterval(interval);
@@ -19,10 +35,9 @@ const Page = () => {
 
   const handleChange = (index, value) => {
     const updatedOtp = [...otp];
-    updatedOtp[index] = value.slice(0, 1); // Limit to 1 character
+    updatedOtp[index] = value.slice(0, 1);
     setOtp(updatedOtp);
 
-    // Automatically move to next input field if a digit is entered
     if (value && index < otp.length - 1) {
       inputRefs.current[index + 1].focus();
     }
@@ -36,20 +51,89 @@ const Page = () => {
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (canResend) {
-      setTimer(30); // Reset the timer
-      setCanResend(false); // Disable the resend button
+      try {
+        const response = await fetch("http://localhost:4000/forgetPassword", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+
+        if (data?.CreatedpasswordResetOTP) {
+          toast.success("OTP sent, check your mailbox");
+
+          setTimer(60);
+          setCanResend(false);
+        } else {
+          toast.error(data?.message || "Error resending OTP");
+        }
+      } catch (error) {
+        console.error("Error during OTP resend:", error);
+        toast.error("An error occurred while resending OTP.");
+      }
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const otpCode = otp.join("");
-    console.log("Verifying OTP:", otpCode);
+
+    if (!otpCode || otpCode.length < 4)
+      return toast.error("Please enter the OTP code correctly");
+    
+    if (!/^\d+$/.test(otpCode)) {
+      return toast.error("OTP code must contain digits only");
+    }
+
+    setLoading(true);
+    let obj = {
+      email,
+      opt:otpCode
+    }
+    console.log(obj);
+    
+    try {
+      const response = await fetch("http://localhost:4000/verifyOTP", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp: otpCode }),
+      });
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (data?.success) {
+        toast.success(data.message);
+        localStorage.setItem("resetToken", data?.token); 
+        router.push("/ResetPassword");
+        setLoading(false);
+      } else {
+        toast.error(data?.message);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error during OTP resend:", error);
+      toast.error("An error occurred while resending OTP.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+
+  if (!isSuccess) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Toaster position="top-right" />
       <Image
         src="/Auth illustrations/shape1.png"
         width={250}
@@ -61,23 +145,23 @@ const Page = () => {
         src="/Auth illustrations/shape2.png"
         width={250}
         height={420}
-        alt="shape 2"
+        alt="Shape 2"
         className="absolute top-0 right-0"
       />
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full">
-        <div className="flex items-center gap-2 mb-8">
+      <div className="z-10 bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full">
+        <div className="flex items-center w-full justify-start  mb-8">
           <img src="/logo.png" width={150} height={150} alt="logo" />
         </div>
 
-        <div className="flex items-start justify-between gap-12">
-          <div className="w-full max-w-sm">
+        <div className="flex items-center justify-center gap-12">
+          <div className="w-full max-w-sm md:text-left text-center">
             <h2 className="text-xl font-semibold mb-2">Verification</h2>
             <p className="text-gray-600 mb-6">
               Veuillez vérifier le code de vérification dans votre boîte de
-              réception
+              réception <span className="underline font-semibold">{email}</span>
             </p>
 
-            <div className="flex gap-3 mb-4">
+            <div className="flex items-center justify-center gap-3 mb-4">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -116,12 +200,12 @@ const Page = () => {
 
             <button
               onClick={handleVerify}
-              className="w-full primary-clr-bg text-white py-3 rounded-md  transition-colors"
+              className="w-full primary-clr-bg font-medium 
+              cursor-pointer text-white py-3 rounded-md  transition-colors"
             >
-              Vérifier le compte
+              {loading ? "Vérification en cours..." : "Vérifier le compte"}
             </button>
           </div>
-
           <div className="hidden md:block flex-1">
             <div className="relative w-full h-80">
               <img
@@ -137,4 +221,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default OTPVerificationPage;

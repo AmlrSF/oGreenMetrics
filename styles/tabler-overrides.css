@@ -1,30 +1,30 @@
 .btn-primary {
-    background-color: var(--primary-clr);
-  }
-  
-  .form-control:focus {
-    border-color: var(--primary-clr);
-    box-shadow: 0 0 0 0.25rem rgba(var(--primary-clr-rgb), 0.25);
-  }
- 
+  background-color: var(--primary-clr);
+}
+
+.form-control:focus {
+  border-color: var(--primary-clr);
+  box-shadow: 0 0 0 0.25rem rgba(var(--primary-clr-rgb), 0.25);
+}
+
 :root {
-    --tblr-primary: var(--primary-clr);
-  }
-  
-  .btn-primary {
-    background-color: var(--tblr-primary);
-  }
-  
-  .card {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  }
-  
-  .form-control:focus {
-    border-color: var(--tblr-primary);
-    box-shadow: 0 0 0 0.25rem rgba(var(--tblr-primary-rgb), 0.25);
-  }
-  
-  .input-group .btn {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
+  --tblr-primary: var(--primary-clr);
+}
+
+.btn-primary {
+  background-color: var(--tblr-primary);
+}
+
+.card {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.form-control:focus {
+  border-color: var(--tblr-primary);
+  box-shadow: 0 0 0 0.25rem rgba(var(--tblr-primary-rgb), 0.25);
+}
+
+.input-group .btn {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
