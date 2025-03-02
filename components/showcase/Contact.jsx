@@ -1,11 +1,32 @@
+"use client";
+
 import React from 'react';
+import { sendForm } from '@emailjs/browser';
 
 const Contact = () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      await sendForm(
+        'service_kxls9d4',  
+        'template_rlqrokt',  
+        e.target,
+        'J6mVdNGhIYkX0YScB'  
+      );
+      alert('Message sent successfully!');
+      e.target.reset();  
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      alert('Failed to send message. Please try again.');
+    }
+  };
+
   return (
     <div className="container-xl py-4 rounded">
       <div className="card">
-        <div className="card-body ">
-          <form>
+        <div className="card-body">
+          <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label className="form-label">Email :</label>
               <input 
@@ -13,6 +34,7 @@ const Contact = () => {
                 className="form-control" 
                 placeholder="Tapez votre adresse e-mail"
                 required
+                name="email"
               />
             </div>
             
@@ -23,6 +45,7 @@ const Contact = () => {
                   type="text" 
                   className="form-control" 
                   placeholder="Tapez votre nom"
+                  name="user_name"
                 />
               </div>
               <div className="col-md-6">
@@ -31,6 +54,7 @@ const Contact = () => {
                   type="text" 
                   className="form-control" 
                   placeholder="Tapez votre prénom"
+                  name="user_firstname"
                 />
               </div>
             </div>
@@ -46,12 +70,12 @@ const Contact = () => {
               <textarea 
                 className="form-control" 
                 rows="4" 
-                placeholder=""
                 required
+                name="message"
               ></textarea>
             </div>
             
-            <div className="d-flex justify-content-end bg-">
+            <div className="d-flex justify-content-end">
               <button 
                 type="submit" 
                 className="btn btn-success px-5"
