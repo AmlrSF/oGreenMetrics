@@ -23,7 +23,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="container-xl py-4 rounded">
+    <div className="container-xl py-4 rounded-2xl">
       <div className="card">
         <div className="card-body">
           <form onSubmit={handleSubmit}>
