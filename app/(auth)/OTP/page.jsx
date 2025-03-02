@@ -171,7 +171,7 @@ const OTPVerificationPage = () => {
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-12 h-12 border-2 rounded-md text-center text-xl font-semibold focus:border-green-500 focus:outline-none"
+                  className="w-12  h-12 border-2 rounded-md text-center text-xl font-semibold focus:border-green-500 focus:outline-none"
                 />
               ))}
             </div>

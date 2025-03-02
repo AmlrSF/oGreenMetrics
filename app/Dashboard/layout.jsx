@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }) {
         if(data?.user){
           setIsSuccess(true);
         }else{
-          push('login')
+          push('/login')
         }
 
       } catch (error) {
@@ -37,10 +37,6 @@ export default function DashboardLayout({ children }) {
 
   return (
     <main>
-      <header>
-        <Link href="/Dashboard">Dashboard</Link>
-        <span>Top Secret</span>
-      </header>
       {children}
     </main>
   );

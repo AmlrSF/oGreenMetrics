@@ -23,3 +23,7 @@ body {
 .primary-clr-bg{
   background-color:var(--primary-clr);
 }
+
+a:hover {
+  text-decoration: none !important;
+}
