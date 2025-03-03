@@ -30,11 +30,20 @@ const Page = () => {
 
       const data = await response.json();
       if (data.user) {
+        console.log(data.user)
         
-        toast.success("User logged successfully!"); 
-
-        router.push("/Dashboard/Admin");
-
+        if(data?.user?.role == "Admin" || data?.user?.role == "Moderator"){
+          toast.success("User logged successfully!"); 
+          router.push("/Dashboard/Admin");s
+        }else{
+          if(!data?.user?.isVerified){
+            toast.success("User logged successfully!"); 
+            router.push("/Dashboard/User");
+          }else{
+            toast.success("Please Wait for Admin Approval"); 
+          }
+        }
+        
       } else {
         toast.error(data.error);
       }
