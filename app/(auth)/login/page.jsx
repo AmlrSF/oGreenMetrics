@@ -148,7 +148,8 @@ const Page = () => {
                 </div>
               </div>
 
-              <button type="submit" className="p-3 rounded-lg text-white font-medium hover:bg-primary-clr
+              <button type="submit" className="p-2  text-[16px] rounded-lg
+               text-white font-medium hover:bg-primary-clr
               btn-primary w-full mt-10">
                 S&apos;authentifier
               </button>

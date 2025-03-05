@@ -20,14 +20,13 @@ export default function DashboardLayout({ children }) {
         
         if(data?.user){
           setIsSuccess(true);
-          
         }else{
           push('/login')
         }
 
       } catch (error) {
         console.error("Authorization failed:", error);
-        push("/login"); 
+        push("/login"); // Redirect if auth fails
       }
     })();
   }, []);

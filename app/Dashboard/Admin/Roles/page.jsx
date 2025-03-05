@@ -1,18 +1,7 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import {
-  IconEdit,
-  IconTrash,
-  IconCheck,
-  IconX,
-  IconUserCheck,
-  IconUserX,
-} from "@tabler/icons-react";
-
+import React,{useEffect} from "react";
 import { formatDate, getInitials } from "@/lib/Utils";
 
-const Page = () => {
+const page = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("all");
@@ -28,42 +17,13 @@ const Page = () => {
     setError(null);
     try {
       const response = await fetch("http://localhost:4000/users");
-      let data = await response.json();
-
-      data = data.filter(
-        (item) => item?.role == "entreprise" || item?.role == "régulier"
-      );
-
+      const data = await response.json();
       setUsers(data);
       setFilteredUsers(data);
     } catch (error) {
       setError("Failed to load users");
     }
     setLoading(false);
-  };
-
-  const handleApproveUser = async (userId, currentStatus) => {
-    try {
-      const response = await fetch(`http://localhost:4000/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          isVerified: !currentStatus,
-        }),
-      });
-
-      const reponse = await response.json();
-      console.log(reponse);
-      fetchUsers();
-    } catch (error) {
-      setError("Failed to update user status");
-    }
-  };
-
-  const getInitials = (firstName, lastName) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   useEffect(() => {
@@ -80,17 +40,10 @@ const Page = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <header className="flex justify-between flex-col items-start
-       mb-8 pb-5 border-b border-gray-200">
-        <h1 className="text-2xl mb-0 font-semibold text-gray-800">
-          User Administration
-        </h1>
-        <p className="text-gray-600 text-sm">
-        Manage users, roles, and permissions efficiently.
-      </p>
+      <header className="flex justify-between items-center mb-8 pb-5 border-b border-gray-200">
+        <h1 className="text-2xl font-semibold text-gray-800">Roles</h1>
+        <p>Manage roles</p>
       </header>
-
-      
 
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -124,9 +77,6 @@ const Page = () => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created At
@@ -164,7 +114,7 @@ const Page = () => {
                         {user.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.role === "entreprise" ? "Enterprise" : "Regular"}
+                        {user.role}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -237,4 +187,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default page;

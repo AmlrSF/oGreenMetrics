@@ -84,19 +84,28 @@ const ResetPasswordPage = () => {
         height={420}
         alt="Shape 1"
         className="absolute bottom-0 left-0"
+        style={{ width: "auto", height: "auto" }}
       />
+      
       <Image
         src="/Auth illustrations/shape2.png"
         width={250}
         height={420}
         alt="shape 2"
         className="absolute top-0 right-0"
+        style={{ width: "auto", height: "auto" }}
       />
 
       <div className="bg-white z-20 p-8 rounded-lg shadow-lg w-full max-w-4xl flex gap-8 items-center">
         <div className="flex-1 space-y-6">
           <div className="flex items-center mb-8">
-            <Image src="/logo.png" width={150} height={150} alt="logo" />
+            <Image
+              src="/logo.png"
+              width={150}
+              height={150}
+              alt="logo"
+              style={{ width: "auto", height: "auto" }}
+            />
           </div>
 
           <div className="mb-8">

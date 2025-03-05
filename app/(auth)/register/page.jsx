@@ -25,7 +25,7 @@ const SignupPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // Handle form field change
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -33,7 +33,7 @@ const SignupPage = () => {
     });
   };
 
-  // Handle account type change
+  
   const handleAccountTypeChange = (type) => {
     setAccountType(type);
     setFormData({
@@ -42,11 +42,11 @@ const SignupPage = () => {
     });
   };
 
-  // Handle form submission
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if passwords match
+    
     if (formData.mot_de_passe !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas");
       return;
@@ -96,14 +96,14 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background shapes */}
+      
       <div className="absolute bottom-0 left-0 w-64 h-80 bg-green-50 opacity-50 rounded-tr-full"></div>
       <div className="absolute top-0 right-0 w-64 h-80 bg-green-50 opacity-50 rounded-bl-full"></div>
 
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-6xl w-full flex relative z-10">
-        {/* Left side - Form */}
+        
         <div className="flex-1">
-          {/* Logo */}
+          
           <div className="flex items-center mb-8">
             <div className="text-[#9BC95B] font-bold flex items-center">
               <span className="text-3xl">Green</span>
@@ -111,14 +111,14 @@ const SignupPage = () => {
             </div>
           </div>
 
-          {/* Header */}
+         
           <h1 className="text-lg font-medium mb-2">Créez votre compte</h1>
           <p className="text-sm text-gray-600 mb-6">
             Inscrivez-vous pour accéder à nos outils et commencer à mesurer votre empreinte carbone en toute simplicité.
           </p>
 
           <form onSubmit={handleSubmit}>
-            {/* Account Type Selection */}
+           
             <div className="flex gap-4 mb-8">
               <button
                 type="button"
@@ -160,7 +160,7 @@ const SignupPage = () => {
 
             <div className="flex flex-col gap-8">
               <div className="flex-1">
-                {/* Personal Information */}
+              
                 <div className="mb-6">
                   <h2 className="flex items-center text-sm font-medium mb-4">
                     <div className="w-5 h-5 rounded-full bg-[#9BC95B] text-white flex items-center justify-center text-xs mr-2">
@@ -381,21 +381,21 @@ const SignupPage = () => {
               </div>
             </div>
 
-            {/* Success message */}
+            
             {success && (
               <div className="text-green-600 bg-green-50 p-3 rounded-md mt-4">
                 Inscription réussie ! Vous pouvez maintenant vous connecter.
               </div>
             )}
 
-            {/* Error message */}
+            
             {error && (
               <div className="text-red-600 bg-red-50 p-3 rounded-md mt-4">
                 {error}
               </div>
             )}
 
-            {/* Submit Button */}
+            
             <button
               type="submit"
               className="w-full py-2 px-4 bg-[#9BC95B] text-white rounded-md mt-6 hover:bg-[#8ab84d] transition-colors"
@@ -403,7 +403,7 @@ const SignupPage = () => {
               S'inscrire
             </button>
 
-            {/* Login Link */}
+           
             <p className="text-center mt-4 text-sm">
               Vous avez déjà un compte?{" "}
               <a href="/login" className="text-[#2C4B85] font-medium">
@@ -419,6 +419,7 @@ const SignupPage = () => {
             width={500}
             height={600}
             alt="Signup Illustration"
+            style={{ width: "auto", height: "auto" }}
           />
         </div>
     

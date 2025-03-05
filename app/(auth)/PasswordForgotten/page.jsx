@@ -58,12 +58,14 @@ const page = () => {
     <div className="min-h-screen bg-white flex items-center justify-center
     p-4 bg-gradient-to-br from-green-50 to-white relative">
       <Toaster position="top-right" />
+      
       <Image
         src="/Auth illustrations/shape1.png"
         width={250}
         height={420}
         alt="Shape 1"
         className="absolute bottom-0 left-0"
+        style={{ width: "auto", height: "auto" }}
       />
       <Image
         src="/Auth illustrations/shape2.png"
@@ -71,6 +73,7 @@ const page = () => {
         height={420}
         alt="shape 2"
         className="absolute top-0 right-0"
+        style={{ width: "auto", height: "auto" }}
       />
 
       <div className="bg-white z-20 p-8 rounded-lg shadow-lg w-full max-w-4xl flex gap-8 items-center">
@@ -83,6 +86,7 @@ const page = () => {
               width={150}
               height={150}
               alt="logo"
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
 
@@ -120,7 +124,7 @@ const page = () => {
 
             <p className="text-sm text-gray-600 text-center mt-1">
               Vous n&apos;avez pas de compte ?{" "}
-              <a href="/register" className="text-primary hover:underline">
+              <a href="/register" className="text-primary p-2  text-[16px]  hover:underline">
                 Inscrivez-vous maintenant
               </a>
             </p>

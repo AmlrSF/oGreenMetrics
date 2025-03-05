@@ -19,10 +19,10 @@ const OTPVerificationPage = () => {
   useEffect(() => {
     const savedEmail = localStorage.getItem("email");
     if (!savedEmail) {
-      router.push('/login');
-    }else{
+      router.push("/login");
+    } else {
       setEmail(savedEmail);
-      setIsSuccess(true)
+      setIsSuccess(true);
     }
 
     if (timer > 0) {
@@ -84,7 +84,7 @@ const OTPVerificationPage = () => {
 
     if (!otpCode || otpCode.length < 4)
       return toast.error("Please enter the OTP code correctly");
-    
+
     if (!/^\d+$/.test(otpCode)) {
       return toast.error("OTP code must contain digits only");
     }
@@ -92,10 +92,10 @@ const OTPVerificationPage = () => {
     setLoading(true);
     let obj = {
       email,
-      opt:otpCode
-    }
+      opt: otpCode,
+    };
     console.log(obj);
-    
+
     try {
       const response = await fetch("http://localhost:4000/verifyOTP", {
         method: "POST",
@@ -111,7 +111,7 @@ const OTPVerificationPage = () => {
 
       if (data?.success) {
         toast.success(data.message);
-        localStorage.setItem("resetToken", data?.token); 
+        localStorage.setItem("resetToken", data?.token);
         router.push("/ResetPassword");
         setLoading(false);
       } else {
@@ -126,7 +126,6 @@ const OTPVerificationPage = () => {
     }
   };
 
-
   if (!isSuccess) {
     return <p>Loading...</p>;
   }
@@ -140,6 +139,7 @@ const OTPVerificationPage = () => {
         height={420}
         alt="Shape 1"
         className="absolute bottom-0 left-0"
+        style={{ width: "auto", height: "auto" }}
       />
       <Image
         src="/Auth illustrations/shape2.png"
@@ -147,10 +147,17 @@ const OTPVerificationPage = () => {
         height={420}
         alt="Shape 2"
         className="absolute top-0 right-0"
+        style={{ width: "auto", height: "auto" }}
       />
       <div className="z-10 bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full">
         <div className="flex items-center w-full justify-start  mb-8">
-          <img src="/logo.png" width={150} height={150} alt="logo" />
+          <Image
+            src="/logo.png"
+            width={150}
+            height={150}
+            alt="logo"
+            style={{ width: "auto", height: "auto" }}
+          />
         </div>
 
         <div className="flex items-center justify-center gap-12">

@@ -3,11 +3,14 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { LogOut, Menu, ChevronLeft } from "lucide-react";
 import Image from "next/image";
-
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 import { menuItems } from "@/lib/Data/";
+import toast from "react-hot-toast";
 
-const Sidebar = () => {
+const Sidebar = ({ user }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const handleResize = () => {
@@ -20,6 +23,31 @@ const Sidebar = () => {
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const logout = async () => {
+    try {
+      
+      const response = await fetch("http://localhost:4000/users/logout", {
+        method: "POST", 
+        credentials: "include", 
+      });
+      const data = await response.json();
+
+      console.log(data);
+      
+  
+      if (response.ok) {
+        Cookies.remove("auth_token");
+        toast.success(data?.message);
+        
+        router.push("/login");
+      } else {
+        console.error("Logout failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
   return (
     <div
@@ -78,7 +106,7 @@ const Sidebar = () => {
           </Link>
         ))}
 
-        <button
+        <button onClick={logout}
           className={`mt-auto flex items-center rounded-lg px-3 py-2.5 text-red-500 hover:bg-red-50 transition-all group ${
             isCollapsed ? `justify-center` : `gap-3`
           }`}
