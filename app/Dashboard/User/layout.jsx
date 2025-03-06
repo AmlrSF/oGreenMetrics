@@ -11,13 +11,12 @@ import { useRouter } from "next/navigation";
 const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   let rolesNeedsToBeverified = ["régulier", "entreprise"];
-  // const [isSuccess, setIsSuccess] = useState(false);
-  let { push } = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const { push } = useRouter();
 
   useEffect(() => {
-    (async () => {
+    const checkAuth = async () => {
       try {
-        // setIsSuccess(false);
         const response = await fetch("http://localhost:4000/auth", {
           method: "POST",
           credentials: "include",
@@ -25,67 +24,66 @@ const DashboardLayout = ({ children }) => {
 
         const data = await response.json();
 
-        if (data?.user && rolesNeedsToBeverified.includes(data?.user?.role)) {
-          setUser(data?.user);
-          setIsSuccess(true);      
+        if (data?.user && rolesNeedsToBeverified.includes(data.user.role)) {
+          setUser(data.user);
+          setIsLoading(false);
         } else {
+          console.log("Invalid role or no user, redirecting to login");
           push("/login");
         }
       } catch (error) {
         console.error("Authorization failed:", error);
         push("/login");
-      } finally {
-        setIsSuccess(false);
       }
-    })();
+    };
+
+    checkAuth();
   }, []);
 
-
-  // if (!isSuccess) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-  //       <motion.div
-  //         initial={{ opacity: 0 }}
-  //         animate={{ opacity: 1 }}
-  //         className="relative"
-  //       >
-  //         <motion.div
-  //           animate={{
-  //             rotate: 360,
-  //             transition: { duration: 2, repeat: Infinity, ease: "linear" },
-  //           }}
-  //           className="w-20 h-20"
-  //         >
-  //           <Loader2 className="w-20 h-20 text-[#8EBE21]" />
-  //         </motion.div>
-  //         <motion.div
-  //           initial={{ scale: 0.8, opacity: 0 }}
-  //           animate={{
-  //             scale: [0.8, 1, 0.8],
-  //             opacity: [0.3, 0.6, 0.3],
-  //             transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-  //           }}
-  //           className="absolute inset-0 bg-[#8EBE21] rounded-full blur-xl opacity-20"
-  //         />
-  //       </motion.div>
-  //       <motion.div
-  //         initial={{ opacity: 0, y: 20 }}
-  //         animate={{ opacity: 1, y: 0 }}
-  //         transition={{ delay: 0.2 }}
-  //         className="mt-8 text-center"
-  //       >
-  //         <h2 className="text-2xl font-semibold text-gray-800">
-  //           Loading your dashboard
-  //         </h2>
-  //         <p className="mt-2 text-gray-600">
-  //           Please wait while we prepare your experience
-  //         </p>
-  //       </motion.div>
-  //     </div>
-  //   );
-  // }
-
-
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative"
+        >
+          <motion.div
+            animate={{
+              rotate: 360,
+              transition: { duration: 2, repeat: Infinity, ease: "linear" },
+            }}
+            className="w-20 h-20"
+          >
+            <Loader2 className="w-20 h-20 text-[#8EBE21]" />
+          </motion.div>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{
+              scale: [0.8, 1, 0.8],
+              opacity: [0.3, 0.6, 0.3],
+              transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+            }}
+            className="absolute inset-0 bg-[#8EBE21] rounded-full blur-xl opacity-20"
+          />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-8 text-center"
+        >
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Loading your dashboard
+          </h2>
+          <p className="mt-2 text-gray-600">
+            Please wait while we verify your access
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+  
   if (
     user?.isVerified === false &&
     rolesNeedsToBeverified.includes(user?.role)
@@ -124,7 +122,6 @@ const DashboardLayout = ({ children }) => {
     );
   }
 
- 
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar user={user} isAdmin={false} />

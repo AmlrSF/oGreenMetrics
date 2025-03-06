@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 
 const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
-  // const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const rolesNeedsToBeverified = ["Admin", "Moderator"];
   const { push } = useRouter();
 
@@ -26,7 +26,7 @@ const DashboardLayout = ({ children }) => {
         
         if (data?.user && rolesNeedsToBeverified.includes(data.user.role)) {
           setUser(data.user);
-          //setIsLoading(false);
+          setIsLoading(false);
         } else {
           console.log("Invalid role or no user, redirecting to login");
           push("/login");
@@ -40,49 +40,49 @@ const DashboardLayout = ({ children }) => {
     checkAuth();
   }, []);
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-  //       <motion.div
-  //         initial={{ opacity: 0 }}
-  //         animate={{ opacity: 1 }}
-  //         className="relative"
-  //       >
-  //         <motion.div
-  //           animate={{
-  //             rotate: 360,
-  //             transition: { duration: 2, repeat: Infinity, ease: "linear" },
-  //           }}
-  //           className="w-20 h-20"
-  //         >
-  //           <Loader2 className="w-20 h-20 text-[#8EBE21]" />
-  //         </motion.div>
-  //         <motion.div
-  //           initial={{ scale: 0.8, opacity: 0 }}
-  //           animate={{
-  //             scale: [0.8, 1, 0.8],
-  //             opacity: [0.3, 0.6, 0.3],
-  //             transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-  //           }}
-  //           className="absolute inset-0 bg-[#8EBE21] rounded-full blur-xl opacity-20"
-  //         />
-  //       </motion.div>
-  //       <motion.div
-  //         initial={{ opacity: 0, y: 20 }}
-  //         animate={{ opacity: 1, y: 0 }}
-  //         transition={{ delay: 0.2 }}
-  //         className="mt-8 text-center"
-  //       >
-  //         <h2 className="text-2xl font-semibold text-gray-800">
-  //           Loading your dashboard
-  //         </h2>
-  //         <p className="mt-2 text-gray-600">
-  //           Please wait while we verify your access
-  //         </p>
-  //       </motion.div>
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative"
+        >
+          <motion.div
+            animate={{
+              rotate: 360,
+              transition: { duration: 2, repeat: Infinity, ease: "linear" },
+            }}
+            className="w-20 h-20"
+          >
+            <Loader2 className="w-20 h-20 text-[#8EBE21]" />
+          </motion.div>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{
+              scale: [0.8, 1, 0.8],
+              opacity: [0.3, 0.6, 0.3],
+              transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+            }}
+            className="absolute inset-0 bg-[#8EBE21] rounded-full blur-xl opacity-20"
+          />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-8 text-center"
+        >
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Loading your dashboard
+          </h2>
+          <p className="mt-2 text-gray-600">
+            Please wait while we verify your access
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
