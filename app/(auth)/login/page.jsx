@@ -12,6 +12,7 @@ const Page = () => {
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [error, setError] = useState("");
+  let rolesNeedsToBeverified = ["Admin", "Moderator"];
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -19,6 +20,8 @@ const Page = () => {
     setError("");
 
     try {
+      console.log(email, motDePasse);
+      
       const response = await fetch("http://localhost:4000/login", {
         method: "POST",
         headers: {
@@ -29,19 +32,15 @@ const Page = () => {
       });
 
       const data = await response.json();
-      if (data.user) {
-        console.log(data.user)
-        
-        if(data?.user?.role == "Admin" || data?.user?.role == "Moderator"){
+      
+      if (data?.user) {
+      
+        if(rolesNeedsToBeverified.includes(data?.user?.role)){
           toast.success("User logged successfully!"); 
           router.push("/Dashboard/Admin");s
         }else{
-          if(!data?.user?.isVerified){
-            toast.success("User logged successfully!"); 
-            router.push("/Dashboard/User");
-          }else{
-            toast.success("Please Wait for Admin Approval"); 
-          }
+          toast.success("User logged successfully!"); 
+          router.push("/Dashboard/User");
         }
         
       } else {

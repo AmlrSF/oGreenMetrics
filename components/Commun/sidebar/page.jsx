@@ -5,14 +5,21 @@ import { LogOut, Menu, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { menuItems } from "@/lib/Data/";
+import { menuItems, userMenuItems } from "@/lib/Data/";
 import toast from "react-hot-toast";
 
-const Sidebar = ({ user }) => {
+const Sidebar = ({ user, isAdmin }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const router = useRouter();
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
+    if (isAdmin) {
+      setItems(menuItems);
+    } else {
+      setItems(userMenuItems);
+    }
+
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setIsCollapsed(true);
@@ -26,20 +33,18 @@ const Sidebar = ({ user }) => {
 
   const logout = async () => {
     try {
-      
       const response = await fetch("http://localhost:4000/users/logout", {
-        method: "POST", 
-        credentials: "include", 
+        method: "POST",
+        credentials: "include",
       });
       const data = await response.json();
 
       console.log(data);
-      
-  
+
       if (response.ok) {
         Cookies.remove("auth_token");
         toast.success(data?.message);
-        
+
         router.push("/login");
       } else {
         console.error("Logout failed:", data.error);
@@ -82,7 +87,7 @@ const Sidebar = ({ user }) => {
       </div>
 
       <div className="flex flex-col flex-grow space-y-1 p-3">
-        {menuItems.map((item, index) => (
+        {items?.map((item, index) => (
           <Link key={index} href={item.href} passHref>
             <div
               className={`flex items-center cursor-pointer
@@ -106,7 +111,8 @@ const Sidebar = ({ user }) => {
           </Link>
         ))}
 
-        <button onClick={logout}
+        <button
+          onClick={logout}
           className={`mt-auto flex items-center rounded-lg px-3 py-2.5 text-red-500 hover:bg-red-50 transition-all group ${
             isCollapsed ? `justify-center` : `gap-3`
           }`}

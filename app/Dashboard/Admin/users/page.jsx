@@ -62,10 +62,6 @@ const Page = () => {
     }
   };
 
-  const getInitials = (firstName, lastName) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
-
   useEffect(() => {
     let result = users;
 
@@ -80,17 +76,17 @@ const Page = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <header className="flex justify-between flex-col items-start
-       mb-8 pb-5 border-b border-gray-200">
+      <header
+        className="flex justify-between flex-col items-start
+       mb-8 pb-5 border-b border-gray-200"
+      >
         <h1 className="text-2xl mb-0 font-semibold text-gray-800">
           User Administration
         </h1>
         <p className="text-gray-600 text-sm">
-        Manage users, roles, and permissions efficiently.
-      </p>
+          Manage users, roles, and permissions efficiently.
+        </p>
       </header>
-
-      
 
       <div className="flex justify-between items-center mb-6">
         <div>
