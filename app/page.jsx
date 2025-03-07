@@ -8,6 +8,8 @@ import {
   Services,
   Navbar,
   Footer,
+  Testimonials,
+  Partners, 
 } from "@/components/showcase";
 
 export default function RootLayout({ children }) {
@@ -16,8 +18,10 @@ export default function RootLayout({ children }) {
       <Navbar />
       <Hero />
       <Calculator />
-      <Services />
       <About />
+      <Services />
+      <Partners/>
+      <Testimonials/>
       <Contact />
       <Footer />
     </div>
