@@ -58,6 +58,8 @@ const Page = () => {
       className="min-h-screen bg-white  flex items-center justify-center bg-gradient-to-br p-4
      from-green-50 to-white relative"
     >
+
+      
       <Toaster position="top-right" />
       <Image
         src="/Auth illustrations/shape1.png"
