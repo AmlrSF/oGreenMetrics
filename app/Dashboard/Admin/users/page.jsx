@@ -75,23 +75,23 @@ const Page = () => {
   }, [currentFilter, users]);
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container">
       <header
-        className="flex justify-between flex-col items-start
-       mb-8 pb-5 border-b border-gray-200"
+        className="d-flex justify-content-between flex-column align-items-start
+       mb-8 pb-5 border-bottom"
       >
-        <h1 className="text-2xl mb-0 font-semibold text-gray-800">
+        <h1 className="h2 mb-0 font-weight-semibold text-gray-800">
           User Administration
         </h1>
-        <p className="text-gray-600 text-sm">
+        <p className="text-muted small">
           Manage users, roles, and permissions efficiently.
         </p>
       </header>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="d-flex justify-content-between align-items-center mb-6">
         <div>
           <select
-            className="border border-gray-300 px-4 py-2 rounded-md"
+            className="form-select"
             value={currentFilter}
             onChange={(e) => setCurrentFilter(e.target.value)}
           >
@@ -105,128 +105,94 @@ const Page = () => {
       {loading ? (
         <p>Loading users...</p>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <p className="text-danger">{error}</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user, index) => (
-                    <tr key={user.id || index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
-                            {user.photo_de_profil ? (
-                              <img
-                                src={user.photo_de_profil}
-                                alt={`${user.prenom} ${user.nom}`}
-                                className="h-10 w-10 rounded-full"
-                              />
-                            ) : (
-                              getInitials(user.prenom, user.nom)
-                            )}
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.prenom} {user.nom}
-                            </div>
+        <div className="table-responsive">
+          <table className="table table-striped table-hover">
+            <thead className="thead-light">
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user, index) => (
+                  <tr key={user.id || index}>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <div className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style={{ width: "40px", height: "40px" }}>
+                          {user.photo_de_profil ? (
+                            <img
+                              src={user.photo_de_profil}
+                              alt={`${user.prenom} ${user.nom}`}
+                              className="rounded-circle w-100 h-100"
+                            />
+                          ) : (
+                            getInitials(user.prenom, user.nom)
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <div className="font-weight-medium">
+                            {user.prenom} {user.nom}
                           </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.role === "entreprise" ? "Enterprise" : "Regular"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      </div>
+                    </td>
+                    <td>{user.email}</td>
+                    <td>{user.role === "entreprise" ? "Enterprise" : "Regular"}</td>
+                    <td>
+                      <span
+                        className={`badge text-white  ${
+                          user.isVerified ? "bg-success" : "bg-danger"
+                        }`}
+                      >
+                        {user.isVerified ? "Verified" : "Unverified"}
+                      </span>
+                    </td>
+                    <td>{formatDate(user.createdAt)}</td>
+                    <td>
+                      <div className="d-flex">
+                        <button
+                          onClick={() =>
+                            handleApproveUser(user._id, user.isVerified)
+                          }
+                          className={`btn btn-sm ${
                             user.isVerified
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                              ? "btn-outline-danger"
+                              : "btn-outline-success"
                           }`}
+                          title={
+                            user.isVerified ? "Revoke Verification" : "Approve User"
+                          }
                         >
                           {user.isVerified ? (
-                            <IconCheck size={14} className="mr-1" />
+                            <IconUserX size={18} />
                           ) : (
-                            <IconX size={14} className="mr-1" />
+                            <IconUserCheck size={18} />
                           )}
-                          {user.isVerified ? "Verified" : "Unverified"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(user.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() =>
-                              handleApproveUser(user._id, user.isVerified)
-                            }
-                            className={`${
-                              user.isVerified
-                                ? "text-red-600 hover:text-red-900"
-                                : "text-green-600 hover:text-green-900"
-                            }`}
-                            title={
-                              user.isVerified
-                                ? "Revoke Verification"
-                                : "Approve User"
-                            }
-                          >
-                            {user.isVerified ? (
-                              <IconUserX size={18} />
-                            ) : (
-                              <IconUserCheck size={18} />
-                            )}
-                          </button>
-                          <button className="text-blue-600 hover:text-blue-900">
-                            <IconEdit size={18} />
-                          </button>
-                          <button className="text-red-600 hover:text-red-900">
-                            <IconTrash size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-6 py-10 text-center text-gray-500"
-                    >
-                      No users found.
+                        </button>
+
+                        <button className="btn btn-sm btn-outline-danger ml-2">
+                          <IconTrash size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-center text-muted">
+                    No users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

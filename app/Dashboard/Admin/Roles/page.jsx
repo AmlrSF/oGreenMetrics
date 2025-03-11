@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { formatDate, getInitials } from "@/lib/Utils";
@@ -20,11 +20,11 @@ const Page = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newUser, setNewUser] = useState({
-    email: '',
-    prenom: '',
-    nom: '',
-    mot_de_passe: '',
-    role: 'Moderator'
+    email: "",
+    prenom: "",
+    nom: "",
+    mot_de_passe: "",
+    role: "Moderator",
   });
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const Page = () => {
       const response = await fetch("http://localhost:4000/users");
       let data = await response.json();
       console.log(data);
-      
+
       data = data.filter((item) => item?.role === "Moderator");
       setUsers(data);
       setFilteredUsers(data);
@@ -47,7 +47,6 @@ const Page = () => {
     }
     setLoading(false);
   };
- 
 
   useEffect(() => {
     let result = users;
@@ -74,14 +73,14 @@ const Page = () => {
       const response = await fetch(`http://localhost:4000/users/${id}`, {
         method: "DELETE",
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to delete user");
       }
-  
+
       console.log("User deleted successfully");
-  
-      fetchUsers(); 
+
+      fetchUsers();
     } catch (error) {
       console.error(error);
       setError("Failed to delete user");
@@ -91,7 +90,7 @@ const Page = () => {
   const handleCreateUser = async (e) => {
     e.preventDefault();
     console.log(newUser);
-    
+
     try {
       const response = await fetch("http://localhost:4000/register", {
         method: "POST",
@@ -101,20 +100,18 @@ const Page = () => {
         body: JSON.stringify(newUser),
       });
 
-
       const data = await response.json();
-      
-
+      console.log(data)
       if (response.ok) {
         await inviteUser(newUser);
         fetchUsers();
         setIsModalOpen(false);
         setNewUser({
-          email: '',
-          prenom: '',
-          nom: '',
-          mot_de_passe: '',
-          role: 'Moderator'
+          email: "",
+          prenom: "",
+          nom: "",
+          mot_de_passe: "",
+          role: "Moderator",
         });
       }
     } catch (error) {
@@ -131,21 +128,18 @@ const Page = () => {
         },
         body: JSON.stringify(user),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to invite user");
       }
-  
+
       console.log("User invited successfully");
-  
- 
     } catch (error) {
       console.error(error);
       setError("Failed to invite user");
     }
   };
-  
-  
+
   return (
     <div className="container mx-auto px-4 py-6">
       <header className="flex justify-between items-center mb-8 pb-5 border-b border-gray-200">
@@ -197,165 +191,174 @@ const Page = () => {
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user, index) => (
-                    <tr key={user.id || index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
-                            {user.photo_de_profil ? (
-                              <img
-                                src={user.photo_de_profil}
-                                alt={`${user.prenom} ${user.nom}`}
-                                className="h-10 w-10 rounded-full"
-                              />
-                            ) : (
-                              getInitials(user.prenom, user.nom)
-                            )}
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.prenom} {user.nom}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.isVerified
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                          {user.isVerified ? (
-                            <IconCheck size={14} className="mr-1" />
+        <div className="table-responsive  rounded-lg shadow overflow-hidden">
+          <table className="table table-striped table-hover">
+            <thead className="thead-light">
+              <tr>
+                <th scope="col">User</th>
+                <th scope="col">Email</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created At</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user, index) => (
+                  <tr key={user.id || index}>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <div
+                          className="rounded-circle bg-light d-flex align-items-center justify-content-center text-dark fw-bold me-3"
+                          style={{ width: "40px", height: "40px" }}
+                        >
+                          {user.photo_de_profil ? (
+                            <img
+                              src={user.photo_de_profil}
+                              alt={`${user.prenom} ${user.nom}`}
+                              className="rounded-circle"
+                              style={{ width: "40px", height: "40px" }}
+                            />
                           ) : (
-                            <IconX size={14} className="mr-1" />
+                            getInitials(user.prenom, user.nom)
                           )}
-                          {user.isVerified ? "Verified" : "Unverified"}
+                        </div>
+                        <span className="fw-medium">
+                          {user.prenom} {user.nom}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(user.createdAt)}
-                      </td>
-                      <td className="p-5 whitespace-nowrap
-                       flex justify-center items-center gap-2
-                      text-sm text-gray-500">
-                        <IconTrash size={25} className="cursor-pointer text-red-600"
-                         onClick={() => deleteUser(user._id)} />
-                         {/* <IconMailShare size={25} className="cursor-pointer text-green-600"
-                         onClick={() => inviteUser(user)} /> */}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
-                      No users found.
+                      </div>
+                    </td>
+                    <td >{user.email}</td>
+                    <td >
+                      <span
+                        className={`badge text-white ${
+                          user.isVerified ? "bg-success" : "bg-danger"
+                        }`}
+                      >
+                        {user.isVerified ? (
+                          <>
+                             Verified
+                          </>
+                        ) : (
+                          <>
+                            Unverified
+                          </>
+                        )}
+                      </span>
+                    </td>
+                    <td>{formatDate(user.createdAt)}</td>
+                    <td >
+                      <IconTrash
+                        size={25}
+                        className="cursor-pointer text-danger"
+                        onClick={() => deleteUser(user._id)}
+                      />
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-center text-muted py-4">
+                    No users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 
       {/* Create User Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Create New User</h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <IconClose size={24} />
-              </button>
+          
+          {isModalOpen && (
+            <div className="modal d-block">
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Create New User</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setIsModalOpen(false)}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <form onSubmit={handleCreateUser}>
+                      <div className="mb-3">
+                        <label className="form-label">Email</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          value={newUser.email}
+                          onChange={(e) =>
+                            setNewUser({ ...newUser, email: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label">First Name</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={newUser.prenom}
+                          onChange={(e) =>
+                            setNewUser({ ...newUser, prenom: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label">Last Name</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={newUser.nom}
+                          onChange={(e) =>
+                            setNewUser({ ...newUser, nom: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label">Password</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={newUser.mot_de_passe}
+                          onChange={(e) =>
+                            setNewUser({
+                              ...newUser,
+                              mot_de_passe: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+
+                      <div className="modal-footer">
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setIsModalOpen(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                          Create User
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={newUser.prenom}
-                  onChange={(e) => setNewUser({...newUser, prenom: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={newUser.nom}
-                  onChange={(e) => setNewUser({...newUser, nom: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300
-                   rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={newUser.mot_de_passe}
-                  onChange={(e) => setNewUser({...newUser, mot_de_passe: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white rounded-lg py-2 px-4 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  Create User
-                </button>
-              </div>
-            </form>
-          </div>
+          )}
         </div>
       )}
     </div>

@@ -103,7 +103,7 @@ const Sidebar = ({ user, isAdmin }) => {
       </div>
 
       <div className="sidebar-footer p-3 mt-auto">
-        <button onClick={logout} className="btn btn-danger w-100 d-flex align-items-center">
+        <button onClick={logout} className="btn btn-danger w-100 justify-content-between d-flex align-items-center">
           <LogOut size={22} className="" style={{ marginLeft: isCollapsed ? "auto" : "0" }} />
           {!isCollapsed && "Logout"}
         </button>
