@@ -4,41 +4,44 @@ import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
 
 const Navbar = ({ user }) => {
-  //console.log(user);
   const router = useRouter();
 
   const handleNavigation = () => {
-    router.push("/Admin/profile"); 
+    router.push("/Admin/profile");
   };
-  
+
   return (
-    <div className="flex h-16 bg-white shadow-sm">
-      <div className="flex flex-grow items-center justify-end px-6">
-        <div className="flex items-center gap-4">
-          <button className="relative rounded-full p-2 hover:bg-gray-100">
-            <Bell size={20} className="text-gray-600" />
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500"></span>
+    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+      <div className="container-fluid d-flex justify-content-end px-4">
+        <div className="d-flex align-items-center gap-3">
+          <button className="btn position-relative" style={{ border: "none", background: "none" }}>
+            <Bell size={20} className="text-secondary" />
+            <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
           </button>
 
-          <div onClick={handleNavigation} className="flex items-center cursor-pointer gap-3 rounded-full border p-1">
-            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
+          <div
+            onClick={handleNavigation}
+            className="d-flex align-items-center cursor-pointer border rounded-pill p-1"
+            style={{ cursor: "pointer" }}
+          >
+            <div className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold" style={{ width: "40px", height: "40px" }}>
               {user?.photo_de_profil ? (
                 <img
                   src={user?.photo_de_profil}
                   alt={`${user?.prenom} ${user?.nom}`}
-                  className="h-10 w-10 rounded-full"
+                  className="rounded-circle w-100 h-100"
                 />
               ) : (
                 getInitials(user?.prenom, user?.nom)
               )}
             </div>
-            <span className="hidden sm:bmock text-sm font-medium text-gray-700">
+            <span className="d-none d-sm-inline-block text-muted fw-medium ms-2 pe-2">
               {user?.prenom} {user?.nom}
             </span>
           </div>
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 
