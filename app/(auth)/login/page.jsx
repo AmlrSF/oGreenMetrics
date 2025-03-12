@@ -37,7 +37,7 @@ const Page = () => {
       
         if(rolesNeedsToBeverified.includes(data?.user?.role)){
           toast.success("User logged successfully!"); 
-          router.push("/Dashboard/Admin");s
+          router.push("/Dashboard/Admin");
         }else{
           toast.success("User logged successfully!"); 
           router.push("/Dashboard/User");

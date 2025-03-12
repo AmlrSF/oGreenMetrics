@@ -11,7 +11,8 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-light
+     bg-white ">
       <div className="container-fluid d-flex justify-content-end px-4">
         <div className="d-flex align-items-center gap-3">
           <button className="btn position-relative" style={{ border: "none", background: "none" }}>

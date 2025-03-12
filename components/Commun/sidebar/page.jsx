@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { LogOut, Menu, ChevronLeft, ChevronDown } from "lucide-react";
-import Image from "next/image";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -16,18 +15,17 @@ const Sidebar = ({ user, isAdmin }) => {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    setItems(isAdmin ? menuItems : userMenuItems);
+    const filteredItems = isAdmin ? menuItems : userMenuItems;
+    setItems(filteredItems.filter((item) => item.label !== "Profile" && item.label !== "Settings"));
 
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setIsCollapsed(true);
-      }
+      setIsCollapsed(window.innerWidth < 768);
     };
 
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [isAdmin]);
 
   const toggleDropdown = (label) => {
     setOpenDropdown(openDropdown === label ? null : label);
@@ -55,9 +53,7 @@ const Sidebar = ({ user, isAdmin }) => {
 
   return (
     <div
-      className={`sidebar navbar-vertical   ${
-        isCollapsed ? "sidebar-collapsed " : ""
-      }`}
+      className={`sidebar navbar-vertical shadow-md ${isCollapsed ? "sidebar-collapsed" : ""}`}
       style={{
         backgroundColor: "white",
         display: "flex",
@@ -67,23 +63,17 @@ const Sidebar = ({ user, isAdmin }) => {
     >
       {/* Sidebar Header */}
       <div
-        className={`sidebar-header  d-flex gap-6 align-items-center p-3 ${
+        className={`sidebar-header d-flex gap-6 align-items-center p-3 ${
           isCollapsed ? "justify-content-center" : "justify-content-between"
         }`}
       >
         {!isCollapsed && (
-          <div
-            className="d-flex justify-content-center p-3  align-items-start 
-          flex-column font-extrabold leading-[0.8]"
-          >
+          <div className="d-flex justify-content-center p-3 align-items-start flex-column font-extrabold leading-[0.8]">
             <span className="text-[15px] text-[#263589]">Green</span>
             <span className="text-[20px] text-[#8EBE21]">Metrics</span>
           </div>
         )}
-        <div
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="cursor-pointer"
-        >
+        <div onClick={() => setIsCollapsed(!isCollapsed)} className="cursor-pointer">
           {isCollapsed ? <Menu size={24} /> : <ChevronLeft size={24} />}
         </div>
       </div>
@@ -98,9 +88,7 @@ const Sidebar = ({ user, isAdmin }) => {
                   <a
                     href="#"
                     className={`nav-link d-flex gap-3 align-items-center ${
-                      isCollapsed
-                        ? "justify-content-center"
-                        : "justify-content-start"
+                      isCollapsed ? "justify-content-center" : "justify-content-start"
                     }`}
                     onClick={() => toggleDropdown(item.label)}
                   >
@@ -108,24 +96,16 @@ const Sidebar = ({ user, isAdmin }) => {
                     {!isCollapsed && (
                       <>
                         <span>{item.label}</span>
-                        <ChevronDown
-                          className={` ${
-                            openDropdown === item.label ? "rotate-180" : ""
-                          }`}
-                        />
+                        <ChevronDown className={`${openDropdown === item.label ? "rotate-180" : ""}`} />
                       </>
                     )}
                   </a>
-                  <ul
-                    className={`nav flex-column ${
-                      openDropdown === item.label ? "d-block" : "d-none"
-                    }`}
-                  >
+                  <ul className={`nav flex-column ${openDropdown === item.label ? "d-block" : "d-none"}`}>
                     {item.children.map((child) => (
                       <li key={child.label} className="nav-item">
                         <Link
                           href={child.href}
-                          className={`nav-link d-flex  align-items-center ${isCollapsed ? "" : "ml-9 " }`}
+                          className={`nav-link d-flex align-items-center ${isCollapsed ? "" : "ml-9"}`}
                         >
                           <child.icon size={20} className="me-2" />
                           {!isCollapsed && <span>{child.label}</span>}
@@ -138,9 +118,7 @@ const Sidebar = ({ user, isAdmin }) => {
                 <Link
                   href={item.href}
                   className={`nav-link d-flex gap-3 align-items-center ${
-                    isCollapsed
-                      ? "justify-content-center"
-                      : "justify-content-start"
+                    isCollapsed ? "justify-content-center" : "justify-content-start"
                   }`}
                 >
                   <item.icon size={22} />
@@ -154,6 +132,28 @@ const Sidebar = ({ user, isAdmin }) => {
 
       {/* Sidebar Footer */}
       <div className="sidebar-footer p-3 mt-auto">
+        {/* Profile & Settings at the Bottom */}
+        <ul className="nav flex-column mb-3">
+          {["Profile", "Settings"].map((label) => {
+            const item = (isAdmin ? menuItems : userMenuItems).find((i) => i.label === label);
+            return (
+              item && (
+                <li key={item.label} className="nav-item">
+                  <Link
+                    href={item.href}
+                    className={`nav-link d-flex gap-3 align-items-center ${
+                      isCollapsed ? "justify-content-center" : "justify-content-start"
+                    }`}
+                  >
+                    <item.icon size={22} />
+                    {!isCollapsed && <span>{item.label}</span>}
+                  </Link>
+                </li>
+              )
+            );
+          })}
+        </ul>
+
         <button
           onClick={logout}
           className={`btn btn-danger w-100 d-flex align-items-center ${
