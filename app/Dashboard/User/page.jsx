@@ -1,9 +1,11 @@
 import React from 'react'
 
-const page = () => {
+const CompanyDash = () => {
   return (
-    <div>page</div>
+    <div>dashboard
+
+    </div>
   )
 }
 
-export default page
+export default CompanyDash
