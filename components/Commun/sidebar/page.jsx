@@ -17,7 +17,7 @@ const Sidebar = ({ user, isAdmin }) => {
 
   useEffect(() => {
     setItems(isAdmin ? menuItems : userMenuItems);
-    
+
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setIsCollapsed(true);
@@ -54,14 +54,41 @@ const Sidebar = ({ user, isAdmin }) => {
   };
 
   return (
-    <div className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`} style={{ backgroundColor: "white", display: "flex", flexDirection: "column", height: "100vh" }}>
-      <div className="sidebar-header d-flex align-items-center justify-content-between p-3">
-        {!isCollapsed && <Image src="/logo.png" width={150} height={150} alt="logo" />}
-        <button onClick={() => setIsCollapsed(!isCollapsed)} className="btn btn-outline-secondary">
+    <div
+      className={`sidebar navbar-vertical   ${
+        isCollapsed ? "sidebar-collapsed " : ""
+      }`}
+      style={{
+        backgroundColor: "white",
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+      }}
+    >
+      {/* Sidebar Header */}
+      <div
+        className={`sidebar-header  d-flex gap-6 align-items-center p-3 ${
+          isCollapsed ? "justify-content-center" : "justify-content-between"
+        }`}
+      >
+        {!isCollapsed && (
+          <div
+            className="d-flex justify-content-center p-3  align-items-start 
+          flex-column font-extrabold leading-[0.8]"
+          >
+            <span className="text-[15px] text-[#263589]">Green</span>
+            <span className="text-[20px] text-[#8EBE21]">Metrics</span>
+          </div>
+        )}
+        <div
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="cursor-pointer"
+        >
           {isCollapsed ? <Menu size={24} /> : <ChevronLeft size={24} />}
-        </button>
+        </div>
       </div>
 
+      {/* Sidebar Content */}
       <div className="sidebar-content p-3 flex-grow-1">
         <ul className="nav flex-column">
           {items.map((item) => (
@@ -70,20 +97,36 @@ const Sidebar = ({ user, isAdmin }) => {
                 <>
                   <a
                     href="#"
-                    className="nav-link d-flex align-items-center justify-content-between"
+                    className={`nav-link d-flex gap-3 align-items-center ${
+                      isCollapsed
+                        ? "justify-content-center"
+                        : "justify-content-start"
+                    }`}
                     onClick={() => toggleDropdown(item.label)}
-                    style={{ paddingRight: isCollapsed ? "8px" : "16px" }}
                   >
-                    <item.icon size={22} className="me-2" style={{ marginLeft: isCollapsed ? "auto" : "0" }} />
-                    {!isCollapsed && <span>{item.label}</span>}
+                    <item.icon size={22} />
                     {!isCollapsed && (
-                      <ChevronDown className={`ms-auto ${openDropdown === item.label ? "rotate-180" : ""}`} />
+                      <>
+                        <span>{item.label}</span>
+                        <ChevronDown
+                          className={` ${
+                            openDropdown === item.label ? "rotate-180" : ""
+                          }`}
+                        />
+                      </>
                     )}
                   </a>
-                  <ul className={`nav flex-column ${openDropdown === item.label ? "d-block" : "d-none"} `}>
+                  <ul
+                    className={`nav flex-column ${
+                      openDropdown === item.label ? "d-block" : "d-none"
+                    }`}
+                  >
                     {item.children.map((child) => (
                       <li key={child.label} className="nav-item">
-                        <Link href={child.href} className="nav-link d-flex align-items-center">
+                        <Link
+                          href={child.href}
+                          className={`nav-link d-flex  align-items-center ${isCollapsed ? "" : "ml-9 " }`}
+                        >
                           <child.icon size={20} className="me-2" />
                           {!isCollapsed && <span>{child.label}</span>}
                         </Link>
@@ -92,8 +135,15 @@ const Sidebar = ({ user, isAdmin }) => {
                   </ul>
                 </>
               ) : (
-                <Link href={item.href} className="nav-link d-flex align-items-center" style={{ paddingRight: isCollapsed ? "8px" : "16px" }}>
-                  <item.icon size={22} className="me-2" style={{ marginLeft: isCollapsed ? "auto" : "0" }} />
+                <Link
+                  href={item.href}
+                  className={`nav-link d-flex gap-3 align-items-center ${
+                    isCollapsed
+                      ? "justify-content-center"
+                      : "justify-content-start"
+                  }`}
+                >
+                  <item.icon size={22} />
                   {!isCollapsed && <span>{item.label}</span>}
                 </Link>
               )}
@@ -102,10 +152,16 @@ const Sidebar = ({ user, isAdmin }) => {
         </ul>
       </div>
 
+      {/* Sidebar Footer */}
       <div className="sidebar-footer p-3 mt-auto">
-        <button onClick={logout} className="btn btn-danger w-100 justify-content-between d-flex align-items-center">
-          <LogOut size={22} className="" style={{ marginLeft: isCollapsed ? "auto" : "0" }} />
-          {!isCollapsed && "Logout"}
+        <button
+          onClick={logout}
+          className={`btn btn-danger w-100 d-flex align-items-center ${
+            isCollapsed ? "justify-content-center" : "justify-content-between"
+          }`}
+        >
+          <LogOut size={22} />
+          {!isCollapsed && <span>Logout</span>}
         </button>
       </div>
     </div>
