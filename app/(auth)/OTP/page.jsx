@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Toaster } from "react-hot-toast";
-import toast from "react-hot-toast";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { IconAlertCircle, IconCheck } from "@tabler/icons-react";
 
 const OTPVerificationPage = () => {
   const [email, setEmail] = useState("");
@@ -13,8 +12,20 @@ const OTPVerificationPage = () => {
   const [timer, setTimer] = useState(60);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [alerts, setAlerts] = useState([]);
   const inputRefs = useRef([]);
   const router = useRouter();
+
+  // Function to show alerts
+  const showAlert = (message, type) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setAlerts(prev => [...prev, { id, message, type }]);
+    
+    // Remove alert after 3 seconds
+    setTimeout(() => {
+      setAlerts(prev => prev.filter(alert => alert.id !== id));
+    }, 3000);
+  };
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("email");
@@ -65,16 +76,16 @@ const OTPVerificationPage = () => {
         const data = await response.json();
 
         if (data?.CreatedpasswordResetOTP) {
-          toast.success("OTP sent, check your mailbox");
+          showAlert("OTP sent, check your mailbox", "success");
 
           setTimer(60);
           setCanResend(false);
         } else {
-          toast.error(data?.message || "Error resending OTP");
+          showAlert(data?.message || "Error resending OTP", "danger");
         }
       } catch (error) {
         console.error("Error during OTP resend:", error);
-        toast.error("An error occurred while resending OTP.");
+        showAlert("An error occurred while resending OTP.", "danger");
       }
     }
   };
@@ -82,11 +93,12 @@ const OTPVerificationPage = () => {
   const handleVerify = async () => {
     const otpCode = otp.join("");
 
-    if (!otpCode || otpCode.length < 4)
-      return toast.error("Please enter the OTP code correctly");
+    if (!otpCode || otpCode.length < 4) {
+      return showAlert("Please enter the OTP code correctly", "danger");
+    }
 
     if (!/^\d+$/.test(otpCode)) {
-      return toast.error("OTP code must contain digits only");
+      return showAlert("OTP code must contain digits only", "danger");
     }
 
     setLoading(true);
@@ -110,116 +122,151 @@ const OTPVerificationPage = () => {
       console.log(data);
 
       if (data?.success) {
-        toast.success(data.message);
+        showAlert(data.message, "success");
         localStorage.setItem("resetToken", data?.token);
         router.push("/ResetPassword");
-        setLoading(false);
       } else {
-        toast.error(data?.message);
-        setLoading(false);
+        showAlert(data?.message, "danger");
       }
     } catch (error) {
-      console.error("Error during OTP resend:", error);
-      toast.error("An error occurred while resending OTP.");
+      console.error("Error during OTP verification:", error);
+      showAlert("An error occurred while verifying OTP.", "danger");
     } finally {
       setLoading(false);
     }
   };
 
   if (!isSuccess) {
-    return <p>Loading...</p>;
+    return <div className="d-flex justify-content-center align-items-center min-vh-100">
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Toaster position="top-right" />
-      <Image
-        src="/Auth illustrations/shape1.png"
-        width={250}
-        height={420}
-        alt="Shape 1"
-        className="absolute bottom-0 left-0"
-        style={{ width: "auto", height: "auto" }}
-      />
-      <Image
-        src="/Auth illustrations/shape2.png"
-        width={250}
-        height={420}
-        alt="Shape 2"
-        className="absolute top-0 right-0"
-        style={{ width: "auto", height: "auto" }}
-      />
-      <div className="z-10 bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full">
-        <div className="flex items-center w-full justify-start  mb-8">
-          <Image
-            src="/logo.png"
-            width={150}
-            height={150}
-            alt="logo"
-            style={{ width: "auto", height: "auto" }}
-          />
-        </div>
-
-        <div className="flex items-center justify-center gap-12">
-          <div className="w-full max-w-sm md:text-left text-center">
-            <h2 className="text-xl font-semibold mb-2">Verification</h2>
-            <p className="text-gray-600 mb-6">
-              Veuillez vérifier le code de vérification dans votre boîte de
-              réception <span className="underline font-semibold">{email}</span>
-            </p>
-
-            <div className="flex items-center justify-center gap-3 mb-4">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-12  h-12 border-2 rounded-md text-center text-xl font-semibold focus:border-green-500 focus:outline-none"
-                />
-              ))}
-            </div>
-
-            <div className="mb-6 text-sm flex flex-col items-center">
-              <span className="text-gray-600">
-                You didn't receive the code?{" "}
-              </span>
-              <div>
-                <button
-                  onClick={handleResend}
-                  disabled={!canResend}
-                  className={`primary-clr ${
-                    !canResend && "opacity-50 cursor-not-allowed"
-                  }`}
-                >
-                  Resend code
-                </button>
-                {!canResend && (
-                  <span className="text-gray-600 ml-1">
-                    in 00:{timer.toString().padStart(2, "0")}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={handleVerify}
-              className="w-full primary-clr-bg font-medium 
-              cursor-pointer text-white py-3 rounded-md  transition-colors"
-            >
-              {loading ? "Vérification en cours..." : "Vérifier le compte"}
-            </button>
+    <div className="page page-center bg-light">
+      {/* Alerts container */}
+      <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
+        {alerts.map((alert) => (
+          <div 
+            key={alert.id} 
+            className={`alert alert-${alert.type} alert-dismissible`}
+            role="alert"
+          >
+            {alert.type === 'success' ? 
+              <IconCheck className="alert-icon" /> : 
+              <IconAlertCircle className="alert-icon" />
+            }
+            <div>{alert.message}</div>
+            <a className="btn-close" onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}></a>
           </div>
-          <div className="hidden md:block flex-1">
-            <div className="relative w-full h-80">
-              <img
-                src="/Auth illustrations/otp.png"
-                alt="Verification illustration"
-                className="w-full h-full object-contain"
+        ))}
+      </div>
+
+      {/* Background shapes */}
+      <div className="position-absolute bottom-0 start-0">
+        <Image
+          src="/Auth illustrations/shape1.png"
+          width={250}
+          height={420}
+          alt="Shape 1"
+          style={{ width: "auto", height: "auto" }}
+        />
+      </div>
+      <div className="position-absolute top-0 end-0">
+        <Image
+          src="/Auth illustrations/shape2.png"
+          width={250}
+          height={420}
+          alt="Shape 2"
+          style={{ width: "auto", height: "auto" }}
+        />
+      </div>
+
+      <div className="container-xl">
+        <div className="card shadow">
+          <div className="card-body p-4">
+            <div className="d-flex mb-4">
+              <Image
+                src="/logo.png"
+                width={150}
+                height={150}
+                alt="logo"
+                style={{ width: "auto", height: "auto" }}
               />
+            </div>
+
+            <div className="row align-items-center g-4">
+              <div className="col-md-6 text-md-start text-center">
+                <h2 className="h3 mb-2">Verification</h2>
+                <p className="text-muted mb-4">
+                  Veuillez vérifier le code de vérification dans votre boîte de
+                  réception <span className="text-decoration-underline fw-semibold">{email}</span>
+                </p>
+
+                <div className="d-flex justify-content-center justify-content-md-start gap-2 mb-4">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => (inputRefs.current[index] = el)}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      className="form-control text-center fw-semibold fs-3"
+                      style={{ width: "3rem", height: "3rem" }}
+                    />
+                  ))}
+                </div>
+
+                <div className="mb-4 small d-flex flex-column align-items-center align-items-md-start">
+                  <span className="text-muted">
+                    You didn't receive the code?{" "}
+                  </span>
+                  <div>
+                    <button
+                      onClick={handleResend}
+                      disabled={!canResend}
+                      className={`btn btn-link p-0 text-primary ${
+                        !canResend && "opacity-50 disabled"
+                      }`}
+                    >
+                      Resend code
+                    </button>
+                    {!canResend && (
+                      <span className="text-muted ms-1">
+                        in 00:{timer.toString().padStart(2, "0")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleVerify}
+                  className="btn btn-primary w-100 py-2"
+                  disabled={loading}
+                >
+                  {loading ? 
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Vérification en cours...
+                    </> : 
+                    "Vérifier le compte"}
+                </button>
+              </div>
+              
+              <div className="col-md-6 d-none d-md-block">
+                <div className="text-center">
+                  <img
+                    src="/Auth illustrations/otp.png"
+                    alt="Verification illustration"
+                    className="img-fluid"
+                    style={{ maxHeight: "320px" }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
