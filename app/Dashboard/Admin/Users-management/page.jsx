@@ -8,7 +8,7 @@ import {
   UserX,
   Trash2,
   X,
-  Plus
+  Plus,
 } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/Utils";
 
@@ -20,11 +20,12 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [roles, setRoles] = useState([]);
   const [newUser, setNewUser] = useState({
     email: "",
     prenom: "",
     nom: "",
-    role: "Moderator",
+    AdminRoles: "",
     mot_de_passe: "",
   });
   const itemsPerPage = 10;
@@ -32,7 +33,19 @@ const Page = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
   }, []);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/roles");
+      const data = await response.json();
+      console.log(data);
+      setRoles(data?.data);
+    } catch (error) {
+      setError("Failed to load roles");
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -40,7 +53,7 @@ const Page = () => {
     try {
       const response = await fetch("http://localhost:4000/users");
       let data = await response.json();
-      data = data.filter((item) => item?.role === "Moderator");
+      data = data.filter((item) => item?.AdminRoles);
       setUsers(data);
       setFilteredUsers(data);
     } catch (error) {
@@ -99,6 +112,8 @@ const Page = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
+    console.log(newUser);
+    
     try {
       const response = await fetch("http://localhost:4000/register", {
         method: "POST",
@@ -108,6 +123,8 @@ const Page = () => {
         body: JSON.stringify(newUser),
       });
 
+      const data = await response.json();
+      console.log(data);
       if (response.ok) {
         fetchUsers();
         setIsModalOpen(false);
@@ -115,7 +132,7 @@ const Page = () => {
           email: "",
           prenom: "",
           nom: "",
-          role: "Moderator",
+          AdminRoles: "",
           mot_de_passe: "",
         });
       }
@@ -222,7 +239,7 @@ const Page = () => {
                         </td>
                         <td className="text-secondary">{user.email}</td>
                         <td>
-                          <span className="badge bg-purple-lt">Moderator</span>
+                          <span className="badge bg-purple-lt">{user.AdminRoles.name}</span>
                         </td>
                         <td>
                           <span
@@ -387,12 +404,15 @@ const Page = () => {
                       className="form-select"
                       value={newUser.role}
                       onChange={(e) =>
-                        setNewUser({ ...newUser, role: e.target.value })
+                        setNewUser({ ...newUser, AdminRoles: e.target.value })
                       }
                     >
-                      <option value="Moderator">Moderator</option>
-                      <option value="Admin">Admin</option>
-                      <option value="User">User</option>
+                      <option value="">Select a role</option>
+                      {roles.map((role) => (
+                        <option key={role._id} value={role._id}>
+                          {role.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="mb-3">

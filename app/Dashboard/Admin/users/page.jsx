@@ -19,9 +19,12 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
   }, []);
 
   const fetchUsers = async () => {
@@ -42,6 +45,8 @@ const Page = () => {
     }
     setLoading(false);
   };
+
+
 
   const handleApproveUser = async (userId, currentStatus) => {
     try {
@@ -181,7 +186,10 @@ const Page = () => {
                         </td>
                         <td>
                           <div className="btn-list flex-nowrap">
-                            <button onClick={()=>handleApproveUser(user._id, user.isVerified)}
+                            <button
+                              onClick={() =>
+                                handleApproveUser(user._id, user.isVerified)
+                              }
                               className={`btn btn-ghost-${
                                 user.isVerified ? "danger" : "success"
                               } btn-icon`}
