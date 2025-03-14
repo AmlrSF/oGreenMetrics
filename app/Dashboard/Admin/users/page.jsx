@@ -181,7 +181,7 @@ const Page = () => {
                         </td>
                         <td>
                           <div className="btn-list flex-nowrap">
-                            <button
+                            <button onClick={()=>handleApproveUser(user._id, user.isVerified)}
                               className={`btn btn-ghost-${
                                 user.isVerified ? "danger" : "success"
                               } btn-icon`}
