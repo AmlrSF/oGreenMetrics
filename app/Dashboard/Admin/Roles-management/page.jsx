@@ -9,6 +9,7 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userAccess, setUserAccess] = useState("");
   const [newRole, setNewRole] = useState({
     name: "",
     description: "",
@@ -22,7 +23,26 @@ const Page = () => {
 
   useEffect(() => {
     fetchRoles();
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data?.user) {
+        setUserAccess(data?.user?.AdminRoles?.userManagement);
+        console.log(data?.user);
+      }
+    } catch (err) {
+      console.log();
+    }
+  };
 
   const fetchRoles = async () => {
     setLoading(true);
@@ -133,7 +153,7 @@ const Page = () => {
                 <th>Role Name</th>
                 <th>Description</th>
                 <th>Role</th>
-                <th>Actions</th>
+                {userAccess == "10" ? <></> : <th className="w-1"> Action </th>}
               </tr>
             </thead>
             <tbody>
@@ -153,12 +173,18 @@ const Page = () => {
                                 <div className="d-flex items-center gap-2">
                                   {role.userManagement == "10" ? (
                                     <>
-                                      <span className="badge bg-orange-lt">Read</span>
+                                      <span className="badge bg-orange-lt">
+                                        Read
+                                      </span>
                                     </>
                                   ) : (
                                     <>
-                                    <span className="badge bg-orange-lt">Read</span>
-                                    <span className="badge bg-orange-lt">Write</span>
+                                      <span className="badge bg-orange-lt">
+                                        Read
+                                      </span>
+                                      <span className="badge bg-orange-lt">
+                                        Write
+                                      </span>
                                     </>
                                   )}
                                 </div>
@@ -174,14 +200,20 @@ const Page = () => {
                                   Role Management
                                 </p>
                                 <div className="d-flex items-center gap-2">
-                                {role.roleManagement == "10" ? (
+                                  {role.roleManagement == "10" ? (
                                     <>
-                                      <span className="badge bg-orange-lt">Read</span>
+                                      <span className="badge bg-orange-lt">
+                                        Read
+                                      </span>
                                     </>
                                   ) : (
                                     <>
-                                    <span className="badge bg-orange-lt">Read</span>
-                                    <span className="badge bg-orange-lt">Write</span>
+                                      <span className="badge bg-orange-lt">
+                                        Read
+                                      </span>
+                                      <span className="badge bg-orange-lt">
+                                        Write
+                                      </span>
                                     </>
                                   )}
                                 </div>
@@ -197,14 +229,20 @@ const Page = () => {
                                   Company Management
                                 </p>
                                 <div className="d-flex items-center gap-2">
-                                {role.companyManagement == "10" ? (
+                                  {role.companyManagement == "10" ? (
                                     <>
-                                      <span className="badge bg-orange-lt">Read</span>
+                                      <span className="badge bg-orange-lt">
+                                        Read
+                                      </span>
                                     </>
                                   ) : (
                                     <>
-                                    <span className="badge bg-orange-lt">Read</span>
-                                    <span className="badge bg-orange-lt">Write</span>
+                                      <span className="badge bg-orange-lt">
+                                        Read
+                                      </span>
+                                      <span className="badge bg-orange-lt">
+                                        Write
+                                      </span>
                                     </>
                                   )}
                                 </div>
@@ -213,14 +251,18 @@ const Page = () => {
                           : ""}
                       </div>
                     </td>
-                    <td>
-                      <button
-                        className="btn btn-ghost-danger btn-icon"
-                        onClick={() => deleterole(role)}
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
+                    {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <td>
+                        <button
+                          className="btn btn-ghost-danger btn-icon"
+                          onClick={() => deleterole(role)}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (

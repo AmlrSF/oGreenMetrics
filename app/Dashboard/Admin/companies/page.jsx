@@ -12,11 +12,31 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [userAccess, setUserAccess] = useState("");
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
 
   useEffect(() => {
     fetchCompanies();
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data?.user) {
+        setUserAccess(data?.user?.AdminRoles?.userManagement);
+        console.log(data?.user);
+      }
+    } catch (err) {
+      console.log();
+    }
+  };
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -63,13 +83,12 @@ const Page = () => {
         }
       );
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       fetchCompanies();
     } catch (error) {
       setError("Failed to update company status");
     }
   };
-
 
   useEffect(() => {
     let result = companies;
@@ -140,7 +159,11 @@ const Page = () => {
                     <th>Industry</th>
                     <th>Status</th>
                     <th>Registration Date</th>
-                    <th className="w-1">Actions</th>
+                    {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <th className="w-1"> Action </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -152,9 +175,14 @@ const Page = () => {
                             className="avatar avatar-sm text-white me-2"
                             style={{ backgroundColor: "#263589" }}
                           >
-                            {getInitials(company.userId?.nom,company.userId?.prenom)}
+                            {getInitials(
+                              company.userId?.nom,
+                              company.userId?.prenom
+                            )}
                           </span>
-                          <p className="text-[10px] mb-0">{company.userId?.nom} {company.userId?.prenom}</p>
+                          <p className="text-[10px] mb-0">
+                            {company.userId?.nom} {company.userId?.prenom}
+                          </p>
                         </td>
                         <td className="text-secondary ">
                           <div className="d-flex align-items-center">
@@ -185,31 +213,37 @@ const Page = () => {
                         <td className="text-secondary">
                           {formatDate(company.createdAt)}
                         </td>
-                        <td>
-                          <div className="btn-list flex-nowrap">
-                            <button
-                               className={`btn btn-ghost-${
-                                company.isVerified ? "danger" : "success"
-                              } btn-icon`}
-                              onClick={() =>
-                                handleApproveCompany(
-                                  company._id,
-                                  company.isVerified
-                                )
-                              }
-                            
-                            >
-                              {company.isVerified ? (
-                                <ShieldX size={18} />
-                              ) : (
-                                <ShieldCheck size={18} />
-                              )}
-                            </button>
-                            <button onClick={()=>handleDeleteCompany(company._id)} className="btn btn-ghost-danger btn-icon">
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <div className="btn-list flex-nowrap">
+                              <button
+                                className={`btn btn-ghost-${
+                                  company.isVerified ? "danger" : "success"
+                                } btn-icon`}
+                                onClick={() =>
+                                  handleApproveCompany(
+                                    company._id,
+                                    company.isVerified
+                                  )
+                                }
+                              >
+                                {company.isVerified ? (
+                                  <ShieldX size={18} />
+                                ) : (
+                                  <ShieldCheck size={18} />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => handleDeleteCompany(company._id)}
+                                className="btn btn-ghost-danger btn-icon"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (

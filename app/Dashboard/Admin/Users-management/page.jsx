@@ -21,6 +21,7 @@ const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roles, setRoles] = useState([]);
+  const [userAccess, setUserAccess] = useState("");
   const [newUser, setNewUser] = useState({
     email: "",
     prenom: "",
@@ -34,6 +35,7 @@ const Page = () => {
   useEffect(() => {
     fetchUsers();
     fetchRoles();
+    checkAuth();
   }, []);
 
   const fetchRoles = async () => {
@@ -110,10 +112,28 @@ const Page = () => {
     return filteredUsers.slice(startIndex, endIndex);
   };
 
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data?.user) {
+        setUserAccess(data?.user?.AdminRoles?.userManagement);
+        console.log(data?.user);
+      }
+    } catch (err) {
+      console.log();
+    }
+  };
+
   const handleAddUser = async (e) => {
     e.preventDefault();
     console.log(newUser);
-    
+
     try {
       const response = await fetch("http://localhost:4000/register", {
         method: "POST",
@@ -208,7 +228,11 @@ const Page = () => {
                     <th>Role</th>
                     <th>Status</th>
                     <th>Created At</th>
-                    <th className="w-1">Actions</th>
+                    {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <th className="w-1"> Action </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -239,7 +263,9 @@ const Page = () => {
                         </td>
                         <td className="text-secondary">{user.email}</td>
                         <td>
-                          <span className="badge bg-purple-lt">{user.AdminRoles.name}</span>
+                          <span className="badge bg-purple-lt">
+                            {user.AdminRoles.name}
+                          </span>
                         </td>
                         <td>
                           <span
@@ -253,30 +279,34 @@ const Page = () => {
                         <td className="text-secondary">
                           {formatDate(user.createdAt)}
                         </td>
-                        <td>
-                          <div className="btn-list flex-nowrap">
-                            <button
-                              className={`btn btn-ghost-${
-                                user.isVerified ? "danger" : "success"
-                              } btn-icon`}
-                              onClick={() =>
-                                handleApproveUser(user._id, user.isVerified)
-                              }
-                            >
-                              {user.isVerified ? (
-                                <UserX size={18} />
-                              ) : (
-                                <UserCheck size={18} />
-                              )}
-                            </button>
-                            <button
-                              className="btn btn-ghost-danger btn-icon"
-                              onClick={() => deleteUser(user._id)}
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <div className="btn-list flex-nowrap">
+                              <button
+                                className={`btn btn-ghost-${
+                                  user.isVerified ? "danger" : "success"
+                                } btn-icon`}
+                                onClick={() =>
+                                  handleApproveUser(user._id, user.isVerified)
+                                }
+                              >
+                                {user.isVerified ? (
+                                  <UserX size={18} />
+                                ) : (
+                                  <UserCheck size={18} />
+                                )}
+                              </button>
+                              <button
+                                className="btn btn-ghost-danger btn-icon"
+                                onClick={() => deleteUser(user._id)}
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (
