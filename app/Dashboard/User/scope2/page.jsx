@@ -3,16 +3,24 @@ import React, { useState } from 'react';
 
 const Scope2 = () => {
   const [activeTab, setActiveTab] = useState('Consommation délectricité');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
   };
 
+  const handleButtonClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   const renderTable = () => {
     return (
       <div className="table-container" style={{ padding: '20px' }}>
-        <h4 style={{ marginBottom: '15px' }}>{getTableTitle()}</h4>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #e9ecef' }}>
               {activeTab === 'Consommation délectricité' && (
@@ -40,6 +48,7 @@ const Scope2 = () => {
         </table>
         <div style={{ textAlign: 'right', marginTop: '20px' }}>
           <button
+            onClick={handleButtonClick}
             style={{
               backgroundColor: '#76b82a',
               color: 'white',
@@ -80,6 +89,86 @@ const Scope2 = () => {
       return 2;
     }
     return 3; 
+  };
+
+  const renderModalFields = () => {
+    if (activeTab === 'Consommation délectricité') {
+      return (
+        <>
+          <div className="mb-3">
+            <label className="form-label">Consommation électrique (kW)</label>
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Consommation en kW"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Durée de fonctionnement (heures)</label>
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Durée en heures"
+            />
+          </div>
+        </>
+      );
+    } else { // Chauffage or Refroidissement
+      return (
+        <>
+          <div className="mb-3">
+            <label className="form-label">Nom</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Nom de l'équipement"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Type</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Type d'équipement"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Énergie Consommée</label>
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Énergie consommée"
+            />
+          </div>
+        </>
+      );
+    }
+  };
+
+  const renderModal = () => {
+    if (!isModalOpen) return null;
+
+    return (
+      <div className="modal show" id="exampleModal" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Nouveau {getTableTitle()}</h5>
+              <button type="button" className="btn-close" onClick={handleCloseModal} aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              {renderModalFields()}
+            </div>
+            <div className="modal-footer">
+              <a href="#" className="btn btn-link link-secondary" onClick={handleCloseModal}> Annuler </a>
+              <a href="#" className="btn btn-primary ms-auto" onClick={handleCloseModal}>
+                Ajouter
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -154,7 +243,10 @@ const Scope2 = () => {
           </ul>
         </div>
 
-        <div className="tab-content">{renderTable()}</div>
+        <div className="tab-content">
+          {renderTable()}
+          {renderModal()}
+        </div>
       </div>
     </div>
   );

@@ -7,13 +7,11 @@ const Scope3 = () => {
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
   };
-
-  // Render the appropriate table based on active tab
+ 
   const renderTable = () => {
     return (
       <div className="table-container" style={{ padding: '20px' }}>
-        <h4 style={{ marginBottom: '15px' }}>{getTableTitle()}</h4>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #e9ecef' }}>
               {getTableHeaders().map((header, index) => (

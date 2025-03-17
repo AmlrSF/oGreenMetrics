@@ -25,66 +25,66 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.mot_de_passe !== formData.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
-      return;
-    }
-    try { 
-      const userResponse = await fetch("http://localhost:4000/register", {
-        method: "POST", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prenom: formData.prenom,
-          nom: formData.nom,
-          email: formData.email,
-          mot_de_passe: formData.mot_de_passe,
-          role: formData.role
-        }),
-      });
-      
-      if (!userResponse.ok) {
-        const errorData = await userResponse.json();
-        setError(errorData.error || "Failed to register user");
+        setError("Les mots de passe ne correspondent pas");
         return;
-      }
-      
-      const userData = await userResponse.json();
-       
-      if (accountType === "entreprise") {
-        const companyResponse = await fetch("http://localhost:4000/registercompany", {
-          method: "POST", 
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nom_entreprise: formData.nom_entreprise,
-            matricule_fiscale: formData.matricule_fiscale,
-            email: formData.email,
-            num_tel: formData.num_tel,
-            adresse: formData.adresse,
-            date_fondation: formData.date_fondation,
-            industrie: formData.industrie,
-            userId: userData.user._id // Link to the user
-          }),
-        });
-        
-        if (!companyResponse.ok) {
-          const errorData = await companyResponse.json();
-          setError(errorData.message || "Failed to register company");
-          return;
-        }
-      }
-      
-      setSuccess(true);
-      setError("");
-      console.log("Registration successful", userData);
-      setFormData({ 
-        prenom: "", nom: "", email: "", mot_de_passe: "", confirmPassword: "", 
-        role: accountType, nom_entreprise: "", matricule_fiscale: "", 
-        num_tel: "", adresse: "", date_fondation: "", industrie: "" 
-      });
-    } catch (err) {
-      setError("Failed to connect to the server");
-      console.error(err);
     }
-  };
+    try {
+        const userResponse = await fetch("http://localhost:4000/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                prenom: formData.prenom,
+                nom: formData.nom,
+                email: formData.email,
+                mot_de_passe: formData.mot_de_passe,
+                role: formData.role
+            }),
+        });
+
+        if (!userResponse.ok) {
+            const errorData = await userResponse.json();
+            setError(errorData.error || "Failed to register user");
+            return;
+        }
+
+        const userData = await userResponse.json();
+
+        if (accountType === "entreprise") {
+            const companyResponse = await fetch("http://localhost:4000/registercompany", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nom_entreprise: formData.nom_entreprise,
+                    matricule_fiscale: formData.matricule_fiscale,
+                    email: formData.email,
+                    num_tel: formData.num_tel,
+                    adresse: formData.adresse,
+                    date_fondation: formData.date_fondation,
+                    industrie: formData.industrie,
+                    userId: userData.user._id
+                }),
+            });
+
+            if (!companyResponse.ok) {
+                const errorData = await companyResponse.json();
+                setError(errorData.message || "Failed to register company");
+                return;
+            }
+        }
+
+        setSuccess(true);
+        setError("");
+        console.log("Registration successful", userData);
+        setFormData({
+            prenom: "", nom: "", email: "", mot_de_passe: "", confirmPassword: "",
+            role: accountType, nom_entreprise: "", matricule_fiscale: "",
+            num_tel: "", adresse: "", date_fondation: "", industrie: ""
+        });
+    } catch (err) {
+        setError("Failed to connect to the server");
+        console.error(err);
+    }
+};
 
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center p-3 position-relative overflow-hidden">
@@ -314,25 +314,19 @@ const SignupPage = () => {
                   </div>
                   <div className="mb-3">
                     <div className="form-label">Industrie<span className="text-danger">*</span></div>
-                    <select 
-                      className="form-select" 
-                      name="industrie"
-                      value={formData.industrie}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="">Sélectionnez une industrie</option>
-                      <option value="Agriculture">Agriculture</option>
-                      <option value="Technologie">Technologie</option>
-                      <option value="Santé">Santé</option>
-                      <option value="Finance">Finance</option>
-                      <option value="Éducation">Éducation</option>
-                      <option value="Commerce">Commerce</option>
-                      <option value="Fabrication">Fabrication</option>
-                      <option value="Transport">Transport</option>
-                      <option value="Construction">Construction</option>
-                      <option value="Autre">Autre</option>
-                    </select>
+               <select 
+  className="form-select" 
+  name="industrie"
+  value={formData.industrie}
+  onChange={handleChange}
+  required
+>
+  <option value="">Sélectionnez une industrie</option>
+  <option value="Cement production">Cement production</option>
+  <option value="Lime production">Lime production</option>
+  <option value="Glass Production">Glass Production</option>
+  {/* Add other options as needed */}
+</select>
                   </div> 
                 </div>
               </div>

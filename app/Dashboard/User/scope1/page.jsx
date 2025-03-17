@@ -3,28 +3,36 @@ import React, { useState } from "react";
 
 const Scope1 = () => {
   const [activeTab, setActiveTab] = useState("Combustion de carburant");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
   };
 
+  const handleButtonClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   const renderTable = () => {
     return (
       <div className="table-container" style={{ padding: "20px" }}>
-        <h4 style={{ marginBottom: "15px" }}>{getTableTitle()}</h4>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #e9ecef" }}>
               {activeTab === "Combustion de carburant" ? (
                 <>
-                  <th style={{ padding: "10px", textAlign: "left" }}>Type</th>
-                  <th style={{ padding: "10px", textAlign: "left" }}>Quantité</th>
+                  <th style={{ padding: "10px", textAlign: "center" }}>Type</th>
+                  <th style={{ padding: "10px", textAlign: "center" }}>Quantité</th>
                 </>
               ) : (
                 <>
-                  <th style={{ padding: "10px", textAlign: "left" }}>Titre</th>
-                  <th style={{ padding: "10px", textAlign: "left" }}>Quantité</th>
-                  <th style={{ padding: "10px", textAlign: "left" }}>Description</th>
+                  <th style={{ padding: "10px", textAlign: "center" }}>Titre</th>
+                  <th style={{ padding: "10px", textAlign: "center" }}>Quantité</th>
+                  <th style={{ padding: "10px", textAlign: "center" }}>Description</th>
                 </>
               )}
             </tr>
@@ -39,6 +47,9 @@ const Scope1 = () => {
         </table>
         <div style={{ textAlign: "right", marginTop: "20px" }}>
           <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleButtonClick}
             style={{
               backgroundColor: "#76b82a",
               color: "white",
@@ -71,6 +82,90 @@ const Scope1 = () => {
         return "Combustion de carburant";
     }
   };
+
+  const renderModalFields = () => {
+    if (activeTab === "Combustion de carburant") {
+      return (
+        <>
+          <div className="mb-3">
+            <label className="form-label">Type</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Type de combustion"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Quantité</label>
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Quantité"
+            />
+          </div>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div className="mb-3">
+            <label className="form-label">Titre</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Titre"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Quantité</label>
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Quantité"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Description</label>
+            <textarea
+              className="form-control"
+              rows="3"
+              placeholder="Description détaillée"
+            ></textarea>
+          </div>
+        </>
+      );
+    }
+  };
+
+  const renderModal = () => {
+    if (!isModalOpen) return null;
+
+    return (
+      <div className="modal show" id="exampleModal" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">
+                {activeTab === "Combustion de carburant" 
+                  ? "Nouvelle combustion de carburant" 
+                  : "Nouvelle émission du procédé"}
+              </h5>
+              <button type="button" className="btn-close" onClick={handleCloseModal} aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              {renderModalFields()}
+            </div>
+            <div className="modal-footer">
+              <a href="#" className="btn btn-link link-secondary" onClick={handleCloseModal}> Annuler </a>
+              <a href="#" className="btn btn-primary ms-auto" onClick={handleCloseModal}>
+                Ajouter
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }; 
 
   return (
     <div className="scope3-container mt-5" style={{ backgroundColor: "#f8f9fa", padding: "20px" }}>
@@ -129,7 +224,10 @@ const Scope1 = () => {
           </ul>
         </div>
 
-        <div className="tab-content">{renderTable()}</div>
+        <div className="tab-content">
+          {renderTable()}
+          {renderModal()}
+        </div>
       </div>
     </div>
   );
