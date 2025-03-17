@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
   const rolesNeedsToBeverified = ["Admin", "Moderator"];
   const { push } = useRouter();
 
@@ -23,9 +24,31 @@ const DashboardLayout = ({ children }) => {
         });
 
         const data = await response.json();
-        
-        if (data?.user && rolesNeedsToBeverified.includes(data.user.role)) {
+        if (
+          data?.user &&
+          (rolesNeedsToBeverified.includes(data.user.role) ||
+            data?.user?.AdminRoles)
+        ) {
           setUser(data.user);
+          //console.log(data?.user);
+
+          if (data?.user?.AdminRoles) {
+
+            let adminRole = data?.user?.AdminRoles;
+            if (adminRole?.companyManagement == "00") {
+              push("/Dashboard/Admin");
+            }
+
+            if (adminRole?.roleManagement == "00") {
+              push("/Dashboard/Admin");
+            }
+
+            if (adminRole?.userManagement == "00") {
+              push("/Dashboard/Admin");
+            }
+
+          }
+
           setIsLoading(false);
         } else {
           console.log("Invalid role or no user, redirecting to login");

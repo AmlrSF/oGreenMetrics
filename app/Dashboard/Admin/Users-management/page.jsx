@@ -7,6 +7,8 @@ import {
   UserCheck,
   UserX,
   Trash2,
+  X,
+  Plus,
 } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/Utils";
 
@@ -17,12 +19,35 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [userAccess, setUserAccess] = useState("");
+  const [newUser, setNewUser] = useState({
+    email: "",
+    prenom: "",
+    nom: "",
+    AdminRoles: "",
+    mot_de_passe: "",
+  });
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
+    checkAuth();
   }, []);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/roles");
+      const data = await response.json();
+      console.log(data);
+      setRoles(data?.data);
+    } catch (error) {
+      setError("Failed to load roles");
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -30,7 +55,7 @@ const Page = () => {
     try {
       const response = await fetch("http://localhost:4000/users");
       let data = await response.json();
-      data = data.filter((item) => item?.role === "Moderator");
+      data = data.filter((item) => item?.AdminRoles);
       setUsers(data);
       setFilteredUsers(data);
     } catch (error) {
@@ -87,20 +112,74 @@ const Page = () => {
     return filteredUsers.slice(startIndex, endIndex);
   };
 
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data?.user) {
+        setUserAccess(data?.user?.AdminRoles?.userManagement);
+        console.log(data?.user);
+      }
+    } catch (err) {
+      console.log();
+    }
+  };
+
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    console.log(newUser);
+
+    try {
+      const response = await fetch("http://localhost:4000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      });
+
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
+        fetchUsers();
+        setIsModalOpen(false);
+        setNewUser({
+          email: "",
+          prenom: "",
+          nom: "",
+          AdminRoles: "",
+          mot_de_passe: "",
+        });
+      }
+    } catch (error) {
+      setError("Failed to create user");
+    }
+  };
+
   return (
-    <div className="container-xl h-full">
+    <div className="container-xl h-full ">
       <div className="py-10 mb-5 d-flex justify-content-between border-b align-items-center">
-        <div className=" d-flex leading-[0.1]  flex-column
-         justify-content-center align-items-start">
+        <div
+          className=" d-flex leading-[0.1]  flex-column
+         justify-content-center align-items-start"
+        >
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
-            Roles Administration
+            Users Administration
           </h3>
           <div className="card-subtitle">
-            Manage  roles, and permissions efficiently.
+            Manage roles, and permissions efficiently.
           </div>
         </div>
-        <button className="btn  bg-[#263589]">
-          Add User
+        <button
+          className="btn btn-success flex items-center"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <Plus size={18} className="mr-2" /> Add Role
         </button>
       </div>
 
@@ -149,7 +228,11 @@ const Page = () => {
                     <th>Role</th>
                     <th>Status</th>
                     <th>Created At</th>
-                    <th className="w-1">Actions</th>
+                    {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <th className="w-1"> Action </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -180,7 +263,9 @@ const Page = () => {
                         </td>
                         <td className="text-secondary">{user.email}</td>
                         <td>
-                          <span className="badge bg-purple-lt">Moderator</span>
+                          <span className="badge bg-purple-lt">
+                            {user.AdminRoles.name}
+                          </span>
                         </td>
                         <td>
                           <span
@@ -194,30 +279,34 @@ const Page = () => {
                         <td className="text-secondary">
                           {formatDate(user.createdAt)}
                         </td>
-                        <td>
-                          <div className="btn-list flex-nowrap">
-                            <button
-                              className={`btn btn-ghost-${
-                                user.isVerified ? "danger" : "success"
-                              } btn-icon`}
-                              onClick={() =>
-                                handleApproveUser(user._id, user.isVerified)
-                              }
-                            >
-                              {user.isVerified ? (
-                                <UserX size={18} />
-                              ) : (
-                                <UserCheck size={18} />
-                              )}
-                            </button>
-                            <button
-                              className="btn btn-ghost-danger btn-icon"
-                              onClick={() => deleteUser(user._id)}
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <div className="btn-list flex-nowrap">
+                              <button
+                                className={`btn btn-ghost-${
+                                  user.isVerified ? "danger" : "success"
+                                } btn-icon`}
+                                onClick={() =>
+                                  handleApproveUser(user._id, user.isVerified)
+                                }
+                              >
+                                {user.isVerified ? (
+                                  <UserX size={18} />
+                                ) : (
+                                  <UserCheck size={18} />
+                                )}
+                              </button>
+                              <button
+                                className="btn btn-ghost-danger btn-icon"
+                                onClick={() => deleteUser(user._id)}
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (
@@ -282,6 +371,127 @@ const Page = () => {
           </>
         )}
       </div>
+
+      {isModalOpen && (
+        <div className="modal modal-blur fade show d-block">
+          <div
+            className="modal-dialog modal-dialog-centered"
+            style={{ zIndex: 1050 }}
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Add New User</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setIsModalOpen(false)}
+                ></button>
+              </div>
+              <form onSubmit={handleAddUser}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      placeholder="Email address"
+                      value={newUser.email}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, email: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">First Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="First name"
+                      value={newUser.prenom}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, prenom: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Last Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Last name"
+                      value={newUser.nom}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, nom: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Role</label>
+                    <select
+                      className="form-select"
+                      value={newUser.role}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, AdminRoles: e.target.value })
+                      }
+                    >
+                      <option value="">Select a role</option>
+                      {roles.map((role) => (
+                        <option key={role._id} value={role._id}>
+                          {role.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="mod de passe"
+                      value={newUser.mot_de_passe}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, mot_de_passe: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-link "
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <a
+                    type="button"
+                    className="btn  bg-[#8EBE21]"
+                    href="/Dashboard/Admin/Roles-management"
+                  >
+                    Create Role
+                  </a>
+                  <button
+                    type="submit"
+                    className="btn text-white"
+                    style={{ backgroundColor: "#263589" }}
+                  >
+                    Create user
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div
+            className="modal-backdrop fade show"
+            style={{ zIndex: 1040 }}
+            onClick={() => setIsModalOpen(false)}
+          ></div>
+        </div>
+      )}
     </div>
   );
 };

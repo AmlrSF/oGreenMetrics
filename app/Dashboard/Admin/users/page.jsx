@@ -17,12 +17,33 @@ const Page = () => {
   const [currentFilter, setCurrentFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [userAccess, setUserAccess] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   useEffect(() => {
+    checkAuth();
     fetchUsers();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data?.user) {
+        setUserAccess(data?.user?.AdminRoles?.userManagement);
+        console.log(data?.user);
+      }
+    } catch (err) {
+      console.log();
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -36,6 +57,7 @@ const Page = () => {
       );
 
       setUsers(data);
+
       setFilteredUsers(data);
     } catch (error) {
       setError("Failed to load users");
@@ -130,7 +152,11 @@ const Page = () => {
                     <th>Role</th>
                     <th>Status</th>
                     <th>Created At</th>
-                    <th className="w-1">Actions</th>
+                    {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <th className="w-1"> Action </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -179,24 +205,31 @@ const Page = () => {
                         <td className="text-secondary">
                           {formatDate(user.createdAt)}
                         </td>
-                        <td>
-                          <div className="btn-list flex-nowrap">
-                            <button
-                              className={`btn btn-ghost-${
-                                user.isVerified ? "danger" : "success"
-                              } btn-icon`}
-                            >
-                              {user.isVerified ? (
-                                <UserX size={18} />
-                              ) : (
-                                <UserCheck size={18} />
-                              )}
-                            </button>
-                            <button className="btn btn-ghost-danger btn-icon">
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <div className="btn-list flex-nowrap">
+                              <button
+                                onClick={() =>
+                                  handleApproveUser(user._id, user.isVerified)
+                                }
+                                className={`btn btn-ghost-${
+                                  user.isVerified ? "danger" : "success"
+                                } btn-icon`}
+                              >
+                                {user.isVerified ? (
+                                  <UserX size={18} />
+                                ) : (
+                                  <UserCheck size={18} />
+                                )}
+                              </button>
+                              <button className="btn btn-ghost-danger btn-icon">
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (
