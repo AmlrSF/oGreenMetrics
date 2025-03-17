@@ -24,7 +24,7 @@ const Page = () => {
     try {
       const response = await fetch("http://localhost:4000/companies");
       const data = await response.json();
-      console.log(data?.data);
+      //console.log(data?.data);
       setCompanies(data?.data);
       setFilteredCompanies(data?.data);
     } catch (error) {
@@ -53,6 +53,23 @@ const Page = () => {
       setError("Failed to update company status");
     }
   };
+
+  const handleDeleteCompany = async (companyId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/deletecompany/${companyId}`,
+        {
+          method: "Delete",
+        }
+      );
+      const data = await response.json();
+      console.log(data)
+      fetchCompanies();
+    } catch (error) {
+      setError("Failed to update company status");
+    }
+  };
+
 
   useEffect(() => {
     let result = companies;
@@ -188,7 +205,7 @@ const Page = () => {
                                 <ShieldCheck size={18} />
                               )}
                             </button>
-                            <button className="btn btn-ghost-danger btn-icon">
+                            <button onClick={()=>handleDeleteCompany(company._id)} className="btn btn-ghost-danger btn-icon">
                               <Trash2 size={18} />
                             </button>
                           </div>

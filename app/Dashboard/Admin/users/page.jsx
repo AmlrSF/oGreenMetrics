@@ -24,7 +24,7 @@ const Page = () => {
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   useEffect(() => {
     fetchUsers();
-    fetchRoles();
+   
   }, []);
 
   const fetchUsers = async () => {

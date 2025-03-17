@@ -21,7 +21,7 @@ const Page = () => {
 
     try {
       console.log(email, motDePasse);
-      
+
       const response = await fetch("http://localhost:4000/login", {
         method: "POST",
         headers: {
@@ -32,22 +32,21 @@ const Page = () => {
       });
 
       const data = await response.json();
-      
+      console.log(data);
       if (data?.user) {
-      
-        if(rolesNeedsToBeverified.includes(data?.user?.role)){
-          toast.success("User logged successfully!"); 
+        if (rolesNeedsToBeverified.includes(data?.user?.role)) {
+          toast.success("User logged successfully!");
           router.push("/Dashboard/Admin");
-        }else{
-          toast.success("User logged successfully!"); 
+        } else if (data?.user?.AdminRoles) {
+          toast.success("User logged successfully!");
+          router.push("/Dashboard/Admin");
+        } else {
+          toast.success("User logged successfully!");
           router.push("/Dashboard/User");
         }
-        
       } else {
         toast.error(data.error);
       }
-
-
     } catch (err) {
       setError(err.message);
     }
@@ -58,8 +57,6 @@ const Page = () => {
       className="min-h-screen bg-white  flex items-center justify-center bg-gradient-to-br p-4
      from-green-50 to-white relative"
     >
-
-      
       <Toaster position="top-right" />
       <Image
         src="/Auth illustrations/shape1.png"
@@ -149,9 +146,12 @@ const Page = () => {
                 </div>
               </div>
 
-              <button type="submit" className="p-2  text-[16px] rounded-lg
+              <button
+                type="submit"
+                className="p-2  text-[16px] rounded-lg
                text-white font-medium hover:bg-primary-clr
-              btn-primary w-full mt-10">
+              btn-primary w-full mt-10"
+              >
                 S&apos;authentifier
               </button>
 

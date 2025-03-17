@@ -24,7 +24,7 @@ const DashboardLayout = ({ children }) => {
 
         const data = await response.json();
         
-        if (data?.user && rolesNeedsToBeverified.includes(data.user.role)) {
+        if (data?.user && (rolesNeedsToBeverified.includes(data.user.role) || data?.user?.AdminRoles)) {
           setUser(data.user);
           setIsLoading(false);
         } else {
