@@ -11,7 +11,6 @@ const Page = () => {
   const [motDePasse, setMotDePasse] = useState("");
   const [error, setError] = useState("");
   const [alerts, setAlerts] = useState([]);
-  let rolesNeedsToBeverified = ["Admin", "Moderator"];
   const router = useRouter();
 
   // Function to show alerts
@@ -42,12 +41,16 @@ const Page = () => {
       });
 
       const data = await response.json();
-      
+      console.log(data)
       if (data?.user) {
-        if(rolesNeedsToBeverified.includes(data?.user?.role)){
-          showAlert("User logged successfully!", "success");
+        console.log(data?.user?.role)
+        if(data?.user?.role == "Admin" || data?.user?.AdminRoles){
+          showAlert(`User logged successfully! ${data?.user?.role}`, "success");
           router.push("/Dashboard/Admin");
-        } else {
+        } else if(data?.user?.role == "régulier") {
+          showAlert("User logged successfully!", "success");
+          router.push("/Dashboard/Regular");
+        }else {
           showAlert("User logged successfully!", "success");
           router.push("/Dashboard/User");
         }

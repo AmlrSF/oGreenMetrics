@@ -178,6 +178,7 @@ const Page = () => {
         <button
           className="btn btn-success flex items-center"
           onClick={() => setIsModalOpen(true)}
+          style={{ backgroundColor: "#8EBE21" }}
         >
           <Plus size={18} className="mr-2" /> Add Role
         </button>
@@ -462,14 +463,15 @@ const Page = () => {
                 <div className="modal-footer">
                   <button
                     type="button"
-                    className="btn btn-link "
+                    className="btn   btn-outline"
                     onClick={() => setIsModalOpen(false)}
                   >
                     Cancel
                   </button>
                   <a
                     type="button"
-                    className="btn  bg-[#8EBE21]"
+                    className="btn text-white"
+                    style={{ backgroundColor: "#8EBE21" }}
                     href="/Dashboard/Admin/Roles-management"
                   >
                     Create Role

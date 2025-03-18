@@ -7,24 +7,37 @@ import toast from "react-hot-toast";
 import { userMenuItems, menuItems } from "@/lib/Data";
 
 const Sidebar = ({ user, isAdmin }) => {
+
+  console.log(user);
+  
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const router = useRouter();
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    if (isAdmin && user?.AdminRoles) {
-      const filteredMenuItems = menuItems.filter(item => {
-        if (!item.service) return true;
-        return user.AdminRoles[item.service] !== '00';
-      });
-
-      setItems(
-        filteredMenuItems.filter(
-          item => item.label !== "Profile" && item.label !== "Settings"
-        )
-      );
-
+    if (isAdmin) {
+      if (user?.role === "Admin") {
+        
+        setItems(
+          menuItems.filter(
+            item => item.label !== "Profile" && item.label !== "Settings"
+          )
+        );
+      } else if (user?.AdminRoles) {
+        
+        const filteredMenuItems = menuItems.filter(item => {
+          if (!item?.service) return true;
+          return user.AdminRoles[item?.service] !== '00';
+        });
+  
+        setItems(
+          filteredMenuItems.filter(
+            item => item.label !== "Profile" && item.label !== "Settings"
+          )
+        );
+      }
     } else {
       setItems(
         userMenuItems.filter(
@@ -32,11 +45,11 @@ const Sidebar = ({ user, isAdmin }) => {
         )
       );
     }
-
+  
     const handleResize = () => {
       setIsCollapsed(window.innerWidth < 768);
     };
-
+  
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
