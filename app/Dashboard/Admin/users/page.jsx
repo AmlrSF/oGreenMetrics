@@ -7,6 +7,7 @@ import {
   UserCheck,
   UserX,
   Trash2,
+  AlertTriangle
 } from "lucide-react";
 
 import { formatDate, getInitials } from "@/lib/Utils";
@@ -19,6 +20,9 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [userAccess, setUserAccess] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const itemsPerPage = 10;
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -65,24 +69,50 @@ const Page = () => {
     setLoading(false);
   };
 
-  const handleApproveUser = async (userId, currentStatus) => {
+  const handleApproveUser = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          isVerified: !currentStatus,
-        }),
-      });
-
-      const reponse = await response.json();
-      console.log(reponse);
+      const response = await fetch(
+        `http://localhost:4000/users/${selectedUser._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isVerified: !selectedUser.isVerified,
+          }),
+        }
+      );
+      await response.json();
+      setModalOpen(false);
       fetchUsers();
     } catch (error) {
       setError("Failed to update user status");
     }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/users/${selectedUser._id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      await response.json();
+      setModalOpen(false);
+      fetchUsers();
+    } catch (error) {
+      setError("Failed to delete user");
+    }
+  };
+
+
+
+  const openModal = (type, user) => {
+    setModalType(type);
+    setSelectedUser(user);
+    setModalOpen(true);
   };
 
   useEffect(() => {
@@ -99,6 +129,79 @@ const Page = () => {
 
   return (
     <div className="container-xl  h-full">
+      {/* Confirmation Modal */}
+      {modalOpen && selectedUser && (
+        <div className="modal modal-blur fade show d-block">
+          <div style={{ zIndex: 1050 }} 
+          className="modal-dialog modal-dialog-centered modal-sm">
+            <div className="modal-content">
+              <div className="modal-body">
+                <div className="text-center py-4">
+                  <AlertTriangle
+                    size={48}
+                    className="text-yellow-500 mb-2 mx-auto"
+                  />
+                  <h3>Are you sure?</h3>
+                  <div className="text-muted">
+                    {modalType === "approve"
+                      ? selectedUser.isVerified
+                        ? "Do you want to disapprove this user?"
+                        : "Do you want to approve this user?"
+                      : "Do you want to delete this user?"}
+                  </div>
+                  <div className="text-muted mt-2">
+                    <strong>
+                      {selectedUser.prenom} {selectedUser.nom}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <div className="w-100">
+                  <div className="row">
+                    <div className="col">
+                      <button
+                        className="btn w-100"
+                        onClick={() => setModalOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <div className="col">
+                      <button
+                        className={`btn w-100 ${
+                          modalType === "approve"
+                            ? selectedUser.isVerified
+                              ? "btn-danger"
+                              : "btn-success"
+                            : "btn-danger"
+                        }`}
+                        onClick={
+                          modalType === "approve"
+                            ? handleApproveUser
+                            : handleDeleteUser
+                        }
+                      >
+                        {modalType === "approve"
+                          ? selectedUser.isVerified
+                            ? "Disapprove"
+                            : "Approve"
+                          : "Delete"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="modal-backdrop fade show"
+            style={{ zIndex: 1040 }}
+            onClick={() => setModalOpen(false)}
+          ></div>
+        </div>
+      )}
+
       <div className="py-10  mb-5 d-flex leading-[0.1] border-b flex-column justify-content-center align-items-start">
         <h3 className=" text-[30px] font-bold" style={{ color: "#263589" }}>
           User Administration
@@ -211,9 +314,7 @@ const Page = () => {
                           <td>
                             <div className="btn-list flex-nowrap">
                               <button
-                                onClick={() =>
-                                  handleApproveUser(user._id, user.isVerified)
-                                }
+                                onClick={() => openModal("approve", user)}
                                 className={`btn btn-ghost-${
                                   user.isVerified ? "danger" : "success"
                                 } btn-icon`}
@@ -224,7 +325,10 @@ const Page = () => {
                                   <UserCheck size={18} />
                                 )}
                               </button>
-                              <button className="btn btn-ghost-danger btn-icon">
+                              <button
+                                onClick={() => openModal("delete", user)}
+                                className="btn btn-ghost-danger btn-icon"
+                              >
                                 <Trash2 size={18} />
                               </button>
                             </div>

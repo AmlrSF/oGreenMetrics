@@ -45,7 +45,7 @@ const Page = () => {
       if (data?.user) {
         console.log(data?.user?.role)
         if(data?.user?.role == "Admin" || data?.user?.AdminRoles){
-          showAlert(`User logged successfully! ${data?.user?.role}`, "success");
+          showAlert(`User logged successfully! `, "success");
           router.push("/Dashboard/Admin");
         } else if(data?.user?.role == "régulier") {
           showAlert("User logged successfully!", "success");

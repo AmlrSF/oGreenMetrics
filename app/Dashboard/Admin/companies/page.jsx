@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, ShieldX, Trash2 } from "lucide-react";
+import { ShieldCheck, ShieldX, Trash2,AlertTriangle } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/Utils";
 
 const Page = () => {
@@ -14,6 +14,9 @@ const Page = () => {
   const itemsPerPage = 10;
   const [userAccess, setUserAccess] = useState("");
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+  const [modalOpen, setModalOpen] = useState(false);
+ 
+  const [selectedCompany, setselectedCompany] = useState(null);
 
   useEffect(() => {
     fetchCompanies();
@@ -74,16 +77,16 @@ const Page = () => {
     }
   };
 
-  const handleDeleteCompany = async (companyId) => {
+  const handleDeleteCompany = async () => {
     try {
       const response = await fetch(
-        `http://localhost:4000/deletecompany/${companyId}`,
+        `http://localhost:4000/deletecompany/${selectedCompany._id}`,
         {
           method: "Delete",
         }
       );
-      const data = await response.json();
-      console.log(data);
+      await response.json();
+      setModalOpen(false);
       fetchCompanies();
     } catch (error) {
       setError("Failed to update company status");
@@ -102,8 +105,71 @@ const Page = () => {
     setFilteredCompanies(result);
   }, [currentFilter, companies]);
 
+  const openModal = (company) => {
+    setselectedCompany(company);
+    setModalOpen(true);
+  };
+
   return (
     <div className="container-xl h-full">
+      {modalOpen && selectedCompany && (
+        <div className="modal modal-blur fade show d-block">
+          <div
+            style={{ zIndex: 1050 }}
+            className="modal-dialog modal-dialog-centered modal-sm"
+          >
+            <div className="modal-content">
+              <div className="modal-body">
+                <div className="text-center py-4">
+                  <AlertTriangle
+                    size={48}
+                    className="text-yellow-500 mb-2 mx-auto"
+                  />
+                  <h3>Are you sure?</h3>
+                  <div className="text-muted">
+                    Do you want to delete this company?
+                  </div>
+                  <div className="text-muted mt-2">
+                    <strong>
+                      {selectedCompany.nom_entreprise}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <div className="w-100">
+                  <div className="row">
+                    <div className="col">
+                      <button
+                        className="btn w-100"
+                        onClick={() => setModalOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <div className="col">
+                      <button
+                        className="btn w-100  btn-danger"
+                        onClick={
+                          ()=>handleDeleteCompany(selectedCompany)
+                        }
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="modal-backdrop fade show"
+            style={{ zIndex: 1040 }}
+            onClick={() => setModalOpen(false)}
+          ></div>
+        </div>
+      )}
+
       <div className="py-10 mb-5 d-flex leading-[0.1] border-b flex-column justify-content-center align-items-start">
         <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
           Company Administration
@@ -157,7 +223,7 @@ const Page = () => {
                     <th>Company</th>
                     <th>Contact Email</th>
                     <th>Industry</th>
-                    <th>Status</th>
+
                     <th>Registration Date</th>
                     {userAccess == "10" ? (
                       <></>
@@ -199,17 +265,6 @@ const Page = () => {
                             {company.industrie}
                           </span>
                         </td>
-                        <td>
-                          <span
-                            className={`badge ${
-                              company.isVerified
-                                ? "bg-success-lt"
-                                : "bg-danger-lt"
-                            }`}
-                          >
-                            {company.isVerified ? "Verified" : "Unverified"}
-                          </span>
-                        </td>
                         <td className="text-secondary">
                           {formatDate(company.createdAt)}
                         </td>
@@ -219,24 +274,7 @@ const Page = () => {
                           <td>
                             <div className="btn-list flex-nowrap">
                               <button
-                                className={`btn btn-ghost-${
-                                  company.isVerified ? "danger" : "success"
-                                } btn-icon`}
-                                onClick={() =>
-                                  handleApproveCompany(
-                                    company._id,
-                                    company.isVerified
-                                  )
-                                }
-                              >
-                                {company.isVerified ? (
-                                  <ShieldX size={18} />
-                                ) : (
-                                  <ShieldCheck size={18} />
-                                )}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteCompany(company._id)}
+                                 onClick={() => openModal(company)}
                                 className="btn btn-ghost-danger btn-icon"
                               >
                                 <Trash2 size={18} />
