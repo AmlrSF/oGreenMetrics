@@ -2,10 +2,6 @@ import "../styles/globals.css";
 import '@tabler/core/dist/css/tabler.min.css';
 import "../styles/tabler-overrides.css";
 
-import { Montserrat } from "next/font/google";
-
-const montserrat = Montserrat({ subsets: ["latin"] });
-
 export const metadata = {
   title: "OGreenMetrics",
   description: "",
@@ -14,9 +10,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="!scroll-smooth">
-      <body
-        className={`${montserrat.className} p-0 m-0 relative`}
-      >
+      <body className="p-0 m-0 relative font-sans">
         {children}
       </body>
     </html>
