@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, ShieldX, Trash2,AlertTriangle } from "lucide-react";
+import { ShieldCheck, ShieldX, Trash2,AlertTriangle, Eye } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/Utils";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const [companies, setCompanies] = useState([]);
@@ -15,8 +16,8 @@ const Page = () => {
   const [userAccess, setUserAccess] = useState("");
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
   const [modalOpen, setModalOpen] = useState(false);
- 
   const [selectedCompany, setselectedCompany] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchCompanies();
@@ -108,6 +109,10 @@ const Page = () => {
   const openModal = (company) => {
     setselectedCompany(company);
     setModalOpen(true);
+  };
+
+  const navigateToCompanyDetails = (companyId) => {
+    router.push(`/Dashboard/Admin/companies/${companyId}`);
   };
 
   return (
@@ -235,7 +240,7 @@ const Page = () => {
                 <tbody>
                   {filteredCompanies.length > 0 ? (
                     filteredCompanies.map((company, index) => (
-                      <tr key={company.id || index}>
+                      <tr key={company._id || index}>
                         <td className="d-flex align-items-center">
                           <span
                             className="avatar avatar-sm text-white me-2"
@@ -273,6 +278,12 @@ const Page = () => {
                         ) : (
                           <td>
                             <div className="btn-list flex-nowrap">
+                            <button
+                                 onClick={() => navigateToCompanyDetails(company._id)}
+                                className="btn btn-ghost-blue btn-icon"
+                              >
+                                <Eye size={18} />
+                              </button>
                               <button
                                  onClick={() => openModal(company)}
                                 className="btn btn-ghost-danger btn-icon"
