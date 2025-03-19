@@ -313,21 +313,55 @@ const SignupPage = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <div className="form-label">Industrie<span className="text-danger">*</span></div>
-               <select 
-  className="form-select" 
-  name="industrie"
-  value={formData.industrie}
-  onChange={handleChange}
-  required
->
-  <option value="">Sélectionnez une industrie</option>
-  <option value="Cement production">Cement production</option>
-  <option value="Lime production">Lime production</option>
-  <option value="Glass Production">Glass Production</option>
-  {/* Add other options as needed */}
-</select>
-                  </div> 
+  <div className="form-label">Industrie<span className="text-danger">*</span></div>
+  <select 
+    className="form-select" 
+    name="industrie"
+    value={formData.industrie}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Sélectionnez une industrie</option>
+    <optgroup label="Mineral Industry">
+      <option value="Cement production">Cement production</option>
+      <option value="Lime production">Lime production</option>
+      <option value="Glass Production">Glass Production</option>
+    </optgroup>
+    <optgroup label="Chemical Industry">
+      <option value="Ammonia Production">Ammonia Production</option>
+      <option value="Soda Ash Production">Soda Ash Production</option>
+      <option value="Carbide Production">Carbide Production</option>
+    </optgroup>
+    <optgroup label="Metal Industry">
+      <option value="Iron and Steel Production">Iron and Steel Production</option>
+      <option value="Magnesium production">Magnesium production</option>
+      <option value="Lead Production">Lead Production</option>
+      <option value="Zinc Production">Zinc Production</option>
+    </optgroup>
+    <optgroup label="Buildings">
+      <option value="Natural gas heating">Natural gas heating</option>
+      <option value="Oil heating">Oil heating</option>
+      <option value="Commercial buildings operations">Commercial buildings operations</option>
+    </optgroup>
+    <optgroup label="Agriculture">
+      <option value="Rice cultivation">Rice cultivation</option>
+      <option value="Fertilizer application">Fertilizer application</option>
+      <option value="Agricultural soil management">Agricultural soil management</option>
+    </optgroup>
+    <optgroup label="Waste Sector">
+      <option value="Municipal solid waste treatment">Municipal solid waste treatment</option>
+      <option value="Wastewater treatment">Wastewater treatment</option>
+      <option value="Composting">Composting</option>
+      <option value="Incineration">Incineration</option>
+    </optgroup>
+    <optgroup label="EU Importers">
+      <option value="Cement">Cement</option>
+      <option value="Iron and steel">Iron and steel</option>
+      <option value="Aluminum">Aluminum</option>
+      <option value="Fertilizers">Fertilizers</option>
+    </optgroup>
+  </select>
+</div>
                 </div>
               </div>
             )}
