@@ -22,6 +22,8 @@ const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roles, setRoles] = useState([]);
   const [userAccess, setUserAccess] = useState("");
+  const [SortOrder, setSortOrder] = useState("all");
+  const [selectedRole, setSelectedRole] = useState("");
   const [newUser, setNewUser] = useState({
     email: "",
     prenom: "",
@@ -55,7 +57,9 @@ const Page = () => {
     try {
       const response = await fetch("http://localhost:4000/users");
       let data = await response.json();
+
       data = data.filter((item) => item?.AdminRoles);
+      console.log(data);
       setUsers(data);
       setFilteredUsers(data);
     } catch (error) {
@@ -103,8 +107,18 @@ const Page = () => {
     } else if (currentFilter === "unverified") {
       result = users.filter((user) => !user.isVerified);
     }
+
+    if (SortOrder === "latest") {
+      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (SortOrder === "oldest") {
+      result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+    if (selectedRole) {
+      result = result.filter((user) => user.AdminRoles?.name === selectedRole);
+    }
+
     setFilteredUsers(result);
-  }, [currentFilter, users]);
+  }, [currentFilter, SortOrder, selectedRole, users]);
 
   const getCurrentPageItems = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -175,21 +189,25 @@ const Page = () => {
             Manage roles, and permissions efficiently.
           </div>
         </div>
-        <button
-          className="btn btn-success flex items-center"
-          onClick={() => setIsModalOpen(true)}
-          style={{ backgroundColor: "#8EBE21" }}
-        >
-          <Plus size={18} className="mr-2" /> Add Role
-        </button>
+        {userAccess == "10" ? (
+          <></>
+        ) : (
+          <button
+            className="btn btn-success flex items-center"
+            onClick={() => setIsModalOpen(true)}
+            style={{ backgroundColor: "#8EBE21" }}
+          >
+            <Plus size={18} className="mr-2" /> Add User
+          </button>
+        )}
       </div>
 
       <div className="card pt-5">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
-            <div className="text-secondary">
+            <div className="text-secondary d-flex align-items-center">
               Show
-              <div className="mx-2 d-inline-block">
+              <div className="mx-2 d-flex gap-2">
                 <select
                   className="form-select form-select-sm"
                   value={currentFilter}
@@ -198,6 +216,26 @@ const Page = () => {
                   <option value="all">All Users</option>
                   <option value="verified">Verified</option>
                   <option value="unverified">Unverified</option>
+                </select>
+                <select
+                  className="form-select form-select-sm"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                >
+                  <option value="">All Roles</option>
+                  {roles.map((role) => (
+                    <option key={role._id} value={role.name}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="form-select form-select-sm"
+                  value={SortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                >
+                  <option value="latest">Oldest</option>
+                  <option value="oldest">Newest</option>
                 </select>
               </div>
               entries

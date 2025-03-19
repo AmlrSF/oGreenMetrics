@@ -7,7 +7,7 @@ import {
   UserCheck,
   UserX,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
 import { formatDate, getInitials } from "@/lib/Utils";
@@ -23,6 +23,8 @@ const Page = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [RoleFilter, setRoleFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("latest");
   const itemsPerPage = 10;
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -107,8 +109,6 @@ const Page = () => {
     }
   };
 
-
-
   const openModal = (type, user) => {
     setModalType(type);
     setSelectedUser(user);
@@ -116,24 +116,37 @@ const Page = () => {
   };
 
   useEffect(() => {
-    let result = users;
+    let result = [...users];
 
     if (currentFilter === "verified") {
-      result = users.filter((user) => user.isVerified);
+      result = result.filter((user) => user.isVerified);
     } else if (currentFilter === "unverified") {
-      result = users.filter((user) => !user.isVerified);
+      result = result.filter((user) => !user.isVerified);
+    }
+
+    if (RoleFilter === "régulier") {
+      result = result.filter((user) => user.role === "régulier");
+    } else if (RoleFilter === "Entreprise") {
+      result = result.filter((user) => user.role === "entreprise");
+    }
+
+    if (sortOrder === "latest") {
+      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Newest first
+    } else if (sortOrder === "oldest") {
+      result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // Oldest first
     }
 
     setFilteredUsers(result);
-  }, [currentFilter, users]);
+  }, [currentFilter, RoleFilter,sortOrder , users]);
 
   return (
     <div className="container-xl  h-full">
-      {/* Confirmation Modal */}
       {modalOpen && selectedUser && (
         <div className="modal modal-blur fade show d-block">
-          <div style={{ zIndex: 1050 }} 
-          className="modal-dialog modal-dialog-centered modal-sm">
+          <div
+            style={{ zIndex: 1050 }}
+            className="modal-dialog modal-dialog-centered modal-sm"
+          >
             <div className="modal-content">
               <div className="modal-body">
                 <div className="text-center py-4">
@@ -213,9 +226,9 @@ const Page = () => {
       <div className="card pt-5">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
-            <div className="text-secondary">
+            <div className="text-secondary d-flex align-items-center">
               Show
-              <div className="mx-2 d-inline-block">
+              <div className="mx-2 d-flex gap-2">
                 <select
                   className="form-select form-select-sm"
                   value={currentFilter}
@@ -224,6 +237,25 @@ const Page = () => {
                   <option value="all">All Users</option>
                   <option value="verified">Verified</option>
                   <option value="unverified">Unverified</option>
+                </select>
+
+                <select
+                  className="form-select form-select-sm"
+                  value={RoleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                >
+                  <option value="all">All Roles</option>
+                  <option value="régulier">Regular</option>
+                  <option value="Entreprise">Entreprise</option>
+                </select>
+
+                <select
+                  className="form-select form-select-sm"
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                >
+                  <option value="latest">Newest</option>
+                  <option value="oldest">Oldest</option>
                 </select>
               </div>
               entries
