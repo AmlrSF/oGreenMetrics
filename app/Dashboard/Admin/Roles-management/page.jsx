@@ -138,12 +138,17 @@ const Page = () => {
           </h3>
           <div className="text-gray-600">Manage user roles efficiently.</div>
         </div>
-        <button
-          className="btn btn-success flex items-center"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <Plus size={18} className="mr-2" /> Add Role
-        </button>
+        {userAccess == "10" ? (
+          <></>
+        ) : (
+          <button
+            className="btn btn-success flex items-center"
+            onClick={() => setIsModalOpen(true)}
+            style={{ backgroundColor: "#8EBE21" }}
+          >
+            <Plus size={18} className="mr-2" /> Add Role
+          </button>
+        )}
       </div>
       <div className="card pt-5">
         <div className="table-responsive">

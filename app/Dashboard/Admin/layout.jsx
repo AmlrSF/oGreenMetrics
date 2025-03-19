@@ -11,8 +11,6 @@ import { Loader2 } from "lucide-react";
 const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  
-  const rolesNeedsToBeverified = ["Admin", "Moderator"];
   const { push } = useRouter();
 
   useEffect(() => {
@@ -24,17 +22,17 @@ const DashboardLayout = ({ children }) => {
         });
 
         const data = await response.json();
-        if (
-          data?.user &&
-          (rolesNeedsToBeverified.includes(data.user.role) ||
-            data?.user?.AdminRoles)
-        ) {
-          setUser(data.user);
-          //console.log(data?.user);
+        if (data?.user) {
+          setUser(data?.user);
+
+          if (data?.user?.role == "Admin") {
+            push("/Dashboard/Admin");
+          }
 
           if (data?.user?.AdminRoles) {
-
             let adminRole = data?.user?.AdminRoles;
+            console.log(adminRole);
+            
             if (adminRole?.companyManagement == "00") {
               push("/Dashboard/Admin");
             }
@@ -46,7 +44,6 @@ const DashboardLayout = ({ children }) => {
             if (adminRole?.userManagement == "00") {
               push("/Dashboard/Admin");
             }
-
           }
 
           setIsLoading(false);
