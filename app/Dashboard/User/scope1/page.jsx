@@ -95,125 +95,203 @@ const Scope1 = () => {
 
     return (
       <div className="table-container" style={{ padding: "20px" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid #e9ecef" }}>
-              {activeTab === "Combustion de carburant" ? (
-                <>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Nom</th>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Type de carburant</th>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Quantité</th>
-                </>
-              ) : (
-                <>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Nom</th>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Quantité</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedItems.length > 0 ? (
-              paginatedItems.map((item, index) => (
-                <tr key={index} style={{ borderBottom: "1px solid #e9ecef" }}>
-                  <td style={{ padding: "10px", textAlign: "center" }}>{item.nom}</td>
-                  {activeTab === "Combustion de carburant" && (
-                    <td style={{ padding: "10px", textAlign: "center" }}>{item.typeDeCarburant}</td>
-                  )}
-                  <td style={{ padding: "10px", textAlign: "center" }}>{item.quantite}</td>
-                </tr>
-              ))
-            ) : (
+        <div className="table-responsive">
+          <table className="table table-vcenter card-table">
+            <thead>
               <tr>
-                <td colSpan={activeTab === "Combustion de carburant" ? "3" : "3"} style={{ textAlign: "center", padding: "30px" }}>
-                  Aucune donnée disponible pour {getTableTitle().toLowerCase()}
-                </td>
+                {activeTab === "Combustion de carburant" ? (
+                  <>
+                    <th>Nom</th>
+                    <th>Type de carburant</th>
+                    <th>Quantité</th>
+                    <th className="w-1">Action</th>
+                  </>
+                ) : (
+                  <>
+                    <th>Nom</th>
+                    <th>Quantité</th>
+                    <th className="w-1">Action</th>
+                  </>
+                )}
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedItems.length > 0 ? (
+                paginatedItems.map((item, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <span
+                          className="avatar avatar-md text-white me-2"
+                          style={{ backgroundColor: "#263589" }}
+                        >
+                          {item.nom.charAt(0)}
+                        </span>
+                        <div className="flex-fill">
+                          <div className="font-weight-medium">{item.nom}</div>
+                        </div>
+                      </div>
+                    </td>
+                    {activeTab === "Combustion de carburant" && (
+                      <td className="text-secondary">{item.typeDeCarburant}</td>
+                    )}
+                    <td>
+                      <span className="badge bg-purple-lt">
+                        {item.quantite}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="btn-list flex-nowrap">
+                        <button className="btn btn-ghost-primary btn-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </button>
+                        <button className="btn btn-ghost-danger btn-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={activeTab === "Combustion de carburant" ? "4" : "3"} className="text-center text-secondary">
+                    Aucune donnée disponible pour {getTableTitle().toLowerCase()}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {items.length > itemsPerPage && (
-          <ul className="pagination" style={{ justifyContent: "center", marginTop: "20px" }}>
-            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-              <a
-                className="page-link"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (currentPage > 1) setCurrentPage(currentPage - 1);
-                }}
-                tabIndex={currentPage === 1 ? "-1" : undefined}
-                aria-disabled={currentPage === 1}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="icon icon-1"
-                >
-                  <path d="M15 6l-6 6l6 6"></path>
-                </svg>
-              </a>
-            </li>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <li key={page} className={`page-item ${currentPage === page ? "active" : ""}`}>
+          <div className="d-flex justify-content-center mt-4">
+            <ul className="pagination">
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                 <a
                   className="page-link"
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    setCurrentPage(page);
+                    if (currentPage > 1) setCurrentPage(currentPage - 1);
                   }}
+                  tabIndex={currentPage === 1 ? "-1" : undefined}
+                  aria-disabled={currentPage === 1}
                 >
-                  {page}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="icon icon-1"
+                  >
+                    <path d="M15 6l-6 6l6 6"></path>
+                  </svg>
                 </a>
               </li>
-            ))}
 
-            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-              <a
-                className="page-link"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                }}
-                tabIndex={currentPage === totalPages ? "-1" : undefined}
-                aria-disabled={currentPage === totalPages}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="icon icon-1"
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <li key={page} className={`page-item ${currentPage === page ? "active" : ""}`}>
+                  <a
+                    className="page-link"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(page);
+                    }}
+                  >
+                    {page}
+                  </a>
+                </li>
+              ))}
+
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                  }}
+                  tabIndex={currentPage === totalPages ? "-1" : undefined}
+                  aria-disabled={currentPage === totalPages}
                 >
-                  <path d="M9 6l6 6l-6 6"></path>
-                </svg>
-              </a>
-            </li>
-          </ul>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="icon icon-1"
+                  >
+                    <path d="M9 6l6 6l-6 6"></path>
+                  </svg>
+                </a>
+              </li>
+            </ul>
+          </div>
         )}
 
-        <div style={{ textAlign: "right", marginTop: "20px" }}>
+        <div className="d-flex justify-content-end mt-4">
           <button
-            type="submit"
-            className="btn btn-primary ms-auto"
+            type="button"
+            className="btn btn-primary"
             onClick={handleButtonClick}
           >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              stroke="currentColor"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ marginRight: "5px" }}
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
             Ajouter
           </button>
         </div>
@@ -239,7 +317,7 @@ const Scope1 = () => {
           <div className="mb-3">
             <label className="form-label">Type de carburant</label>
             <select
-              className="form-control"
+              className="form-select"
               name="typeDeCarburant"
               required
             >
@@ -305,32 +383,23 @@ const Scope1 = () => {
   }; 
 
   return (
-    <div className="scope3-container mt-5" style={{ backgroundColor: "#f8f9fa", padding: "20px" }}>
-      <div className="card">
+    <div className="container-xl mt-3">
+      <div className="card mb-3">
         <div className="card-body">
-          <b>
-            <p style={{ color: "#8EBE21" }}>Scope 1</p>
-          </b>
-          <p>
-            <b style={{ color: "#263589" }}>Émissions directes </b>provenant de sources détenues ou contrôlées par une organisation.
+          <h3 className="card-title text-success">Scope 1</h3>
+          <p className="card-subtitle">
+            <strong className="text-primary">Émissions directes</strong> provenant de sources détenues ou contrôlées par une organisation.
           </p>
         </div>
       </div>
 
-      <div className="scope3-tabs-container mt-4" style={{ backgroundColor: "white", borderRadius: "5px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-        <div className="scope3-tabs">
-          <ul className="nav" style={{ display: "flex", listStyle: "none", padding: "0", margin: "0", borderBottom: "1px solid #e9ecef" }}>
-            <li className="nav-item" style={{ padding: "15px 0", textAlign: "center", flex: "1" }}>
+      <div className="card">
+        <div className="card-header">
+          <ul className="nav nav-tabs card-header-tabs">
+            <li className="nav-item">
               <a
                 href="#Combustion de carburant"
                 className={`nav-link ${activeTab === "Combustion de carburant" ? "active" : ""}`}
-                style={{
-                  color: activeTab === "Combustion de carburant" ? "#76b82a" : "#333",
-                  textDecoration: "none",
-                  fontSize: "14px",
-                  borderBottom: activeTab === "Combustion de carburant" ? "2px solid #76b82a" : "none",
-                  paddingBottom: "15px",
-                }}
                 onClick={(e) => {
                   e.preventDefault();
                   handleTabClick("Combustion de carburant");
@@ -339,17 +408,10 @@ const Scope1 = () => {
                 Combustion de carburant
               </a>
             </li>
-            <li className="nav-item" style={{ padding: "15px 0", textAlign: "center", flex: "1" }}>
+            <li className="nav-item">
               <a
                 href="#Émissions du procédé"
                 className={`nav-link ${activeTab === "Émissions du procédé" ? "active" : ""}`}
-                style={{
-                  color: activeTab === "Émissions du procédé" ? "#76b82a" : "#333",
-                  textDecoration: "none",
-                  fontSize: "14px",
-                  borderBottom: activeTab === "Émissions du procédé" ? "2px solid #76b82a" : "none",
-                  paddingBottom: "15px",
-                }}
                 onClick={(e) => {
                   e.preventDefault();
                   handleTabClick("Émissions du procédé");
@@ -361,9 +423,11 @@ const Scope1 = () => {
           </ul>
         </div>
 
-        <div className="tab-content">
-          {renderTable()}
-          {renderModal()}
+        <div className="card-body p-0">
+          <div className="tab-content">
+            {renderTable()}
+            {renderModal()}
+          </div>
         </div>
       </div>
     </div>
