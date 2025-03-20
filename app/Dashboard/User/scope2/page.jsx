@@ -1,170 +1,207 @@
 "use client";
 import React, { useState } from 'react';
+import { Plus } from 'lucide-react';
 
 const Scope2 = () => {
-  const [activeTab, setActiveTab] = useState('Consommation délectricité');
+  const [activeTab, setActiveTab] = useState('electricity');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({});
 
-  const handleTabClick = (tabId) => {
+  const tabs = {
+    electricity: {
+      id: 'electricity',
+      label: 'Consommation d\'électricité',
+      headers: ['Consommation électrique (kWH)', 'Action'],
+      fields: [
+        {
+          name: 'consumption',
+          label: 'Consommation électrique (kW)',
+          type: 'number',
+          placeholder: 'Consommation en kW'
+        }
+      ]
+    },
+    heating: {
+      id: 'heating',
+      label: 'Chauffage',
+      headers: ['Nom', 'Type', 'Énergie Consommée', 'Action'],
+      fields: [
+        {
+          name: 'name',
+          label: 'Nom',
+          type: 'text',
+          placeholder: 'Nom de l\'équipement'
+        },
+        {
+          name: 'type',
+          label: 'Type',
+          type: 'select',
+          placeholder: 'Sélectionner un type',
+          options: [
+            { value: 'type1', label: 'Type 1' },
+            { value: 'type2', label: 'Type 2' },
+            { value: 'type3', label: 'Type 3' }
+          ]
+        },
+        {
+          name: 'energy',
+          label: 'Énergie Consommée',
+          type: 'number',
+          placeholder: 'Énergie consommée'
+        }
+      ]
+    },
+    cooling: {
+      id: 'cooling',
+      label: 'Refroidissement',
+      headers: ['Nom', 'Type', 'Énergie Consommée', 'Action'],
+      fields: [
+        {
+          name: 'name',
+          label: 'Nom',
+          type: 'text',
+          placeholder: 'Nom de l\'équipement'
+        },
+        {
+          name: 'type',
+          label: 'Type',
+          type: 'select',
+          placeholder: 'Sélectionner un type',
+          options: [
+            { value: 'type1', label: 'Type 1' },
+            { value: 'type2', label: 'Type 2' },
+            { value: 'type3', label: 'Type 3' }
+          ]
+        },
+        {
+          name: 'energy',
+          label: 'Énergie Consommée',
+          type: 'number',
+          placeholder: 'Énergie consommée'
+        }
+      ]
+    }
+  };
+
+  const handleTabClick = (tabId, e) => {
+    e.preventDefault();
     setActiveTab(tabId);
   };
 
-  const handleButtonClick = () => {
-    setIsModalOpen(true);
+  const toggleModal = (isOpen) => {
+    setIsModalOpen(isOpen);
+    if (!isOpen) setFormData({});
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Here you would add the data to your state or send it to your API
+    console.log('Form submitted:', formData);
+    toggleModal(false);
   };
 
   const renderTable = () => {
+    const currentTab = tabs[activeTab];
+    
     return (
-      <div className="table-container" style={{ padding: '20px' }}>
-         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid #e9ecef' }}>
-              {activeTab === 'Consommation délectricité' && (
-                <>
-                  <th style={{ padding: '10px', textAlign: 'left' }}>Consommation électrique (kW)</th>
-                  <th style={{ padding: '10px', textAlign: 'left' }}>Durée de fonctionnement (heures)</th>
-                </>
-              )}
-              {activeTab === 'Chauffage ' || activeTab === 'Refroidissement' ? (
-                <>
-                  <th style={{ padding: '10px', textAlign: 'left' }}>Nom</th>
-                  <th style={{ padding: '10px', textAlign: 'left' }}>Type</th>
-                  <th style={{ padding: '10px', textAlign: 'left' }}>Énergie Consommée</th>
-                </>
-              ) : null}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colSpan={getColSpan()} style={{ textAlign: 'center', padding: '30px' }}>
-                Aucune donnée disponible pour {getTableTitle().toLowerCase()}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div style={{ textAlign: 'right', marginTop: '20px' }}>
+      <div className="table-container p-5">
+        <div className="table-responsive">
+          <table className="table table-vcenter card-table">
+            <thead>
+              <tr>
+                {currentTab.headers.map((header, index) => (
+                  <th key={index}>{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={currentTab.headers.length} className="text-center text-secondary">
+                  Aucune donnée disponible pour {currentTab.label.toLowerCase()}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="d-flex justify-content-end mt-4">
           <button
-            onClick={handleButtonClick}
-            style={{
-              backgroundColor: '#76b82a',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              width: '40px',
-              height: '40px',
-              fontSize: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              margin: '0 0 0 auto',
-            }}
+            type="button"
+            className="btn btn-primary"
+            onClick={() => toggleModal(true)}
           >
-            +
+            <Plus className="mr-2" size={16} />
+            Ajouter
           </button>
         </div>
       </div>
     );
   };
 
-  const getTableTitle = () => {
-    switch (activeTab) {
-      case 'Consommation délectricité':
-        return 'Consommation d\'électricité';
-      case 'Chauffage ':
-        return 'Chauffage';
-      case 'Refroidissement':
-        return 'Refroidissement';
-      default:
-        return 'Consommation d\'électricité';
-    }
-  };
-
-  const getColSpan = () => {
-    if (activeTab === 'Consommation délectricité') {
-      return 2;
-    }
-    return 3; 
-  };
-
-  const renderModalFields = () => {
-    if (activeTab === 'Consommation délectricité') {
-      return (
-        <>
-          <div className="mb-3">
-            <label className="form-label">Consommation électrique (kW)</label>
-            <input
-              type="number"
-              className="form-control"
-              placeholder="Consommation en kW"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Durée de fonctionnement (heures)</label>
-            <input
-              type="number"
-              className="form-control"
-              placeholder="Durée en heures"
-            />
-          </div>
-        </>
-      );
-    } else { // Chauffage or Refroidissement
-      return (
-        <>
-          <div className="mb-3">
-            <label className="form-label">Nom</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Nom de l'équipement"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Type</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Type d'équipement"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Énergie Consommée</label>
-            <input
-              type="number"
-              className="form-control"
-              placeholder="Énergie consommée"
-            />
-          </div>
-        </>
-      );
-    }
+  const renderFormFields = () => {
+    const currentTab = tabs[activeTab];
+    
+    return currentTab.fields.map((field, index) => (
+      <div className="mb-3" key={index}>
+        <label className="form-label">{field.label}</label>
+        {field.type === 'select' ? (
+          <select 
+            className="form-select"
+            name={field.name}
+            onChange={handleInputChange}
+            value={formData[field.name] || ''}
+          >
+            <option value="" disabled>{field.placeholder}</option>
+            {field.options.map((option, idx) => (
+              <option key={idx} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={field.type}
+            className="form-control"
+            name={field.name}
+            placeholder={field.placeholder}
+            onChange={handleInputChange}
+            value={formData[field.name] || ''}
+          />
+        )}
+      </div>
+    ));
   };
 
   const renderModal = () => {
     if (!isModalOpen) return null;
+    
+    const currentTab = tabs[activeTab];
 
     return (
-      <div className="modal show" id="exampleModal" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
         <div className="modal-dialog modal-lg" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">Nouveau {getTableTitle()}</h5>
-              <button type="button" className="btn-close" onClick={handleCloseModal} aria-label="Close"></button>
+              <h5 className="modal-title">Nouveau {currentTab.label}</h5>
+              <button type="button" className="btn-close" onClick={() => toggleModal(false)} aria-label="Close"></button>
             </div>
-            <div className="modal-body">
-              {renderModalFields()}
-            </div>
-            <div className="modal-footer">
-              <a href="#" className="btn btn-link link-secondary" onClick={handleCloseModal}> Annuler </a>
-              <a href="#" className="btn btn-primary ms-auto" onClick={handleCloseModal}>
-                Ajouter
-              </a>
-            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
+                {renderFormFields()}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-link link-secondary" onClick={() => toggleModal(false)}>Annuler</button>
+                <button type="submit" className="btn btn-primary ms-auto">
+                  Ajouter
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -172,80 +209,38 @@ const Scope2 = () => {
   };
 
   return (
-    <div className="scope3-container mt-5" style={{ backgroundColor: '#f8f9fa', padding: '20px' }}>
-      <div className="card">
+    <div className="container-xl mt-3">
+      <div className="card mb-3">
         <div className="card-body">
-          <b><p style={{ color: '#8EBE21' }}>Scope 2</p></b>
-          <p><b style={{ color: '#263589' }}>Émissions indirectes </b>provenant de sources détenues ou contrôlées par une organisation.</p>
+          <h3 className="card-title text-success">Scope 2</h3>
+          <p className="card-subtitle">
+            <strong className="text-primary">Émissions indirectes</strong> provenant de sources détenues ou contrôlées par une organisation.
+          </p>
         </div>
       </div>
 
-      <div className="scope3-tabs-container mt-4" style={{ backgroundColor: 'white', borderRadius: '5px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <div className="scope3-tabs">
-          <ul className="nav" style={{ display: 'flex', listStyle: 'none', padding: '0', margin: '0', borderBottom: '1px solid #e9ecef' }}>
-            <li className="nav-item" style={{ padding: '15px 0', textAlign: 'center', flex: '1' }}>
-              <a
-                href="#Consommation délectricité"
-                className={`nav-link ${activeTab === 'Consommation délectricité' ? 'active' : ''}`}
-                style={{
-                  color: activeTab === 'Consommation délectricité' ? '#76b82a' : '#333',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  borderBottom: activeTab === 'Consommation délectricité' ? '2px solid #76b82a' : 'none',
-                  paddingBottom: '15px',
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleTabClick('Consommation délectricité');
-                }}
-              >
-                Consommation d'électricité
-              </a>
-            </li>
-            <li className="nav-item" style={{ padding: '15px 0', textAlign: 'center', flex: '1' }}>
-              <a
-                href="#Chauffage"
-                className={`nav-link ${activeTab === 'Chauffage ' ? 'active' : ''}`}
-                style={{
-                  color: activeTab === 'Chauffage ' ? '#76b82a' : '#333',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  borderBottom: activeTab === 'Chauffage ' ? '2px solid #76b82a' : 'none',
-                  paddingBottom: '15px',
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleTabClick('Chauffage ');
-                }}
-              >
-                Chauffage
-              </a>
-            </li>
-            <li className="nav-item" style={{ padding: '15px 0', textAlign: 'center', flex: '1' }}>
-              <a
-                href="#Refroidissement"
-                className={`nav-link ${activeTab === 'Refroidissement' ? 'active' : ''}`}
-                style={{
-                  color: activeTab === 'Refroidissement' ? '#76b82a' : '#333',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  borderBottom: activeTab === 'Refroidissement' ? '2px solid #76b82a' : 'none',
-                  paddingBottom: '15px',
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleTabClick('Refroidissement');
-                }}
-              >
-                Refroidissement
-              </a>
-            </li>
+      <div className="card">
+        <div className="card-header">
+          <ul className="nav nav-tabs card-header-tabs">
+            {Object.values(tabs).map((tab) => (
+              <li className="nav-item" key={tab.id}>
+                <a
+                  href={`#${tab.id}`}
+                  className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={(e) => handleTabClick(tab.id, e)}
+                >
+                  {tab.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
 
-        <div className="tab-content">
-          {renderTable()}
-          {renderModal()}
+        <div className="card-body p-0">
+          <div className="tab-content">
+            {renderTable()}
+            {renderModal()}
+          </div>
         </div>
       </div>
     </div>

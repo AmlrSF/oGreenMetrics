@@ -101,8 +101,8 @@ const Page = () => {
         />
       </div>
 
-      <div className="container-tight py-4">
-        <div className="card shadow">
+      <div className="container py-4">
+        <div className="card shadow ">
           <div className="card-body p-4">
             <div className="row g-4">
               <div className="col-md-6">
@@ -168,7 +168,7 @@ const Page = () => {
 
               <div className="col-md-6 d-none d-md-block">
                 <div className="d-flex h-100 align-items-center justify-content-center">
-                  <div className="w-100">
+                  <div className="w-100 ml-40">
                     <img
                       src="/Auth illustrations/Forgot password.png"
                       alt="Login illustration"
