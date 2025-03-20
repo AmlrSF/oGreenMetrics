@@ -11,7 +11,7 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light
+    <nav className="navbar py-2 navbar-expand-lg navbar-light
      bg-white ">
       <div className="container-fluid d-flex justify-content-end px-4">
         <div className="d-flex align-items-center gap-3">
