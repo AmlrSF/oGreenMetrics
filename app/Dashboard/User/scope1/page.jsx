@@ -325,11 +325,7 @@ const Scope1 = () => {
 
         <div className="d-flex justify-content-between mt-4">
           <div>
-            {data.totalEmissions > 0 && (
-              <div className="alert alert-info" role="alert">
-                Total des émissions: <strong>{data.totalEmissions.toFixed(2)} kg CO2</strong>
-              </div>
-            )}
+          
           </div>
           <button
             type="button"
