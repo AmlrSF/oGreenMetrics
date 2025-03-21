@@ -6,6 +6,8 @@ const Scope1 = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState({ machines: [], products: [], totalEmissions: 0 });
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 3;
 
   useEffect(() => {
@@ -13,13 +15,31 @@ const Scope1 = () => {
   }, [activeTab]);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     const endpoint = activeTab === "Combustion de carburant" ? "/fuelcombution" : "/production";
     try {
-      const response = await fetch(`http://localhost:4000${endpoint}`);
+      const response = await fetch(`http://localhost:4000${endpoint}`, {
+        method: "GET",
+        credentials: "include", // Important: send cookies with the request
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication required. Please log in again.");
+        }
         throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
+      
       const result = await response.json();
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
       const record = result[0] || { machines: [], products: [], totalEmissions: 0 }; 
       setData({
         machines: record.machines || [],
@@ -29,6 +49,9 @@ const Scope1 = () => {
       setCurrentPage(1); // Reset to first page when data changes
     } catch (error) {
       console.error("Failed to fetch data:", error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,6 +69,9 @@ const Scope1 = () => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+    
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     const endpoint = activeTab === "Combustion de carburant" ? "/fuelcombution" : "/production";
@@ -68,17 +94,31 @@ const Scope1 = () => {
     try {
       const response = await fetch(`http://localhost:4000${endpoint}`, {
         method: "POST",
+        credentials: "include", // Important: send cookies with the request
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication required. Please log in again.");
+        }
         const errorText = await response.text();
         throw new Error(`Failed to add data: ${response.status} ${response.statusText} - ${errorText}`);
       }
+      
+      const result = await response.json();
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
       fetchData();
       handleCloseModal();
     } catch (error) {
       console.error("Failed to add data:", error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,6 +129,20 @@ const Scope1 = () => {
   };
 
   const renderTable = () => {
+    if (loading) {
+      return <div className="p-4 text-center">Chargement des données...</div>;
+    }
+    
+    if (error) {
+      return (
+        <div className="p-4 text-center text-danger">
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        </div>
+      );
+    }
+    
     const items = activeTab === "Combustion de carburant" ? data.machines : data.products;
     const paginatedItems = paginateItems(items);
     const totalPages = Math.ceil(items.length / itemsPerPage);
@@ -269,7 +323,10 @@ const Scope1 = () => {
           </div>
         )}
 
-        <div className="d-flex justify-content-end mt-4">
+        <div className="d-flex justify-content-between mt-4">
+          <div>
+          
+          </div>
           <button
             type="button"
             className="btn btn-primary"
@@ -352,7 +409,9 @@ const Scope1 = () => {
         </div>
         <div className="modal-footer">
           <a href="#" className="btn btn-link link-secondary" onClick={handleCloseModal}>Annuler</a>
-          <button type="submit" className="btn btn-primary ms-auto">Ajouter</button>
+          <button type="submit" className="btn btn-primary ms-auto" disabled={loading}>
+            {loading ? "Traitement..." : "Ajouter"}
+          </button>
         </div>
       </form>
     );
@@ -374,6 +433,11 @@ const Scope1 = () => {
               <button type="button" className="btn-close" onClick={handleCloseModal} aria-label="Close"></button>
             </div>
             <div className="modal-body">
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
               {renderModalFields()}
             </div>
           </div>

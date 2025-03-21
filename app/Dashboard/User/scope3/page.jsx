@@ -8,217 +8,8 @@ const Scope3 = () => {
   const [formData, setFormData] = useState({});
 
   // Configuration object for all tabs
-  const tabs = {
-    transport: {
-      id: 'transport',
-      label: 'Transport',
-      headers: ['Distance', 'Poids', 'Description', 'Action'],
-      fields: [
-        {
-          name: 'distance',
-          label: 'Distance',
-          type: 'number',
-          placeholder: 'Distance en km',
-          required: true,
-          min: 0
-        },
-        {
-          name: 'poids',
-          label: 'Poids',
-          type: 'number',
-          placeholder: 'Poids en kg',
-          required: true,
-          min: 0
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          placeholder: 'Description',
-          rows: 3
-        }
-      ]
-    },
-    dechets: {
-      id: 'dechets',
-      label: 'Déchets',
-      headers: ['Type', 'Poids', 'Description', 'Action'],
-      fields: [
-        {
-          name: 'type',
-          label: 'Type',
-          type: 'select',
-          placeholder: 'Choisir un type de déchet',
-          required: true,
-          options: [
-            { value: 'Papier', label: 'Papier' },
-            { value: 'Plastique', label: 'Plastique' },
-            { value: 'Organique', label: 'Organique' },
-            { value: 'Métal', label: 'Métal' },
-            { value: 'Verre', label: 'Verre' },
-            { value: 'Électronique', label: 'Électronique' }
-          ]
-        },
-        {
-          name: 'poids',
-          label: 'Poids',
-          type: 'number',
-          placeholder: 'Poids en kg',
-          required: true,
-          min: 0
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          placeholder: 'Description',
-          rows: 3
-        }
-      ]
-    },
-    voyage: {
-      id: 'voyage',
-      label: 'Voyage d\'affaires',
-      headers: ['Type', 'Distance', 'Description', 'Action'],
-      fields: [
-        {
-          name: 'type',
-          label: 'Type',
-          type: 'select',
-          placeholder: 'Choisir un type de voyage',
-          required: true,
-          options: [
-            { value: 'Avion', label: 'Avion' },
-            { value: 'Train', label: 'Train' },
-            { value: 'Voiture', label: 'Voiture' },
-            { value: 'Bus', label: 'Bus' }
-          ]
-        },
-        {
-          name: 'distance',
-          label: 'Distance',
-          type: 'number',
-          placeholder: 'Distance en km',
-          required: true,
-          min: 0
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          placeholder: 'Description',
-          rows: 3
-        }
-      ]
-    },
-    'biens-services': {
-      id: 'biens-services',
-      label: 'Biens et services achetés',
-      headers: ['Titre', 'Type', 'Quantité', 'Description', 'Action'],
-      fields: [
-        {
-          name: 'titre',
-          label: 'Titre',
-          type: 'text',
-          placeholder: 'Titre',
-          required: true
-        },
-        {
-          name: 'type',
-          label: 'Type',
-          type: 'select',
-          placeholder: 'Choisir un type',
-          required: true,
-          options: [
-            { value: 'Matériel', label: 'Matériel' },
-            { value: 'Service', label: 'Service' },
-            { value: 'Logiciel', label: 'Logiciel' }
-          ]
-        },
-        {
-          name: 'quantite',
-          label: 'Quantité',
-          type: 'number',
-          placeholder: 'Quantité',
-          required: true,
-          min: 0
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          placeholder: 'Description',
-          rows: 3
-        }
-      ]
-    },
-    equipement: {
-      id: 'equipement',
-      label: 'Biens d\'équipement',
-      headers: ['Type', 'Valeur', 'Description', 'Action'],
-      fields: [
-        {
-          name: 'type',
-          label: 'Type',
-          type: 'select',
-          placeholder: 'Choisir un type d\'équipement',
-          required: true,
-          options: [
-            { value: 'Informatique', label: 'Informatique' },
-            { value: 'Mobilier', label: 'Mobilier' },
-            { value: 'Véhicule', label: 'Véhicule' },
-            { value: 'Machines', label: 'Machines' }
-          ]
-        },
-        {
-          name: 'valeur',
-          label: 'Valeur',
-          type: 'number',
-          placeholder: 'Valeur en €',
-          required: true,
-          min: 0
-        },
-        {
-          name: 'description',
-          label: 'Description',
-          type: 'textarea',
-          placeholder: 'Description',
-          rows: 3
-        }
-      ]
-    },
-    'deplacement-employes': {
-      id: 'deplacement-employes',
-      label: 'Déplacements des employés',
-      headers: ['Distance', 'Nb d\'employés', 'Nb de voyages par jour', 'Action'],
-      fields: [
-        {
-          name: 'distance',
-          label: 'Distance',
-          type: 'number',
-          placeholder: 'Distance en km',
-          required: true,
-          min: 0
-        },
-        {
-          name: 'nbEmployes',
-          label: 'Nombre d\'employés',
-          type: 'number',
-          placeholder: 'Nombre d\'employés',
-          required: true,
-          min: 1
-        },
-        {
-          name: 'nbVoyages',
-          label: 'Nombre de voyages par jour',
-          type: 'number',
-          placeholder: 'Nombre de voyages par jour',
-          required: true,
-          min: 0
-        }
-      ]
-    }
-  };
+ const tabs = { transport: { id: 'transport', label: 'Transport', headers: ['Distance', 'Poids', 'Description', 'Action'], fields: [ { name: 'distance', label: 'Distance', type: 'number', placeholder: 'Distance en km', required: true, min: 0 }, { name: 'poids', label: 'Poids', type: 'number', placeholder: 'Poids en kg', required: true, min: 0 }, { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Description', rows: 3 } ] }, dechets: { id: 'dechets', label: 'Déchets', headers: ['Type', 'Poids', 'Description', 'Action'], fields: [ { name: 'type', label: 'Type', type: 'select', placeholder: 'Choisir un type de déchet', required: true, options: [ { value: 'Papier', label: 'Papier' }, { value: 'Plastique', label: 'Plastique' }, { value: 'Organique', label: 'Organique' }, { value: 'Métal', label: 'Métal' }, { value: 'Verre', label: 'Verre' }, { value: 'Électronique', label: 'Électronique' } ] }, { name: 'poids', label: 'Poids', type: 'number', placeholder: 'Poids en kg', required: true, min: 0 }, { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Description', rows: 3 } ] }, voyage: { id: 'voyage', label: 'Voyage d\'affaires', headers: ['Type', 'Distance', 'Description', 'Action'], fields: [ { name: 'type', label: 'Type', type: 'select', placeholder: 'Choisir un type de voyage', required: true, options: [ { value: 'Avion', label: 'Avion' }, { value: 'Train', label: 'Train' }, { value: 'Voiture', label: 'Voiture' }, { value: 'Bus', label: 'Bus' } ] }, { name: 'distance', label: 'Distance', type: 'number', placeholder: 'Distance en km', required: true, min: 0 }, { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Description', rows: 3 } ] }, 'biens-services': { id: 'biens-services', label: 'Biens et services achetés', headers: ['Titre', 'Type', 'Quantité', 'Description', 'Action'], fields: [ { name: 'titre', label: 'Titre', type: 'text', placeholder: 'Titre', required: true }, { name: 'type', label: 'Type', type: 'select', placeholder: 'Choisir un type', required: true, options: [ { value: 'Matériel', label: 'Matériel' }, { value: 'Service', label: 'Service' }, { value: 'Logiciel', label: 'Logiciel' } ] }, { name: 'quantite', label: 'Quantité', type: 'number', placeholder: 'Quantité', required: true, min: 0 }, { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Description', rows: 3 } ] }, equipement: { id: 'equipement', label: 'Biens d\'équipement', headers: ['Type', 'Valeur', 'Description', 'Action'], fields: [ { name: 'type', label: 'Type', type: 'select', placeholder: 'Choisir un type d\'équipement', required: true, options: [ { value: 'Informatique', label: 'Informatique' }, { value: 'Mobilier', label: 'Mobilier' }, { value: 'Véhicule', label: 'Véhicule' }, { value: 'Machines', label: 'Machines' } ] }, { name: 'valeur', label: 'Valeur', type: 'number', placeholder: 'Valeur en €', required: true, min: 0 }, { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Description', rows: 3 } ] }, 'deplacement-employes': { id: 'deplacement-employes', label: 'Déplacements des employés', headers: ['Distance', 'Nb d\'employés', 'Nb de voyages par jour', 'Action'], fields: [ { name: 'distance', label: 'Distance', type: 'number', placeholder: 'Distance en km', required: true, min: 0 }, { name: 'nbEmployes', label: 'Nombre d\'employés', type: 'number', placeholder: 'Nombre d\'employés', required: true, min: 1 }, { name: 'nbVoyages', label: 'Nombre de voyages par jour', type: 'number', placeholder: 'Nombre de voyages par jour', required: true, min: 0 } ] } };
+
 
   const handleTabClick = (tabId, e) => {
     e.preventDefault();
@@ -287,11 +78,7 @@ const Scope3 = () => {
         <label className="form-label">{field.label}</label>
         {field.type === 'select' ? (
           <select 
-            className="form-select"
-            name={field.name}
-            onChange={handleInputChange}
-            value={formData[field.name] || ''}
-            required={field.required}
+            className="form-select" name={field.name} onChange={handleInputChange} value={formData[field.name] || ''} required={field.required}
           >
             <option value="" disabled>{field.placeholder}</option>
             {field.options.map((option, idx) => (
@@ -299,25 +86,11 @@ const Scope3 = () => {
             ))}
           </select>
         ) : field.type === 'textarea' ? (
-          <textarea
-            className="form-control"
-            name={field.name}
-            placeholder={field.placeholder}
-            rows={field.rows}
-            onChange={handleInputChange}
-            value={formData[field.name] || ''}
-            required={field.required}
+          <textarea className="form-control" name={field.name} placeholder={field.placeholder} rows={field.rows} onChange={handleInputChange} value={formData[field.name] || ''} required={field.required}
           ></textarea>
         ) : (
           <input
-            type={field.type}
-            className="form-control"
-            name={field.name}
-            placeholder={field.placeholder}
-            onChange={handleInputChange}
-            value={formData[field.name] || ''}
-            required={field.required}
-            min={field.min}
+            type={field.type} className="form-control" placeholder={field.placeholder} onChange={handleInputChange} value={formData[field.name] || ''} required={field.required} min={field.min}
           />
         )}
       </div>
