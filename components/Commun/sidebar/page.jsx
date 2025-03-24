@@ -93,7 +93,7 @@ const Sidebar = ({ user, isAdmin }) => {
     >
      
       <div
-        className={`sidebar-header d-flex gap-6 align-items-center p-3 ${
+        className={`sidebar-header mb-10 d-flex gap-6 align-items-center p-3 ${
           isCollapsed ? "justify-content-center" : "justify-content-between"
         }`}
       >
@@ -105,7 +105,7 @@ const Sidebar = ({ user, isAdmin }) => {
         )}
         <div
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="cursor-pointer"
+          className="cursor-pointer mt-2"
         >
           {isCollapsed ? <Menu size={24} /> : <ChevronLeft size={24} />}
         </div>
