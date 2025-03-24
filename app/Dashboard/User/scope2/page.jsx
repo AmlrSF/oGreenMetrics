@@ -21,74 +21,30 @@ const Scope2 = () => {
     electricity: {
       id: "electricity",
       label: "Consommation d'électricité",
-      headers: ["Consommation électrique (kWh)",  "Action"],
+      headers: ["Consommation électrique (kWh)", "Action"],
       fields: [
-        {
-          name: "yearlyConsumption",
-          label: "Consommation électrique (kWh)",
-          type: "number",
-          placeholder: "Consommation annuelle en kWh",
-        },
-        {
-          name: "country",
-          label: "Pays",
-          type: "select",
-          placeholder: "Sélectionner un pays",
-          options: [
-            "Sweden", "Lithuania", "France", "Austria", "Latvia", "Finland", "Slovakia",
-            "Denmark", "Belgium", "Croatia", "Luxembourg", "Slovenia", "Italy", "Hungary",
-            "Spain", "United Kingdom", "Romania", "Portugal", "Ireland", "Germany", "Bulgaria",
-            "Netherlands", "Czechia", "Greece", "Malta", "Cyprus", "Poland", "Estonia",
-          ].map((country) => ({ value: country, label: country })),
-        },
+        { name: "yearlyConsumption", label: "Consommation électrique (kWh)", type: "number", placeholder: "Consommation annuelle en kWh" },
+        { name: "country", label: "Pays", type: "select", placeholder: "Sélectionner un pays", options: ["Sweden", "Lithuania", "France", "Austria", "Latvia", "Finland", "Slovakia", "Denmark", "Belgium", "Croatia", "Luxembourg", "Slovenia", "Italy", "Hungary", "Spain", "United Kingdom", "Romania", "Portugal", "Ireland", "Germany", "Bulgaria", "Netherlands", "Czechia", "Greece", "Malta", "Cyprus", "Poland", "Estonia"].map((country) => ({ value: country, label: country })) },
       ],
     },
     heating: {
       id: "heating",
       label: "Chauffage",
-      headers: ["Nom", "Type", "Énergie Consommée (kWh)",  "Action"],
+      headers: ["Nom", "Type", "Énergie Consommée (kWh)", "Action"],
       fields: [
         { name: "name", label: "Nom", type: "text", placeholder: "Nom de l'équipement" },
-        {
-          name: "type",
-          label: "Type",
-          type: "select",
-          placeholder: "Sélectionner un type",
-          options: [
-            { value: "Electric Heating", label: "Electric Heating" },
-            { value: "District Heating", label: "District Heating" },
-          ],
-        },
-        {
-          name: "energy",
-          label: "Énergie Consommée (kWh)",
-          type: "number",
-          placeholder: "Énergie consommée",
-        },
+        { name: "type", label: "Type", type: "select", placeholder: "Sélectionner un type", options: [{ value: "Electric Heating", label: "Electric Heating" }, { value: "District Heating", label: "District Heating" }] },
+        { name: "energy", label: "Énergie Consommée (kWh)", type: "number", placeholder: "Énergie consommée" },
       ],
     },
     cooling: {
       id: "cooling",
       label: "Refroidissement",
-      headers: ["Nom", "Type", "Énergie Consommée (kWh)",  "Action"],
+      headers: ["Nom", "Type", "Énergie Consommée (kWh)", "Action"],
       fields: [
         { name: "name", label: "Nom", type: "text", placeholder: "Nom de l'équipement" },
-        {
-          name: "type",
-          label: "Type",
-          type: "select",
-          placeholder: "Sélectionner un type",
-          options: [
-            { value: "Electric Cooling", label: "Electric Cooling" },
-            { value: "District Cooling", label: "District Cooling" },
-          ],
-        },
-        {
-          name: "energy",
-          label: "Énergie Consommée (kWh)",
-          type: "number",
-          placeholder: "Énergie consommée",
-        },
+        { name: "type", label: "Type", type: "select", placeholder: "Sélectionner un type", options: [{ value: "Electric Cooling", label: "Electric Cooling" }, { value: "District Cooling", label: "District Cooling" }] },
+        { name: "energy", label: "Énergie Consommée (kWh)", type: "number", placeholder: "Énergie consommée" },
       ],
     },
   };
@@ -116,7 +72,7 @@ const Scope2 = () => {
   const handleTabClick = (tabId, e) => {
     e.preventDefault();
     setActiveTab(tabId);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
   const toggleModal = (isOpen, editMode = false, item = null, recordId = null) => {
@@ -147,22 +103,16 @@ const Scope2 = () => {
         endpoint = isEditMode ? `http://localhost:4000/energy-consumption/${editId}` : "http://localhost:4000/energy-consumption";
         method = isEditMode ? "PUT" : "POST";
       } else if (activeTab === "heating") {
-        endpoint = isEditMode
-          ? `http://localhost:4000/heating/${editRecordId}/heater/${editId}`
-          : "http://localhost:4000/heating";
+        endpoint = isEditMode ? `http://localhost:4000/heating/${editRecordId}/heater/${editId}` : "http://localhost:4000/heating";
         method = isEditMode ? "PUT" : "POST";
       } else if (activeTab === "cooling") {
-        endpoint = isEditMode
-          ? `http://localhost:4000/cooling/${editRecordId}/cooler/${editId}`
-          : "http://localhost:4000/cooling";
+        endpoint = isEditMode ? `http://localhost:4000/cooling/${editRecordId}/cooler/${editId}` : "http://localhost:4000/cooling";
         method = isEditMode ? "PUT" : "POST";
       }
 
       const response = await fetch(endpoint, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const result = await response.json();
@@ -171,10 +121,7 @@ const Scope2 = () => {
         throw new Error(result.message || "Failed to save data");
       }
 
-      setScope2Data((prev) => ({
-        ...prev,
-        [activeTab]: result.data,
-      }));
+      setScope2Data((prev) => ({ ...prev, [activeTab]: result.data }));
       setCurrentPage(1); // Reset to first page after adding/editing
       toggleModal(false);
     } catch (error) {
@@ -184,12 +131,8 @@ const Scope2 = () => {
 
   const handleDelete = async (recordId, itemId) => {
     try {
-      if (!recordId) {
-        throw new Error("Record ID is missing");
-      }
-      if ((activeTab === "heating" || activeTab === "cooling") && !itemId) {
-        throw new Error("Item ID is missing");
-      }
+      if (!recordId) throw new Error("Record ID is missing");
+      if ((activeTab === "heating" || activeTab === "cooling") && !itemId) throw new Error("Item ID is missing");
 
       let endpoint;
       if (activeTab === "electricity") {
@@ -210,10 +153,7 @@ const Scope2 = () => {
           throw new Error(errorData.message || "Failed to delete");
         }
 
-        setScope2Data((prev) => ({
-          ...prev,
-          electricity: { yearlyConsumption: 0, emissions: 0, country: null },
-        }));
+        setScope2Data((prev) => ({ ...prev, electricity: { yearlyConsumption: 0, emissions: 0, country: null } }));
       } else if (activeTab === "heating") {
         endpoint = `/heating/${recordId}/heater/${itemId}`;
         const response = await fetch(endpoint, { method: "DELETE" });
@@ -228,13 +168,8 @@ const Scope2 = () => {
         }
 
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to delete");
-        }
-        setScope2Data((prev) => ({
-          ...prev,
-          heating: result.data,
-        }));
+        if (!response.ok) throw new Error(result.message || "Failed to delete");
+        setScope2Data((prev) => ({ ...prev, heating: result.data }));
       } else if (activeTab === "cooling") {
         endpoint = `/cooling/${recordId}/cooler/${itemId}`;
         const response = await fetch(endpoint, { method: "DELETE" });
@@ -249,13 +184,8 @@ const Scope2 = () => {
         }
 
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to delete");
-        }
-        setScope2Data((prev) => ({
-          ...prev,
-          cooling: result.data,
-        }));
+        if (!response.ok) throw new Error(result.message || "Failed to delete");
+        setScope2Data((prev) => ({ ...prev, cooling: result.data }));
       }
       setCurrentPage(1); // Reset to first page after deleting
     } catch (error) {
@@ -302,42 +232,16 @@ const Scope2 = () => {
               {activeTab === "electricity" && data.yearlyConsumption > 0 ? (
                 <tr>
                   <td>{data.yearlyConsumption}</td>
-                   <td>
+                  <td>
                     <div className="btn-list flex-nowrap">
-                      <button
-                        className="btn btn-ghost-primary btn-icon"
-                        onClick={() => toggleModal(true, true, data, data._id)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                      <button className="btn btn-ghost-primary btn-icon" onClick={() => toggleModal(true, true, data, data._id)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                       </button>
-                      <button
-                        className="btn btn-ghost-danger btn-icon"
-                        onClick={() => handleDelete(data._id)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                      <button className="btn btn-ghost-danger btn-icon" onClick={() => handleDelete(data._id)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M3 6h18"></path>
                           <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                           <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -354,42 +258,16 @@ const Scope2 = () => {
                     <td>{heater.name}</td>
                     <td>{heater.type}</td>
                     <td>{heater.energy}</td>
-                     <td>
+                    <td>
                       <div className="btn-list flex-nowrap">
-                        <button
-                          className="btn btn-ghost-primary btn-icon"
-                          onClick={() => toggleModal(true, true, heater, data._id)}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
+                        <button className="btn btn-ghost-primary btn-icon" onClick={() => toggleModal(true, true, heater, data._id)}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                           </svg>
                         </button>
-                        <button
-                          className="btn btn-ghost-danger btn-icon"
-                          onClick={() => handleDelete(data._id, heater._id)}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
+                        <button className="btn btn-ghost-danger btn-icon" onClick={() => handleDelete(data._id, heater._id)}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 6h18"></path>
                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -407,42 +285,16 @@ const Scope2 = () => {
                     <td>{cooler.name}</td>
                     <td>{cooler.type}</td>
                     <td>{cooler.energy}</td>
-                     <td>
+                    <td>
                       <div className="btn-list flex-nowrap">
-                        <button
-                          className="btn btn-ghost-primary btn-icon"
-                          onClick={() => toggleModal(true, true, cooler, data._id)}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
+                        <button className="btn btn-ghost-primary btn-icon" onClick={() => toggleModal(true, true, cooler, data._id)}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                           </svg>
                         </button>
-                        <button
-                          className="btn btn-ghost-danger btn-icon"
-                          onClick={() => handleDelete(data._id, cooler._id)}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
+                        <button className="btn btn-ghost-danger btn-icon" onClick={() => handleDelete(data._id, cooler._id)}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 6h18"></path>
                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -463,7 +315,7 @@ const Scope2 = () => {
               )}
               {(activeTab === "heating" || activeTab === "cooling") && data.totalEmissions > 0 && (
                 <tr>
-                    <td></td>
+                  <td></td>
                 </tr>
               )}
             </tbody>
@@ -475,35 +327,15 @@ const Scope2 = () => {
           <nav className="d-flex justify-content-center mt-4">
             <ul className="pagination">
               <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Précédent
-                </button>
+                <button className="page-link" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Précédent</button>
               </li>
               {[...Array(totalPages).keys()].map((page) => (
-                <li
-                  key={page + 1}
-                  className={`page-item ${currentPage === page + 1 ? "active" : ""}`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => handlePageChange(page + 1)}
-                  >
-                    {page + 1}
-                  </button>
+                <li key={page + 1} className={`page-item ${currentPage === page + 1 ? "active" : ""}`}>
+                  <button className="page-link" onClick={() => handlePageChange(page + 1)}>{page + 1}</button>
                 </li>
               ))}
               <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Suivant
-                </button>
+                <button className="page-link" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Suivant</button>
               </li>
             </ul>
           </nav>
@@ -525,30 +357,14 @@ const Scope2 = () => {
       <div className="mb-3" key={index}>
         <label className="form-label">{field.label}</label>
         {field.type === "select" ? (
-          <select
-            className="form-select"
-            name={field.name}
-            onChange={handleInputChange}
-            value={formData[field.name] || ""}
-          >
-            <option value="" disabled>
-              {field.placeholder}
-            </option>
+          <select className="form-select" name={field.name} onChange={handleInputChange} value={formData[field.name] || ""}>
+            <option value="" disabled>{field.placeholder}</option>
             {field.options.map((option, idx) => (
-              <option key={idx} value={option.value}>
-                {option.label}
-              </option>
+              <option key={idx} value={option.value}>{option.label}</option>
             ))}
           </select>
         ) : (
-          <input
-            type={field.type}
-            className="form-control"
-            name={field.name}
-            placeholder={field.placeholder}
-            onChange={handleInputChange}
-            value={formData[field.name] || ""}
-          />
+          <input type={field.type} className="form-control" name={field.name} placeholder={field.placeholder} onChange={handleInputChange} value={formData[field.name] || ""} />
         )}
       </div>
     ));
@@ -569,12 +385,8 @@ const Scope2 = () => {
             <form onSubmit={handleSubmit}>
               <div className="modal-body">{renderFormFields()}</div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-link link-secondary" onClick={() => toggleModal(false)}>
-                  Annuler
-                </button>
-                <button type="submit" className="btn btn-primary ms-auto">
-                  {isEditMode ? "Modifier" : "Ajouter"}
-                </button>
+                <button type="button" className="btn btn-link link-secondary" onClick={() => toggleModal(false)}>Annuler</button>
+                <button type="submit" className="btn btn-primary ms-auto">{isEditMode ? "Modifier" : "Ajouter"}</button>
               </div>
             </form>
           </div>
@@ -589,8 +401,7 @@ const Scope2 = () => {
         <div className="card-body">
           <h3 className="card-title text-success">Scope 2</h3>
           <p className="card-subtitle">
-            <strong className="text-primary">Émissions indirectes</strong> provenant de sources détenues ou contrôlées
-            par une organisation.
+            <strong className="text-primary">Émissions indirectes</strong> provenant de sources détenues ou contrôlées par une organisation.
           </p>
         </div>
       </div>
@@ -600,11 +411,7 @@ const Scope2 = () => {
           <ul className="nav nav-tabs card-header-tabs">
             {Object.values(tabs).map((tab) => (
               <li className="nav-item" key={tab.id}>
-                <a
-                  href={`#${tab.id}`}
-                  className={`nav-link ${activeTab === tab.id ? "active" : ""}`}
-                  onClick={(e) => handleTabClick(tab.id, e)}
-                >
+                <a href={`#${tab.id}`} className={`nav-link ${activeTab === tab.id ? "active" : ""}`} onClick={(e) => handleTabClick(tab.id, e)}>
                   {tab.label}
                 </a>
               </li>
