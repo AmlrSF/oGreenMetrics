@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 const Scope1 = () => {
   const [activeTab, setActiveTab] = useState("Combustion de carburant");
@@ -9,8 +9,13 @@ const Scope1 = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [fuelFilter, setFuelFilter] = useState("all");
+  const [editingItem, setEditingItem] = useState(null);
+  const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const itemsPerPage = 3;
-
+ 
   useEffect(() => {
     fetchData();
   }, [activeTab]);
@@ -46,45 +51,151 @@ const Scope1 = () => {
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
+    setSearchTerm("");
+    setFuelFilter("all");
   };
 
-  const toggleModal = (isOpen) => {
+  const toggleModal = (isOpen, mode = "add", item = null) => {
     setIsModalOpen(isOpen);
+    setModalMode(mode);
+    setEditingItem(item);
   };
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    const endpoint = activeTab === "Combustion de carburant" ? "/fuelcombution" : "/production";
-    const payload = {
-      ...(activeTab === "Combustion de carburant" && {
-        machines: [{ nom: data.nom, typeDeCarburant: data.typeDeCarburant || '', quantite: Number(data.quantite) }],
-      }),
-      ...(activeTab !== "Combustion de carburant" && {
-        products: [{ nom: data.nom, quantite: Number(data.quantite) }],
-      }),
+    const newItem = {
+      nom: formData.get("nom"),
+      quantite: parseFloat(formData.get("quantite"))
     };
+    
+    if (activeTab === "Combustion de carburant") {
+      newItem.typeDeCarburant = formData.get("typeDeCarburant");
+      newItem.modele = formData.get("modele") || "Standard";
+      
+      const payload = { machines: [newItem] };
+      try {
+        const response = await fetch("http://localhost:4000/fuelcombution", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) throw new Error("Failed to add fuel combustion");
+        
+        toggleModal(false);
+        fetchData();
+      } catch (error) {
+        console.error("Error adding fuel combustion:", error);
+        setError(error.message);
+      }
+    } else {
+      const payload = { products: [newItem] };
+      try {
+        const response = await fetch("http://localhost:4000/production", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) throw new Error("Failed to add production");
+        
+        toggleModal(false);
+        fetchData();
+      } catch (error) {
+        console.error("Error adding production:", error);
+        setError(error.message);
+      }
+    }
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const updatedItem = {
+      nom: formData.get("nom"),
+      quantite: parseFloat(formData.get("quantite"))
+    };
+    
+    if (activeTab === "Combustion de carburant") {
+      updatedItem.typeDeCarburant = formData.get("typeDeCarburant");
+      updatedItem.modele = formData.get("modele") || editingItem.modele || "Standard";
+      
+      try {
+        const response = await fetch(`http://localhost:4000/fuelcombution/${editingItem._id}`, {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedItem)
+        });
+        
+        if (!response.ok) throw new Error("Failed to update fuel combustion");
+        
+        toggleModal(false);
+        fetchData();
+      } catch (error) {
+        console.error("Error updating fuel combustion:", error);
+        setError(error.message);
+      }
+    } else {
+      try {
+        const response = await fetch(`http://localhost:4000/production/${editingItem._id}`, {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedItem)
+        });
+        
+        if (!response.ok) throw new Error("Failed to update production");
+        
+        toggleModal(false);
+        fetchData();
+      } catch (error) {
+        console.error("Error updating production:", error);
+        setError(error.message);
+      }
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const endpoint = activeTab === "Combustion de carburant" 
+      ? `/fuelcombution/${id}` 
+      : `/production/${id}`;
+    
     try {
       const response = await fetch(`http://localhost:4000${endpoint}`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        method: "DELETE",
+        credentials: "include",  
       });
+      
       if (!response.ok) {
-        throw new Error(`Failed to add data: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to delete item: ${response.status} - ${errorText}`);
       }
+      
+      setConfirmDelete(null);
       fetchData();
-      toggleModal(false);
     } catch (error) {
-      console.error("Failed to add data:", error.message);
+      console.error("Error deleting item:", error.message);
       setError(error.message);
-    } finally {
-      setLoading(false);
     }
+  };
+  const filteredItems = () => {
+    let items = activeTab === "Combustion de carburant" ? data.machines : data.products;
+     
+    if (searchTerm) {
+      items = items.filter(item => 
+        item.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.modele && item.modele.toLowerCase().includes(searchTerm.toLowerCase())));
+    }
+     
+    if (activeTab === "Combustion de carburant" && fuelFilter !== "all") {
+      items = items.filter(item => item.typeDeCarburant === fuelFilter);
+    }
+    
+    return items;
   };
 
   const paginateItems = (items) => {
@@ -104,10 +215,11 @@ const Scope1 = () => {
         </div>
       );
     }
-    const items = activeTab === "Combustion de carburant" ? data.machines : data.products;
+    
+    const items = filteredItems();
     const paginatedItems = paginateItems(items);
     const totalPages = Math.ceil(items.length / itemsPerPage);
-
+    
     return (
       <div className="table-container p-5">
         <div className="table-responsive">
@@ -117,6 +229,7 @@ const Scope1 = () => {
                 {activeTab === "Combustion de carburant" ? (
                   <>
                     <th>Nom</th>
+                    <th>Modèle</th>
                     <th>Type de carburant</th>
                     <th>Quantité</th>
                     <th className="w-1">Action</th>
@@ -139,26 +252,33 @@ const Scope1 = () => {
                         <span className="avatar avatar-md text-white me-2" style={{ backgroundColor: "#263589" }}>
                           {item.nom.charAt(0)}
                         </span>
-                        <div className="flex-fill">
-                          <div className="font-weight-medium">{item.nom}</div>
-                        </div>
+                        <div className="font-weight-medium">{item.nom}</div>
                       </div>
                     </td>
                     {activeTab === "Combustion de carburant" && (
-                      <td className="text-secondary">{item.typeDeCarburant}</td>
+                      <>
+                        <td>{item.modele}</td>
+                        <td className="text-secondary">{item.typeDeCarburant}</td>
+                      </>
                     )}
                     <td>
                       <span className="badge bg-purple-lt">{item.quantite}</span>
                     </td>
                     <td>
                       <div className="btn-list flex-nowrap">
-                        <button className="btn btn-ghost-primary btn-icon">
+                        <button 
+                          className="btn btn-ghost-primary btn-icon"
+                          onClick={() => toggleModal(true, "edit", item)}
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                           </svg>
                         </button>
-                        <button className="btn btn-ghost-danger btn-icon">
+                        <button 
+                          className="btn btn-ghost-danger btn-icon"
+                          onClick={() => setConfirmDelete(item)}
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 6h18"></path>
                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -173,8 +293,8 @@ const Scope1 = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={activeTab === "Combustion de carburant" ? "4" : "3"} className="text-center text-secondary">
-                    Aucune donnée disponible pour ce table
+                  <td colSpan={activeTab === "Combustion de carburant" ? "5" : "3"} className="text-center text-secondary">
+                    Aucune donnée disponible pour ce tableau
                   </td>
                 </tr>
               )}
@@ -206,7 +326,6 @@ const Scope1 = () => {
       </div>
     );
   };
- 
 
   return (
     <div className="container-xl mt-3">
@@ -250,51 +369,107 @@ const Scope1 = () => {
         </div>
 
         <div className="card-body p-0">
-        <div className="card-body">
-  <div className="d-flex justify-content-between align-items-center mb-4">
-     <button type="button" className="btn btn-primary" onClick={() => toggleModal(true)}>
-      <Plus className="mr-2" size={16} />
-      Ajouter
-    </button>
-  </div>
-  {renderTable()}
-</div>
-        </div>
-      </div>
-
-      {isModalOpen && (
-        <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Ajouter  </h5>
-                <button type="button" className="btn-close" onClick={() => toggleModal(false)} aria-label="Close"></button>
-              </div>
-              <form onSubmit={handleAdd}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Nom</label>
-                    <input type="text" className="form-control" name="nom" required />
-                  </div>
-                  {activeTab === "Combustion de carburant" && (
-                    <div className="mb-3">
-                    <label className="form-label">Type de carburant</label>
-                    <select
-                      className="form-select"
-                      name="typeDeCarburant"
-                      required
+          <div className="card-body">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <div className="d-flex gap-2">
+                {activeTab === "Combustion de carburant" && (
+                  <div className="input-group" style={{ width: "200px" }}>
+                    <select 
+                      className="form-select" 
+                      value={fuelFilter}
+                      onChange={(e) => setFuelFilter(e.target.value)}
                     >
-                      <option value="" disabled defaultValue>Choisir un type de carburant</option>
+                      <option value="all">Tous les carburants</option>
                       <option value="Natural Gas">Natural Gas</option>
                       <option value="Diesel">Diesel</option>
                       <option value="Gasoline">Gasoline</option>
                       <option value="Coal">Coal</option>
                     </select>
                   </div>
+                )}
+                <div className="input-group" style={{ width: "250px" }}>
+                  <span className="input-group-text">
+                    <Search size={16} />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+              <button type="button" className="btn btn-primary" onClick={() => toggleModal(true, "add")}>
+                <Plus className="mr-2" size={16} />
+                Ajouter
+              </button>
+            </div>
+            {renderTable()}
+          </div>
+        </div>
+      </div>
+
+      {/* Add/Edit Modal */}
+      {isModalOpen && (
+        <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-lg" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {modalMode === "add" ? "Ajouter" : "Modifier"} {activeTab === "Combustion de carburant" ? "une machine" : "un produit"}
+                </h5>
+                <button type="button" className="btn-close" onClick={() => toggleModal(false)} aria-label="Close"></button>
+              </div>
+              <form onSubmit={modalMode === "add" ? handleAdd : handleEdit}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Nom</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      name="nom" 
+                      defaultValue={editingItem?.nom || ""} 
+                      required 
+                    />
+                  </div>
+                  {activeTab === "Combustion de carburant" && (
+                    <>
+                      <div className="mb-3">
+                        <label className="form-label">Modèle</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          name="modele" 
+                          defaultValue={editingItem?.modele || ""} 
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Type de carburant</label>
+                        <select
+                          className="form-select"
+                          name="typeDeCarburant"
+                          defaultValue={editingItem?.typeDeCarburant || ""}
+                          required
+                        >
+                          <option value="" disabled>Choisir un type de carburant</option>
+                          <option value="Natural Gas">Natural Gas</option>
+                          <option value="Diesel">Diesel</option>
+                          <option value="Gasoline">Gasoline</option>
+                          <option value="Coal">Coal</option>
+                        </select>
+                      </div>
+                    </>
                   )}
                   <div className="mb-3">
                     <label className="form-label">Quantité</label>
-                    <input type="number" className="form-control" name="quantite" required />
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      name="quantite" 
+                      defaultValue={editingItem?.quantite || ""} 
+                      required 
+                    />
                   </div>
                 </div>
                 <div className="modal-footer">
@@ -302,7 +477,7 @@ const Scope1 = () => {
                     Annuler
                   </button>
                   <button type="submit" className="btn btn-primary ms-auto">
-                    Ajouter
+                    {modalMode === "add" ? "Ajouter" : "Mettre à jour"}
                   </button>
                 </div>
               </form>
@@ -310,8 +485,32 @@ const Scope1 = () => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-sm" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirmer la suppression</h5>
+                <button type="button" className="btn-close" onClick={() => setConfirmDelete(null)} aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer <strong>{confirmDelete.nom}</strong>? Cette action est irréversible.</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-link link-secondary" onClick={() => setConfirmDelete(null)}>
+                  Annuler
+                </button>
+                <button type="button" className="btn btn-danger ms-auto" onClick={() => handleDelete(confirmDelete._id)}>
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
 export default Scope1;
