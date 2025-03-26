@@ -7,23 +7,31 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDate, setSortDate] = useState("newest");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const getUniqueValues = (key) => {
-    return [...new Set(data.map(item => item[key]))].filter(Boolean);
+    return [...new Set(data.map((item) => item[key]))].filter(Boolean);
   };
 
-  const categories = tab.id === "equipement" ? getUniqueValues("category") 
-                  : tab.id === "dechets" ? getUniqueValues("type")
-                  : tab.id === "transport" ? getUniqueValues("mode")
-                  : [];
+  const categories =
+    tab.id === "equipement"
+      ? getUniqueValues("category")
+      : tab.id === "dechets"
+      ? getUniqueValues("type")
+      : tab.id === "transport"
+      ? getUniqueValues("mode")
+      : [];
 
   useEffect(() => {
     let result = [...data];
 
     // Search filter
     if (searchTerm) {
-      result = result.filter(item =>
-        Object.values(item).some(val =>
+      result = result.filter((item) =>
+        Object.values(item).some((val) =>
           String(val).toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
@@ -31,13 +39,17 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
 
     // Category filter
     if (selectedCategory !== "all") {
-      const filterKey = tab.id === "equipement" ? "category" 
-                     : tab.id === "dechets" ? "type"
-                     : tab.id === "transport" ? "mode"
-                     : null;
-      
+      const filterKey =
+        tab.id === "equipement"
+          ? "category"
+          : tab.id === "dechets"
+          ? "type"
+          : tab.id === "transport"
+          ? "mode"
+          : null;
+
       if (filterKey) {
-        result = result.filter(item => item[filterKey] === selectedCategory);
+        result = result.filter((item) => item[filterKey] === selectedCategory);
       }
     }
 
@@ -54,21 +66,21 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   return (
     <div className="card">
       <div className="card-header">
-        <div className="d-flex justify-content-between align-items-center gap-3">
-          <div className="input-icon" style={{ width: "250px" }}>
-            <span className="input-icon-addon">
-              <Search size={16} />
-            </span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
+        <div className="d-flex justify-content-between w-full align-items-center gap-3">
           <div className="d-flex gap-2">
+            <div className="input-icon" style={{ width: "250px" }}>
+              <span className="input-icon-addon">
+                <Search size={16} />
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
             {categories.length > 0 && (
               <select
                 className="form-select"
@@ -77,7 +89,9 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               >
                 <option value="all">All Types</option>
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             )}
@@ -91,6 +105,9 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               <option value="oldest">Oldest First</option>
             </select>
           </div>
+          <button className="btn btn-primary" onClick={onAdd}>
+            Add New
+          </button>
         </div>
       </div>
 
@@ -99,9 +116,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
           <thead>
             <tr>
               {headers.map((header, index) => (
-                <th key={index}>
-                  {header}
-                </th>
+                <th key={index}>{header}</th>
               ))}
             </tr>
           </thead>
@@ -113,52 +128,133 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                 </td>
               </tr>
             ) : (
-              filteredData.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {headers.slice(0, -1).map((header, colIndex) => {
-                    let cellValue = row[header.toLowerCase() === "createdat" ? "createdAt" : header.toLowerCase()];
-                    
-                    if (header.toLowerCase() === "createdat" && cellValue) {
-                      cellValue = formatDate(cellValue);
-                    }
+              filteredData
+                .slice(
+                  (currentPage - 1) * itemsPerPage,
+                  currentPage * itemsPerPage
+                )
+                .map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {headers.slice(0, -1).map((header, colIndex) => {
+                      let cellValue =
+                        row[
+                          header.toLowerCase() === "createdat"
+                            ? "createdAt"
+                            : header.toLowerCase()
+                        ];
 
-                    return (
-                      <td className="text-secondary" key={colIndex}>
-                        <span className={header === "Emissions" ? "badge bg-purple-lt" : ""}>
-                          {header.toLowerCase() === "emissions"
-                            ? `${cellValue} ${tab.unit1}/${tab.unit2}`
-                            : cellValue}
-                        </span>
-                      </td>
-                    );
-                  })}
-                  <td>
-                    <div className="btn-list">
-                      <button
-                        className="btn btn-ghost-danger btn-icon"
-                        onClick={() => onDelete(row._id)}
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                      <button
-                        className="btn btn-ghost-success btn-icon"
-                        onClick={() => onUpdate(row._id)}
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                      if (header.toLowerCase() === "createdat" && cellValue) {
+                        cellValue = formatDate(cellValue);
+                      }
+
+                      return (
+                        <td className="text-secondary" key={colIndex}>
+                          <span
+                            className={
+                              header === "Emissions" ? "badge bg-purple-lt" : ""
+                            }
+                          >
+                            {header.toLowerCase() === "emissions"
+                              ? `${cellValue} ${tab.unit1}/${tab.unit2}`
+                              : cellValue}
+                          </span>
+                        </td>
+                      );
+                    })}
+                    <td>
+                      <div className="btn-list">
+                        <button
+                          className="btn btn-ghost-danger btn-icon"
+                          onClick={() => onDelete(row._id)}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                        <button
+                          className="btn btn-ghost-success btn-icon"
+                          onClick={() => onUpdate(row._id)}
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
             )}
           </tbody>
         </table>
       </div>
-      
-      <div className="card-footer text-end">
-        <button className="btn btn-primary" onClick={onAdd}>
-          Add New
-        </button>
+
+      <div className="card-footer d-flex align-items-center">
+        <p className="m-0 text-secondary">
+          Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+          <span>
+            {Math.min(currentPage * itemsPerPage, filteredData.length)}
+          </span>{" "}
+          of <span>{filteredData.length}</span> entries
+        </p>
+        <ul className="pagination m-0 ms-auto">
+          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+            <button
+              className="page-link"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M15 6l-6 6l6 6" />
+              </svg>
+            </button>
+          </li>
+          <li className="page-item active">
+            <span
+              className="page-link"
+              style={{
+                backgroundColor: "#263589",
+                borderColor: "#263589",
+              }}
+            >
+              {currentPage}
+            </span>
+          </li>
+          <li
+            className={`page-item ${
+              currentPage === totalPages ? "disabled" : ""
+            }`}
+          >
+            <button
+              className="page-link"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M9 6l6 6l-6 6" />
+              </svg>
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   );

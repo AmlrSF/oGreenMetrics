@@ -20,7 +20,7 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [userAccess, setUserAccess] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false); 
   const [modalType, setModalType] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [RoleFilter, setRoleFilter] = useState("all");

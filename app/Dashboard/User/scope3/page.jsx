@@ -41,7 +41,7 @@ const Scope3 = () => {
           
           
           setCompany(CompanyData?.data);
-          fetchData();
+          
 
         } else {
           console.log("User not found");
@@ -55,9 +55,30 @@ const Scope3 = () => {
     fetchData();
   }, []);
 
+
   useEffect(() => {
-    fetchData();
+    fetchData(activeTab);
   }, [activeTab]);
+
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/${activeTab}/${Company?._id}`,
+        {
+          method: "GET",
+        }
+      );
+      const data = await response.json();
+      
+
+      if (response.ok) {
+        setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -141,24 +162,7 @@ const Scope3 = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:4000/${activeTab}/${Company?._id}`,
-        {
-          method: "GET",
-        }
-      );
-      const data = await response.json();
-      
-
-      if (response.ok) {
-        setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  
 
   const renderFormFields = () => {
     const currentTab = tabs[activeTab];
