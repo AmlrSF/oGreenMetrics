@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
 import { tabs } from "@/lib/Data";
 import DataTable from "@/components/Commun/Datatable/Datatable";
 
@@ -29,6 +28,7 @@ const Scope3 = () => {
           credentials: "include",
         });
         const UseData = await UserReponse.json();
+
         if (UseData?.user) {
           const CompanyResponse = await fetch(
             `http://localhost:4000/GetCompanyByOwnerID/${UseData?.user?._id}`,
@@ -36,8 +36,13 @@ const Scope3 = () => {
               method: "GET",
             }
           );
-          const CompanyData = await CompanyResponse.json();
-          setCompany(CompanyData?.data[0]);
+
+        const CompanyData = await CompanyResponse.json();
+          
+          
+          setCompany(CompanyData?.data);
+          fetchData();
+
         } else {
           console.log("User not found");
         }
@@ -271,7 +276,7 @@ const Scope3 = () => {
             headers={tabs[activeTab].headers}
             data={tableData[activeTab]}
             activeTab={activeTab}
-            tabs={tabs}
+            tab={tabs[[activeTab]]}
             onDelete={handleDelete}
             onUpdate={handleUpdate}
             onAdd={() => toggleModal(true)}
