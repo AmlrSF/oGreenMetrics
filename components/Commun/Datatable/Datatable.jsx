@@ -13,15 +13,17 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const getUniqueValues = (key) => {
-    return [...new Set(data.map((item) => item[key]))].filter(Boolean);
+    return [...new Set(data?.map((item) => item[key]))].filter(Boolean);
   };
 
   const categories =
-    tab.id === "equipement"
+    tab?.id === "equipement"
       ? getUniqueValues("category")
-      : tab.id === "dechets"
+      : tab?.id === "dechets"
       ? getUniqueValues("type")
-      : tab.id === "transport"
+      : tab?.id === "transport"
+      ? getUniqueValues("mode")
+      : tab?.id === "businessTravel"
       ? getUniqueValues("mode")
       : [];
 
@@ -40,11 +42,13 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
     // Category filter
     if (selectedCategory !== "all") {
       const filterKey =
-        tab.id === "equipement"
+          tab?.id === "equipement"
           ? "category"
-          : tab.id === "dechets"
+          : tab?.id === "dechets"
           ? "type"
-          : tab.id === "transport"
+          : tab?.id === "transport"
+          ? "mode": 
+          tab?.id === "businessTravel"
           ? "mode"
           : null;
 
@@ -115,27 +119,26 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
         <table className="table table-vcenter card-table">
           <thead>
             <tr>
-              {headers.map((header, index) => (
+              {headers?.map((header, index) => (
                 <th key={index}>{header}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {filteredData.length === 0 ? (
+            {filteredData?.length === 0 ? (
               <tr>
-                <td colSpan={headers.length} className="text-center text-muted">
+                <td colSpan={headers?.length} className="text-center text-muted">
                   No data available
                 </td>
               </tr>
             ) : (
-              filteredData
-                .slice(
+              filteredData?.slice(
                   (currentPage - 1) * itemsPerPage,
                   currentPage * itemsPerPage
                 )
                 .map((row, rowIndex) => (
                   <tr key={rowIndex}>
-                    {headers.slice(0, -1).map((header, colIndex) => {
+                    {headers?.slice(0, -1).map((header, colIndex) => {
                       let cellValue =
                         row[
                           header.toLowerCase() === "createdat"

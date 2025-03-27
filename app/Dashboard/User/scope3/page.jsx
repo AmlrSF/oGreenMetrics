@@ -99,6 +99,9 @@ const Scope3 = () => {
         body: JSON.stringify(newFormData),
       });
 
+      console.log(newFormData);
+      
+
       const responseData = await response.json();
 
       console.log(responseData)
@@ -132,7 +135,7 @@ const Scope3 = () => {
     
     if (itemToUpdate) {
       const updatedFormData = {};
-      tabs[activeTab].fields.forEach((field) => {
+      tabs[activeTab]?.fields.forEach((field) => {
         updatedFormData[field.name] = itemToUpdate[field.name];
       });
 
@@ -155,6 +158,8 @@ const Scope3 = () => {
   const handleTabClick = async (tabId, e) => {
     e.preventDefault();
     setActiveTab(tabId);
+    console.log(tabId);
+    
   };
 
   const handleInputChange = (e) => {
@@ -167,11 +172,11 @@ const Scope3 = () => {
   const renderFormFields = () => {
     const currentTab = tabs[activeTab];
 
-    return currentTab.fields.map((field, index) => {
+    return currentTab?.fields.map((field, index) => {
       // Cas spécial pour le type de transport avec options dynamiques
       if (
         field.name === "type" &&
-        activeTab === "transport" &&
+        (activeTab === "transport" || activeTab === "businessTravel") &&
         field.dynamicOptions
       ) {
         const transportMode = formData.mode;
@@ -181,7 +186,7 @@ const Scope3 = () => {
 
         return (
           <div className="mb-3" key={index}>
-            <label className="form-label">{field.label}</label>
+            <label className="form-label">{field?.label}</label>
             <select
               className="form-select"
               name={field.name}
@@ -193,7 +198,7 @@ const Scope3 = () => {
               <option value="">{field.placeholder}</option>
               {availableOptions.map((option, idx) => (
                 <option key={idx} value={option.value}>
-                  {option.label}
+                  {option?.label}
                 </option>
               ))}
             </select>
@@ -203,7 +208,7 @@ const Scope3 = () => {
 
       return (
         <div className="mb-3" key={index}>
-          <label className="form-label">{field.label}</label>
+          <label className="form-label">{field?.label}</label>
           {field.type === "select" ? (
             <select
               className="form-select"
@@ -215,7 +220,7 @@ const Scope3 = () => {
               <option value="">{field.placeholder}</option>
               {field.options.map((option, idx) => (
                 <option key={idx} value={option.value}>
-                  {option.label}
+                  {option?.label}
                 </option>
               ))}
             </select>
@@ -262,13 +267,13 @@ const Scope3 = () => {
         <div className="card-header">
           <ul className="nav nav-tabs card-header-tabs">
             {Object.values(tabs).map((tab) => (
-              <li className="nav-item" key={tab.id}>
+              <li className="nav-item" key={tab?.id}>
                 <a
-                  href={`#${tab.id}`}
-                  className={`nav-link ${activeTab === tab.id ? "active" : ""}`}
-                  onClick={(e) => handleTabClick(tab.id, e)}
+                  href={`#${tab?.id}`}
+                  className={`nav-link ${activeTab === tab?.id ? "active" : ""}`}
+                  onClick={(e) => handleTabClick(tab?.id, e)}
                 >
-                  {tab.label}
+                  {tab?.label}
                 </a>
               </li>
             ))}
@@ -277,8 +282,8 @@ const Scope3 = () => {
 
         <div className="card-body">
           <DataTable
-            headers={tabs[activeTab].headers}
-            data={tableData[activeTab]}
+            headers={tabs[activeTab]?.headers}
+            data={tableData[activeTab]  || []}
             activeTab={activeTab}
             tab={tabs[[activeTab]]}
             onDelete={handleDelete}
@@ -294,7 +299,7 @@ const Scope3 = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {isEditing ? "Modifier" : "Nouveau"} {tabs[activeTab].label}
+                  {isEditing ? "Modifier" : "Nouveau"} {tabs[activeTab]?.label}
                 </h5>
                 <button
                   type="button"
