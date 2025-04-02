@@ -12,15 +12,20 @@ import VerificationRequired from "@/components/VerificationRequired";
 
 const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   let rolesNeedsToBeverified = ["régulier", "entreprise"];
   const [isLoading, setIsLoading] = useState(true);
   const { push } = useRouter();
 
-  const naviagteToLoginPage  = ()=>{
-    push('/login')
-  }
+  const naviagteToLoginPage = () => {
+    push("/login");
+  };
 
   useEffect(() => {
+    // Get sidebar state from localStorage
+    const savedSidebarState = localStorage.getItem('sidebarCollapsed');
+    setIsCollapsed(savedSidebarState ? JSON.parse(savedSidebarState) : false);
+
     const checkAuth = async () => {
       try {
         const response = await fetch("http://localhost:4000/auth", {
@@ -44,26 +49,46 @@ const DashboardLayout = ({ children }) => {
     };
 
     checkAuth();
+
+    // Add event listener for localStorage changes
+    const handleStorageChange = () => {
+      const savedState = localStorage.getItem('sidebarCollapsed');
+      setIsCollapsed(savedState ? JSON.parse(savedState) : false);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   if (isLoading) {
     return <Loader />;
-  } 
-    
+  }
 
   if (
     user?.isVerified === false &&
     rolesNeedsToBeverified.includes(user?.role)
   ) {
-    return <VerificationRequired naviagteToLoginPage={naviagteToLoginPage}/>
+    return <VerificationRequired naviagteToLoginPage={naviagteToLoginPage} />;
   }
 
   return (
     <div className="d-flex" style={{ background: "#f9fafb" }}>
       <Sidebar user={user} isAdmin={false} />
-      <div className="d-flex flex-column flex-grow">
+      <div className="d-flex flex-column flex-grow h-[100vh]">
         <Navbar user={user} />
-        <main className="flex-grow">{children}</main>
+        <main 
+          className="flex-grow-1 p-3" 
+          style={{ 
+            marginLeft: isCollapsed ? "5rem" : "16rem", 
+            transition: "margin 0.3s ease",
+            minHeight: "100vh"
+          }}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

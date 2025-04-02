@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertTriangle, FileText } from "lucide-react";
-
+import { formatDate } from "@/lib/Utils";
 const Reporting = () => {
   const [reports, setReports] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -13,7 +13,7 @@ const Reporting = () => {
   const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const [Company, setCompany] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -26,6 +26,42 @@ const Reporting = () => {
     detailLevel: "summary",
   });
 
+  useEffect(() => {
+    const id = fetchUser();
+    if (id) {
+      fetchReports(id);
+    }
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      const UserReponse = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+      const UseData = await UserReponse.json();
+
+      if (UseData?.user) {
+        const CompanyResponse = await fetch(
+          `http://localhost:4000/GetCompanyByOwnerID/${UseData?.user?._id}`,
+          {
+            method: "GET",
+          }
+        );
+
+        const CompanyData = await CompanyResponse.json();
+
+        setCompany(CompanyData?.data);
+        return CompanyData?.data?._id;
+      } else {
+        console.log("User not found");
+        return null;
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
   const filteredReports = reports
     .filter((report) => {
       if (statusFilter === "all") return true;
@@ -56,19 +92,56 @@ const Reporting = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    const newReport = {
-      ...formData,
-    };
-    setReports((prev) => [newReport, ...prev]);
-    setModalOpen(false);
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/createReport", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newReport),
+      });
+
+      const responseData = await response.json();
+
+      console.log(responseData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchReports = async (idPromise) => {
+    try {
+      const id = await idPromise;
+      console.log(id);
+
+      const response = await fetch(`http://localhost:4000/reports/${id}`, {
+        method: "GET",
+      });
+
+      const responseData = await response.json();
+      setReports(responseData?.data);
+      
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+    }
+  };
+
+  const getScopes = (report) => {
+    const scopes = [];
+    if (report.scope1) scopes.push("Scope 1");
+    if (report.scope2) scopes.push("Scope 2");
+    if (report.scope3) scopes.push("Scope 3");
+    return scopes.join(", ") || "None";
   };
 
   return (
-    <div className="container-xl h-full">
+    <div className="container-xl h-full overflow-y-auto">
       {modalOpen && (
         <div className="modal modal-blur fade show d-block">
-          <div style={{ zIndex: 1050 }} className="modal-dialog modal-lg modal-dialog-centered">
+          <div
+            style={{ zIndex: 1050 }}
+            className="modal-dialog modal-lg modal-dialog-centered"
+          >
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Generate New Report</h5>
@@ -236,7 +309,11 @@ const Reporting = () => {
               </div>
             </div>
           </div>
-          <div  style={{ zIndex: 1040 }} className="modal-backdrop fade show" onClick={() => setModalOpen(false)}></div>
+          <div
+            style={{ zIndex: 1040 }}
+            className="modal-backdrop fade show"
+            onClick={() => setModalOpen(false)}
+          ></div>
         </div>
       )}
 
@@ -306,8 +383,94 @@ const Reporting = () => {
           <>
             <div className="table-responsive">
               <table className="table table-vcenter card-table">
-                {/* Your existing table content */}
-                {/* ... */}
+                <thead>
+                  <tr>
+                    <th>Report Name</th>
+                    <th>Description</th>
+                    <th>Period</th>
+                    <th>Scopes</th>
+                    <th>Charts</th>
+                    <th>Detail Level</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <span className="avatar avatar-md bg-blue-lt text-blue me-2">
+                          <FileText size={18} />
+                        </span>
+                        <div className="flex-fill">
+                          <div className="font-weight-medium">{data.name}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="text-secondary">
+                      {data.description.length > 30
+                        ? `${data.description.slice(0, 30)}...`
+                        : data.description}
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <Calendar size={16} className="me-1" />
+                        <span>
+                          {formatDate(data.startDate)} -{" "}
+                          {formatDate(data.endDate)}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="badge bg-purple-lt">
+                        {getScopes(data)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-blue-lt">
+                        <BarChart2 size={14} className="me-1" />
+                        {data.includeCharts}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-green-lt">
+                        {data.detailLevel}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          data.status === "pending"
+                            ? "bg-yellow-lt"
+                            : data.status === "completed"
+                            ? "bg-success-lt"
+                            : "bg-secondary-lt"
+                        }`}
+                      >
+                        {data.status.charAt(0).toUpperCase() +
+                          data.status.slice(1)}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <div className="btn-list flex-nowrap">
+                      <button
+                        className={`btn btn-ghost-${
+                          user.isVerified ? "danger" : "success"
+                        } btn-icon`}
+                      >
+                        {user.isVerified ? (
+                          <UserX size={18} />
+                        ) : (
+                          <UserCheck size={18} />
+                        )}
+                      </button>
+                      <button className="btn btn-ghost-danger btn-icon">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </tr>
+                </tbody>
               </table>
             </div>
 
