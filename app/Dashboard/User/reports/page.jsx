@@ -3,6 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { AlertTriangle, FileText } from "lucide-react";
 import { formatDate } from "@/lib/Utils";
+import {
+  Calendar,
+  BarChart2,
+  UserX,
+  UserCheck,
+  Trash2,
+  FileTextIcon,
+} from "lucide-react";
+
 const Reporting = () => {
   const [reports, setReports] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -13,7 +22,7 @@ const Reporting = () => {
   const itemsPerPage = 5;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [Company, setCompany] = useState(null);
+  const [company, setCompany] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -27,62 +36,70 @@ const Reporting = () => {
   });
 
   useEffect(() => {
-    const id = fetchUser();
-    if (id) {
-      fetchReports(id);
-    }
+    const initializeData = async () => {
+      const id = await fetchUser();
+      if (id) {
+        fetchReports(id);
+      }
+    };
+    initializeData();
   }, []);
 
   const fetchUser = async () => {
     try {
-      const UserReponse = await fetch("http://localhost:4000/auth", {
+      const userResponse = await fetch("http://localhost:4000/auth", {
         method: "POST",
         credentials: "include",
       });
-      const UseData = await UserReponse.json();
+      const userData = await userResponse.json();
 
-      if (UseData?.user) {
-        const CompanyResponse = await fetch(
-          `http://localhost:4000/GetCompanyByOwnerID/${UseData?.user?._id}`,
+      if (userData?.user) {
+        const companyResponse = await fetch(
+          `http://localhost:4000/GetCompanyByOwnerID/${userData.user._id}`,
           {
             method: "GET",
           }
         );
-
-        const CompanyData = await CompanyResponse.json();
-
-        setCompany(CompanyData?.data);
-        return CompanyData?.data?._id;
-      } else {
-        console.log("User not found");
-        return null;
+        const companyData = await companyResponse.json();
+        setCompany(companyData?.data);
+        return companyData?.data?._id;
       }
+      return null;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return null;
     }
   };
-  const filteredReports = reports
-    .filter((report) => {
-      if (statusFilter === "all") return true;
-      return report.status === statusFilter;
-    })
-    .filter((report) => {
-      if (scopeFilter === "all") return true;
-      if (scopeFilter === "scope1") return report.scope1;
-      if (scopeFilter === "scope2") return report.scope2;
-      if (scopeFilter === "scope3") return report.scope3;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortOrder === "latest") {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      } else {
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      }
-    });
 
+  const getFilteredReports = () => {
+    if (!reports) return [];
+
+    return reports
+      .filter((report) => {
+        if (statusFilter === "all") return true;
+        return report.status === statusFilter;
+      })
+      .filter((report) => {
+        if (scopeFilter === "all") return true;
+        if (scopeFilter === "scope1") return report.scope1;
+        if (scopeFilter === "scope2") return report.scope2;
+        if (scopeFilter === "scope3") return report.scope3;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortOrder === "latest") {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      });
+  };
+
+  const filteredReports = getFilteredReports();
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
+  const paginatedReports = filteredReports.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -93,36 +110,56 @@ const Reporting = () => {
   };
 
   const handleSubmit = async () => {
+
+    let form = {
+      ...formData,
+      company_id:company._id
+    } 
+
     try {
       const response = await fetch("http://localhost:4000/createReport", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newReport),
+        body: JSON.stringify(form),
       });
 
-      const responseData = await response.json();
-
-      console.log(responseData);
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        setModalOpen(false);
+        fetchReports(company._id);
+      }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
-  const fetchReports = async (idPromise) => {
-    try {
-      const id = await idPromise;
-      console.log(id);
 
+  const fetchReports = async (id) => {
+    try {
+      setLoading(true);
       const response = await fetch(`http://localhost:4000/reports/${id}`, {
         method: "GET",
       });
-
-      const responseData = await response.json();
-      setReports(responseData?.data);
-      
+      const data = await response.json();
+      setReports(data?.data || []);
     } catch (error) {
-      console.error("Error fetching reports:", error);
+      setError("Failed to fetch reports");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteReport = async (id) => {
+    try {
+      await fetch(`http://localhost:4000/deleteReport/${id}`, {
+        method: "DELETE",
+      });
+      fetchReports(company._id);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -134,8 +171,12 @@ const Reporting = () => {
     return scopes.join(", ") || "None";
   };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
-    <div className="container-xl h-full overflow-y-auto">
+    <div className="container-xl h-full">
       {modalOpen && (
         <div className="modal modal-blur fade show d-block">
           <div
@@ -396,80 +437,104 @@ const Reporting = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <span className="avatar avatar-md bg-blue-lt text-blue me-2">
-                          <FileText size={18} />
-                        </span>
-                        <div className="flex-fill">
-                          <div className="font-weight-medium">{data.name}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="text-secondary">
-                      {data.description.length > 30
-                        ? `${data.description.slice(0, 30)}...`
-                        : data.description}
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <Calendar size={16} className="me-1" />
-                        <span>
-                          {formatDate(data.startDate)} -{" "}
-                          {formatDate(data.endDate)}
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge bg-purple-lt">
-                        {getScopes(data)}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="badge bg-blue-lt">
-                        <BarChart2 size={14} className="me-1" />
-                        {data.includeCharts}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="badge bg-green-lt">
-                        {data.detailLevel}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          data.status === "pending"
-                            ? "bg-yellow-lt"
-                            : data.status === "completed"
-                            ? "bg-success-lt"
-                            : "bg-secondary-lt"
-                        }`}
-                      >
-                        {data.status.charAt(0).toUpperCase() +
-                          data.status.slice(1)}
-                      </span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <div className="btn-list flex-nowrap">
-                      <button
-                        className={`btn btn-ghost-${
-                          user.isVerified ? "danger" : "success"
-                        } btn-icon`}
-                      >
-                        {user.isVerified ? (
-                          <UserX size={18} />
-                        ) : (
-                          <UserCheck size={18} />
-                        )}
-                      </button>
-                      <button className="btn btn-ghost-danger btn-icon">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </tr>
+                  {reports?.length > 0 ? (
+                    reports
+                      .slice(
+                        (currentPage - 1) * itemsPerPage,
+                        currentPage * itemsPerPage
+                      )
+                      .map((data) => (
+                        <tr key={data._id}>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              <span className="avatar avatar-md bg-blue-lt text-blue me-2">
+                                <FileTextIcon size={18} />
+                              </span>
+                              <div className="flex-fill">
+                                <div className="font-weight-medium">
+                                  {data.name}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-secondary">
+                            {data.description.length > 30
+                              ? `${data.description.slice(0, 30)}...`
+                              : data.description}
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              <Calendar size={16} className="me-1" />
+                              <span>
+                                {formatDate(data.startDate)} -{" "}
+                                {formatDate(data.endDate)}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge bg-purple-lt">
+                              {getScopes(data)}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="badge flex items-center bg-blue-lt">
+                              <div className="flex">
+                                <BarChart2 size={14} className="me-1" />
+                                {data.includeCharts ? "Yes" : "No"}
+                              </div>
+                            </span>
+                          </td>
+                          <td>
+                            <span className="badge bg-green-lt">
+                              {data.detailLevel}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`badge ${
+                                data.status === "pending"
+                                  ? "bg-yellow-lt"
+                                  : data.status === "completed"
+                                  ? "bg-success-lt"
+                                  : "bg-secondary-lt"
+                              }`}
+                            >
+                              {data.status.charAt(0).toUpperCase() +
+                                data.status.slice(1)}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="btn-list flex-nowrap">
+                              <button
+                                className={`btn btn-ghost-${
+                                  data.status === "pending"
+                                    ? "danger"
+                                    : "success"
+                                } btn-icon`}
+                              >
+                                {data.status === "pending" ? (
+                                  <UserX size={18} />
+                                ) : (
+                                  <UserCheck size={18} />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => deleteReport(data?._id)}
+                                className="btn btn-ghost-danger btn-icon"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                  ) : (
+                    <tr>
+                      <td colSpan="8" className="text-center text-muted">
+                        No reports available.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -478,9 +543,12 @@ const Reporting = () => {
               <p className="m-0 text-secondary">
                 Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
                 <span>
-                  {Math.min(currentPage * itemsPerPage, filteredReports.length)}
+                  {Math.min(
+                    currentPage * itemsPerPage,
+                    filteredReports?.length
+                  )}
                 </span>{" "}
-                of <span>{filteredReports.length}</span> entries
+                of <span>{filteredReports?.length}</span> entries
               </p>
               <ul className="pagination m-0 ms-auto">
                 <li
