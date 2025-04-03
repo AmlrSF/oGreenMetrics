@@ -20,12 +20,12 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [userAccess, setUserAccess] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false); 
   const [modalType, setModalType] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [RoleFilter, setRoleFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("latest");
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   useEffect(() => {
@@ -296,7 +296,9 @@ const Page = () => {
                 </thead>
                 <tbody>
                   {filteredUsers.length > 0 ? (
-                    filteredUsers.map((user, index) => (
+                    filteredUsers
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) 
+                    .map((user, index) => (
                       <tr key={user.id || index}>
                         <td>
                           <div className="d-flex align-items-center">

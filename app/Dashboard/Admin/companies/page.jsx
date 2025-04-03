@@ -12,7 +12,7 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
   const [userAccess, setUserAccess] = useState("");
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
   const [modalOpen, setModalOpen] = useState(false);
@@ -239,7 +239,9 @@ const Page = () => {
                 </thead>
                 <tbody>
                   {filteredCompanies.length > 0 ? (
-                    filteredCompanies.map((company, index) => (
+                    filteredCompanies
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((company, index) => (
                       <tr key={company._id || index}>
                         <td className="d-flex align-items-center">
                           <span

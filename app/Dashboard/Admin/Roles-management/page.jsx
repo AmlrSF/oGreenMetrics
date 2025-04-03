@@ -163,113 +163,118 @@ const Page = () => {
             </thead>
             <tbody>
               {roles?.length > 0 ? (
-                roles.map((role, index) => (
-                  <tr key={role._id || index}>
-                    <td>{role.name}</td>
-                    <td>{role.description}</td>
-                    <td className="gap-2 flex justify-start items-center">
-                      <div>
-                        {role.userManagement != "00"
-                          ? role.userManagement && (
-                              <div>
-                                <p className="badge bg-purple-lt">
-                                  User Management
-                                </p>
-                                <div className="d-flex items-center gap-2">
-                                  {role.userManagement == "10" ? (
-                                    <>
-                                      <span className="badge bg-orange-lt">
-                                        Read
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="badge bg-orange-lt">
-                                        Read
-                                      </span>
-                                      <span className="badge bg-orange-lt">
-                                        Write
-                                      </span>
-                                    </>
-                                  )}
+                roles
+                  .slice(
+                    (currentPage - 1) * itemsPerPage,
+                    currentPage * itemsPerPage
+                  )
+                  .map((role, index) => (
+                    <tr key={role._id || index}>
+                      <td>{role.name}</td>
+                      <td>{role.description}</td>
+                      <td className="gap-2 flex justify-start items-center">
+                        <div>
+                          {role.userManagement != "00"
+                            ? role.userManagement && (
+                                <div>
+                                  <p className="badge bg-purple-lt">
+                                    User Management
+                                  </p>
+                                  <div className="d-flex items-center gap-2">
+                                    {role.userManagement == "10" ? (
+                                      <>
+                                        <span className="badge bg-orange-lt">
+                                          Read
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="badge bg-orange-lt">
+                                          Read
+                                        </span>
+                                        <span className="badge bg-orange-lt">
+                                          Write
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          : ""}
-                      </div>
-                      <div>
-                        {role.roleManagement != "00"
-                          ? role.roleManagement && (
-                              <div>
-                                <p className="badge bg-purple-lt">
-                                  Role Management
-                                </p>
-                                <div className="d-flex items-center gap-2">
-                                  {role.roleManagement == "10" ? (
-                                    <>
-                                      <span className="badge bg-orange-lt">
-                                        Read
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="badge bg-orange-lt">
-                                        Read
-                                      </span>
-                                      <span className="badge bg-orange-lt">
-                                        Write
-                                      </span>
-                                    </>
-                                  )}
+                              )
+                            : ""}
+                        </div>
+                        <div>
+                          {role.roleManagement != "00"
+                            ? role.roleManagement && (
+                                <div>
+                                  <p className="badge bg-purple-lt">
+                                    Role Management
+                                  </p>
+                                  <div className="d-flex items-center gap-2">
+                                    {role.roleManagement == "10" ? (
+                                      <>
+                                        <span className="badge bg-orange-lt">
+                                          Read
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="badge bg-orange-lt">
+                                          Read
+                                        </span>
+                                        <span className="badge bg-orange-lt">
+                                          Write
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          : ""}
-                      </div>
-                      <div>
-                        {role.companyManagement != "00"
-                          ? role.companyManagement && (
-                              <div>
-                                <p className="badge bg-purple-lt">
-                                  Company Management
-                                </p>
-                                <div className="d-flex items-center gap-2">
-                                  {role.companyManagement == "10" ? (
-                                    <>
-                                      <span className="badge bg-orange-lt">
-                                        Read
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="badge bg-orange-lt">
-                                        Read
-                                      </span>
-                                      <span className="badge bg-orange-lt">
-                                        Write
-                                      </span>
-                                    </>
-                                  )}
+                              )
+                            : ""}
+                        </div>
+                        <div>
+                          {role.companyManagement != "00"
+                            ? role.companyManagement && (
+                                <div>
+                                  <p className="badge bg-purple-lt">
+                                    Company Management
+                                  </p>
+                                  <div className="d-flex items-center gap-2">
+                                    {role.companyManagement == "10" ? (
+                                      <>
+                                        <span className="badge bg-orange-lt">
+                                          Read
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="badge bg-orange-lt">
+                                          Read
+                                        </span>
+                                        <span className="badge bg-orange-lt">
+                                          Write
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          : ""}
-                      </div>
-                    </td>
-                    {userAccess == "10" ? (
-                      <></>
-                    ) : (
-                      <td>
-                        <button
-                          className="btn btn-ghost-danger btn-icon"
-                          onClick={() => deleterole(role)}
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                              )
+                            : ""}
+                        </div>
                       </td>
-                    )}
-                  </tr>
-                ))
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <td>
+                          <button
+                            className="btn btn-ghost-danger btn-icon"
+                            onClick={() => deleterole(role)}
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))
               ) : (
                 <tr>
                   <td colSpan={4} className="text-center text-gray-500">
@@ -280,35 +285,77 @@ const Page = () => {
             </tbody>
           </table>
         </div>
-        <div className="card-footer flex justify-between">
-          <p className="text-gray-600">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(currentPage * itemsPerPage, roles?.length)} of{" "}
-            {roles?.length} entries
+        <div className="card-footer d-flex align-items-center">
+          <p className="m-0 text-secondary">
+            Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+            <span>
+              {Math.min(currentPage * itemsPerPage, roles.length)}
+            </span>{" "}
+            of <span>{roles.length}</span> entries
           </p>
-          <div className="flex space-x-2">
-            <button
-              className={`btn ${currentPage === 1 ? "opacity-50" : ""}`}
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            >
-              <ChevronLeft />
-            </button>
-            <span className="px-4 py-2 bg-[#263589] text-white rounded">
-              {currentPage}
-            </span>
-            <button
-              className={`btn ${
-                currentPage === totalPages ? "opacity-50" : ""
+          <ul className="pagination m-0 ms-auto">
+            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="icon"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M15 6l-6 6l6 6" />
+                </svg>
+              </button>
+            </li>
+            <li className="page-item active">
+              <span
+                className="page-link"
+                style={{
+                  backgroundColor: "#263589",
+                  borderColor: "#263589",
+                }}
+              >
+                {currentPage}
+              </span>
+            </li>
+            <li
+              className={`page-item ${
+                currentPage === totalPages ? "disabled" : ""
               }`}
-              disabled={currentPage === totalPages}
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
             >
-              <ChevronRight />
-            </button>
-          </div>
+              <button
+                className="page-link"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="icon"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M9 6l6 6l-6 6" />
+                </svg>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
 

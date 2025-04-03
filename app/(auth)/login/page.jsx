@@ -38,6 +38,8 @@ const Page = () => {
       });
 
       const data = await response.json();
+      console.log(data);
+      
       if (data?.user) {
         if(data?.user?.role === "Admin" || data?.user?.AdminRoles){
           showAlert("User logged successfully! ", "success");
