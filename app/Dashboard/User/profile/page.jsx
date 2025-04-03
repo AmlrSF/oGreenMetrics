@@ -7,21 +7,8 @@ const UserProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [showPersonalModal, setShowPersonalModal] = useState(false);
   const [showCompanyModal, setShowCompanyModal] = useState(false);
-  const [personalForm, setPersonalForm] = useState({
-    prenom: '',
-    nom: '',
-    email: '',
-    photo_de_profil: ''
-  });
-  const [companyForm, setCompanyForm] = useState({
-    nom_entreprise: '',
-    matricule_fiscale: '',
-    email: '',
-    num_tel: '',
-    adresse: '',
-    date_fondation: '',
-    industrie: ''
-  });
+  const [personalForm, setPersonalForm] = useState({prenom: '',nom: '',email: '',photo_de_profil: ''});
+  const [companyForm, setCompanyForm] = useState({ nom_entreprise: '', matricule_fiscale: '', email: '', num_tel: '', adresse: '', date_fondation: '', industrie: ''});
   const [passwordModal, setPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -30,19 +17,11 @@ const UserProfilePage = () => {
   });
  
   const industries = [
-    "Agriculture",
-    "Automobile",
-    "Banking",
+    "Agriculture", "Automobile", "Banking",
   ];
  
   const locations = [
-    "Tunis",
-    "Kairouan",
-    "Bizerte",
-    "Monastir",
-    "Ben Arous",
-    "Mahdia", 
-    "Kébili", 
+    "Tunis", "Kairouan", "Bizerte", "Monastir", "Ben Arous", "Mahdia",  "Kébili", 
   ];
 
   useEffect(() => {
