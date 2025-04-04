@@ -20,7 +20,7 @@ const Hero = () => {
         <div className="col-lg-6">
           <div className="position-relative">
             <Image 
-              src="/Auth illustrations/signup.png" 
+              src="/analytics.png" 
               alt="Dashboard carbone" 
               width={500} 
               height={400} 
