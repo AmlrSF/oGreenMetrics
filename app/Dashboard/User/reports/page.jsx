@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AlertTriangle, FileText } from "lucide-react";
 import { formatDate } from "@/lib/Utils";
 import {
   Calendar,
@@ -29,8 +28,7 @@ const Reporting = () => {
     scope1: false,
     scope2: false,
     scope3: false,
-    startDate: "",
-    endDate: "",
+    Year: "",
     includeCharts: "yes",
     detailLevel: "summary",
   });
@@ -111,29 +109,33 @@ const Reporting = () => {
 
   const handleSubmit = async () => {
 
+    if(formData.Year == "") return 
+
     let form = {
       ...formData,
-      company_id:company._id
-    } 
+      company_id: company._id,
+    };
 
-    try {
-      const response = await fetch("http://localhost:4000/createReport", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+    console.log(form);
 
-      const data = await response.json();
-      console.log(data);
-      if (data.success) {
-        setModalOpen(false);
-        fetchReports(company._id);
+      try {
+        const response = await fetch("http://localhost:4000/createReport", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        });
+
+        const data = await response.json();
+        console.log(data);
+        if (data.success) {
+          setModalOpen(false);
+          fetchReports(company._id);
+        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const fetchReports = async (id) => {
@@ -254,24 +256,20 @@ const Reporting = () => {
 
                 <div className="row mb-3">
                   <div className="col-6">
-                    <label className="form-label">Start Date</label>
-                    <input
-                      type="date"
-                      name="startDate"
+                    <label className="form-label">Select Year</label>
+                    <select
+                      name="Year"
                       className="form-control"
-                      value={formData.startDate}
+                      value={formData.Year}
                       onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="col-6">
-                    <label className="form-label">End Date</label>
-                    <input
-                      type="date"
-                      name="endDate"
-                      className="form-control"
-                      value={formData.endDate}
-                      onChange={handleInputChange}
-                    />
+                    >
+                      <option value="">Select a year</option>
+                      {[2025, 2024, 2023].map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -465,10 +463,7 @@ const Reporting = () => {
                           <td>
                             <div className="d-flex align-items-center">
                               <Calendar size={16} className="me-1" />
-                              <span>
-                                {formatDate(data.startDate)} -{" "}
-                                {formatDate(data.endDate)}
-                              </span>
+                              <span>{data.Year}</span>
                             </div>
                           </td>
                           <td>
