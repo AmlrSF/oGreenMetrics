@@ -2,10 +2,7 @@
 
 import Navbar from "@/components/Commun/navbar/page";
 import Sidebar from "@/components/Commun/sidebar/page";
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Toaster } from "react-hot-toast";
-import { AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/Commun/Loader/page";
 import VerificationRequired from "@/components/VerificationRequired";
@@ -22,7 +19,6 @@ const DashboardLayout = ({ children }) => {
   };
 
   useEffect(() => {
-    // Get sidebar state from localStorage
     const savedSidebarState = localStorage.getItem('sidebarCollapsed');
     setIsCollapsed(savedSidebarState ? JSON.parse(savedSidebarState) : false);
 
@@ -50,7 +46,6 @@ const DashboardLayout = ({ children }) => {
 
     checkAuth();
 
-    // Add event listener for localStorage changes
     const handleStorageChange = () => {
       const savedState = localStorage.getItem('sidebarCollapsed');
       setIsCollapsed(savedState ? JSON.parse(savedState) : false);
@@ -75,18 +70,30 @@ const DashboardLayout = ({ children }) => {
   }
 
   return (
-    <div className="d-flex" style={{ background: "#f9fafb" }}>
-      <Sidebar user={user} isAdmin={false} />
-      <div className="d-flex flex-column flex-grow h-[100vh]">
+    <div className="min-vh-100 d-flex">
+      <div 
+        className="position-fixed h-100"
+        style={{ 
+          width: isCollapsed ? "5rem" : "16rem",
+          transition: "width 0.3s ease",
+          zIndex: 1030
+        }}
+      >
+        <Sidebar user={user} isAdmin={false} />
+      </div>
+      
+      <div 
+        className="flex-grow-1"
+        style={{ 
+          marginLeft: isCollapsed ? "5rem" : "16rem",
+          transition: "margin-left 0.3s ease",
+          background: "#f9fafb",
+          minHeight: "100vh",
+          width: "100%"
+        }}
+      >
         <Navbar user={user} />
-        <main 
-          className="flex-grow-1 p-3" 
-          style={{ 
-            marginLeft: isCollapsed ? "5rem" : "16rem", 
-            transition: "margin 0.3s ease",
-            minHeight: "100vh"
-          }}
-        >
+        <main className="p-3">
           {children}
         </main>
       </div>
