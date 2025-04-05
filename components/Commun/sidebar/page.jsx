@@ -8,7 +8,7 @@ const Sidebar = ({ user, isAdmin }) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebarCollapsed');
-      return saved ? JSON.parse(saved) : window.innerWidth < 768;
+      return saved ? JSON.parse(saved) : false;
     }
     return false;
   });
@@ -44,23 +44,12 @@ const Sidebar = ({ user, isAdmin }) => {
         )
       );
     }
-  
-    const handleResize = () => {
-      const shouldCollapse = window.innerWidth < 768;
-      setIsCollapsed(shouldCollapse);
-      localStorage.setItem('sidebarCollapsed', JSON.stringify(shouldCollapse));
-    };
-  
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
   }, [isAdmin, user]);
 
   const toggleCollapse = () => {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
     localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
-    
-    window.dispatchEvent(new Event('storage'));
   };
 
   const toggleDropdown = (label) => {
@@ -86,11 +75,10 @@ const Sidebar = ({ user, isAdmin }) => {
 
   return (
     <div
-      className={`sidebar navbar-vertical shadow-md position-fixed top-0 start-0 bottom-0 overflow-y-auto ${
-        isCollapsed ? "sidebar-collapsed" : ""
+      className={`position-fixed top-0 start-0 bottom-0 overflow-y-auto bg-white shadow-sm ${
+        isCollapsed ? "collapsed" : ""
       }`}
       style={{
-        backgroundColor: "white",
         display: "flex",
         flexDirection: "column",
         zIndex: 1030,
@@ -99,25 +87,26 @@ const Sidebar = ({ user, isAdmin }) => {
       }}
     >
       <div
-        className={`sidebar-header mb-3 d-flex gap-3 align-items-center p-3 ${
+        className={`d-flex align-items-center p-3 border-bottom ${
           isCollapsed ? "justify-content-center" : "justify-content-between"
         }`}
       >
         {!isCollapsed && (
-          <div className="d-flex justify-content-center p-3 align-items-start flex-column font-extrabold leading-tight">
-            <span className="text-[15px] text-[#263589]">Green</span>
-            <span className="text-[20px] text-[#8EBE21]">Metrics</span>
+          <div className="d-flex align-items-start flex-column">
+            <span className="fs-6 fw-bold text-primary">Green</span>
+            <span className="fs-5 fw-bold text-success">Metrics</span>
           </div>
         )}
         <div
           onClick={toggleCollapse}
-          className="cursor-pointer"
+          className="btn btn-link p-1"
+          style={{ cursor: "pointer" }}
         >
           {isCollapsed ? <Menu size={24} /> : <ChevronLeft size={24} />}
         </div>
       </div>
 
-      <div className="sidebar-content p-3 flex-grow-1">
+      <div className="p-3 flex-grow-1">
         <ul className="nav flex-column">
           {items.map((item) => (
             <li key={item.label} className="nav-item mb-1">
@@ -125,51 +114,55 @@ const Sidebar = ({ user, isAdmin }) => {
                 <>
                   <a
                     href="#"
-                    className={`nav-link d-flex gap-3 align-items-center ${
-                      isCollapsed ? "justify-content-center" : "justify-content-between"
-                    }`}
+                    className="nav-link d-flex align-items-center py-2 px-3 text-dark text-decoration-none"
                     onClick={() => toggleDropdown(item.label)}
+                    style={{
+                      backgroundColor: openDropdown === item.label ? "#f8f9fa" : "",
+                      borderRadius: "4px",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f8f9fa"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = openDropdown === item.label ? "#f8f9fa" : ""}
                   >
-                    <div className="d-flex gap-3 align-items-center">
+                    <div className="d-flex align-items-center gap-2">
                       <item.icon size={22} />
                       {!isCollapsed && <span>{item.label}</span>}
                     </div>
                     {!isCollapsed && (
                       <ChevronDown
-                        className={`transition-transform ${
-                          openDropdown === item.label ? "rotate-180" : ""
-                        }`}
+                        className={`ms-auto ${openDropdown === item.label ? "rotate-180" : ""}`}
+                        style={{ transition: "transform 0.3s ease" }}
                       />
                     )}
                   </a>
-                  <ul
-                    className={`nav flex-column ${
+                  <div
+                    className={`nav flex-column ms-3 mt-1 ${
                       openDropdown === item.label ? "d-block" : "d-none"
                     }`}
                   >
                     {item.children.map((child) => (
-                      <li key={child.label} className="nav-item">
-                        <Link
-                          href={child.href}
-                          className={`nav-link d-flex align-items-center ${
-                            isCollapsed ? "" : "ps-4"
-                          }`}
-                        >
-                          <child.icon size={20} className="me-2" />
-                          {!isCollapsed && <span>{child.label}</span>}
-                        </Link>
-                      </li>
+                      <Link
+                        key={child.label}
+                        href={child.href}
+                        className="nav-link d-flex align-items-center py-2 px-3 text-dark text-decoration-none"
+                        style={{ borderRadius: "4px" }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f8f9fa"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ""}
+                      >
+                        <child.icon size={20} className="me-2" />
+                        {!isCollapsed && <span>{child.label}</span>}
+                      </Link>
                     ))}
-                  </ul>
+                  </div>
                 </>
               ) : (
                 <Link
                   href={item.href}
-                  className={`nav-link d-flex gap-3 align-items-center ${
-                    isCollapsed ? "justify-content-center" : ""
-                  }`}
+                  className="nav-link d-flex align-items-center py-2 px-3 text-dark text-decoration-none"
+                  style={{ borderRadius: "4px" }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f8f9fa"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ""}
                 >
-                  <item.icon size={22} />
+                  <item.icon size={22} className="me-2" />
                   {!isCollapsed && <span>{item.label}</span>}
                 </Link>
               )}
@@ -178,7 +171,7 @@ const Sidebar = ({ user, isAdmin }) => {
         </ul>
       </div>
 
-      <div className="sidebar-footer border-top p-3 mt-auto">
+      <div className="border-top p-3">
         <ul className="nav flex-column mb-3">
           {["Profile", "Settings"].map((label) => {
             const item = (isAdmin ? menuItems : userMenuItems).find(
@@ -189,11 +182,12 @@ const Sidebar = ({ user, isAdmin }) => {
                 <li key={item.label} className="nav-item mb-1">
                   <Link
                     href={item.href}
-                    className={`nav-link d-flex gap-3 align-items-center ${
-                      isCollapsed ? "justify-content-center" : ""
-                    }`}
+                    className="nav-link d-flex align-items-center py-2 px-3 text-dark text-decoration-none"
+                    style={{ borderRadius: "4px" }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f8f9fa"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ""}
                   >
-                    <item.icon size={22} />
+                    <item.icon size={22} className="me-2" />
                     {!isCollapsed && <span>{item.label}</span>}
                   </Link>
                 </li>
@@ -204,9 +198,7 @@ const Sidebar = ({ user, isAdmin }) => {
 
         <button
           onClick={logout}
-          className={`btn btn-danger w-100 d-flex align-items-center ${
-            isCollapsed ? "justify-content-center" : "justify-content-between"
-          }`}
+          className="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2"
         >
           <LogOut size={22} />
           {!isCollapsed && <span>Logout</span>}
