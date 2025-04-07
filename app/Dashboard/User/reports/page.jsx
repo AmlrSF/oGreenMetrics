@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
 import {
@@ -401,8 +401,7 @@ const Reporting = () => {
                   <option value="oldest">Oldest</option>
                 </select>
               </div>
-              entries
-            </div>
+             </div>
           </div>
         </div>
 
@@ -521,6 +520,14 @@ const Reporting = () => {
                                 <Trash2 size={18} />
                               </button>
                             </div>
+                           
+                          </td>
+                          <td>
+                          <Link href={`/Dashboard/User/reports/view/${data._id}`}>
+      <button className="btn btn-ghost-primary btn-icon me-1">
+        View
+      </button>
+    </Link>
                           </td>
                         </tr>
                       ))

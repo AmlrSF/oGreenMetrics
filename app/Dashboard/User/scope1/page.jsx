@@ -12,10 +12,10 @@ const Scope1 = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [fuelFilter, setFuelFilter] = useState("all");
   const [editingItem, setEditingItem] = useState(null);
-  const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
+  const [modalMode, setModalMode] = useState("add");
   const [confirmDelete, setConfirmDelete] = useState(null);
   const itemsPerPage = 3;
- 
+
   useEffect(() => {
     fetchData();
   }, [activeTab]);
@@ -23,7 +23,7 @@ const Scope1 = () => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    const endpoint = activeTab === "Combustion de carburant" ? "/fuelcombution" : "/production";
+    const endpoint = activeTab === "Combustion de carburant" ? "/fuelcombustion" : "/production";
     try {
       const response = await fetch(`http://localhost:4000${endpoint}`, {
         method: "GET",
@@ -75,7 +75,7 @@ const Scope1 = () => {
       
       const payload = { machines: [newItem] };
       try {
-        const response = await fetch("http://localhost:4000/fuelcombution", {
+        const response = await fetch("http://localhost:4000/fuelcombustion", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -124,7 +124,7 @@ const Scope1 = () => {
       updatedItem.modele = formData.get("modele") || editingItem.modele || "Standard";
       
       try {
-        const response = await fetch(`http://localhost:4000/fuelcombution/${editingItem._id}`, {
+        const response = await fetch(`http://localhost:4000/fuelcombustion/${editingItem._id}`, {
           method: "PUT",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -161,13 +161,13 @@ const Scope1 = () => {
 
   const handleDelete = async (id) => {
     const endpoint = activeTab === "Combustion de carburant" 
-      ? `/fuelcombution/${id}` 
+      ? `/fuelcombustion/${id}` 
       : `/production/${id}`;
     
     try {
       const response = await fetch(`http://localhost:4000${endpoint}`, {
         method: "DELETE",
-        credentials: "include",  
+        credentials: "include",
       });
       
       if (!response.ok) {
@@ -182,6 +182,7 @@ const Scope1 = () => {
       setError(error.message);
     }
   };
+
   const filteredItems = () => {
     let items = activeTab === "Combustion de carburant" ? data.machines : data.products;
      
@@ -410,7 +411,6 @@ const Scope1 = () => {
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-lg" role="document">
@@ -486,7 +486,6 @@ const Scope1 = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {confirmDelete && (
         <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-sm" role="document">
@@ -513,4 +512,5 @@ const Scope1 = () => {
     </div>
   );
 };
+
 export default Scope1;
