@@ -146,6 +146,7 @@ const Reporting = () => {
       });
       const data = await response.json();
       setReports(data?.data || []);
+      console.log(data?.data);
     } catch (error) {
       setError("Failed to fetch reports");
       console.error(error);
