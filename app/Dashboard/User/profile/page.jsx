@@ -58,7 +58,7 @@ const UserProfilePage = () => {
           }));
 
           const CompanyResponse = await fetch(
-            `http://localhost:4000/GetCompanyByOwnerID/${UserData.user._id}`,
+            `http://localhost:4000/GetCompanyByOwnerID/${UserData?.user?._id}`,
             { method: "GET" }
           );
           const CompanyData = await CompanyResponse.json();
@@ -178,7 +178,7 @@ const UserProfilePage = () => {
     e.preventDefault();
     
     try {
-      const personalResponse = await fetch(`http://localhost:4000/users/${user._id}`, {
+      const personalResponse = await fetch(`http://localhost:4000/users/${user?._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -222,6 +222,24 @@ const UserProfilePage = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          personal: { ...prev.personal, photo_de_profil: reader.result }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadClick = () => {
+    document.getElementById("fileInput").click();
+  };
+
   if (loading) {
     return (
       <div className="container-xl py-4 d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
@@ -240,7 +258,7 @@ const UserProfilePage = () => {
             <div className="hr-text mb-4">Personal Information</div>
             <div className="row align-items-center mb-4">
               <div className="col-auto">
-                {formData.personal.photo_de_profil ? (
+              {formData.personal.photo_de_profil ? (
                   <img src={formData.personal.photo_de_profil} alt="Profile" className="avatar avatar-xl rounded-circle" />
                 ) : (
                   <span className="avatar avatar-xl rounded-circle bg-blue-lt">
@@ -250,15 +268,7 @@ const UserProfilePage = () => {
               </div>
               <div className="col">
                 <div className="btn-list">
-                  <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => {
-                    const url = prompt("Enter profile photo URL:", formData.personal.photo_de_profil);
-                    if (url !== null) {
-                      setFormData(prev => ({
-                        ...prev,
-                        personal: { ...prev.personal, photo_de_profil: url }
-                      }));
-                    }
-                  }}>
+                <button type="button" className="btn btn-outline-primary btn-sm" onClick={handleUploadClick}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-camera" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"></path>
@@ -266,12 +276,16 @@ const UserProfilePage = () => {
                     </svg>
                     Change avatar
                   </button>
-                  <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => {
-                    setFormData(prev => ({
-                      ...prev,
-                      personal: { ...prev.personal, photo_de_profil: '' }
-                    }));
-                  }}>
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-danger btn-sm" 
+                    onClick={() => {
+                      setFormData(prev => ({
+                        ...prev,
+                        personal: { ...prev.personal, photo_de_profil: '' }
+                      }));
+                    }}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <path d="M4 7l16 0"></path>
@@ -283,6 +297,13 @@ const UserProfilePage = () => {
                     Delete avatar
                   </button>
                 </div>
+                <input 
+                  type="file" 
+                  id="fileInput" 
+                  accept="image/*" 
+                  style={{ display: 'none' }} 
+                  onChange={handleFileChange} 
+                />
               </div>
             </div>
             <div className="row g-3 mb-4">

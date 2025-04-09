@@ -9,7 +9,11 @@ import {
   UserCheck,
   Trash2,
   FileTextIcon,
+  Eye,
 } from "lucide-react";
+
+import { useRouter } from "next/navigation";
+
 
 const Reporting = () => {
   const [reports, setReports] = useState([]);
@@ -32,6 +36,8 @@ const Reporting = () => {
     includeCharts: "yes",
     detailLevel: "summary",
   });
+
+  const router = useRouter();
 
   useEffect(() => {
     const initializeData = async () => {
@@ -108,8 +114,7 @@ const Reporting = () => {
   };
 
   const handleSubmit = async () => {
-
-    if(formData.Year == "") return 
+    if (formData.Year == "") return;
 
     let form = {
       ...formData,
@@ -118,24 +123,24 @@ const Reporting = () => {
 
     console.log(form);
 
-      try {
-        const response = await fetch("http://localhost:4000/createReport", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        });
+    try {
+      const response = await fetch("http://localhost:4000/createReport", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-        const data = await response.json();
-        console.log(data);
-        if (data.success) {
-          setModalOpen(false);
-          fetchReports(company._id);
-        }
-      } catch (error) {
-        console.error(error);
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        setModalOpen(false);
+        fetchReports(company._id);
       }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const fetchReports = async (id) => {
@@ -401,7 +406,7 @@ const Reporting = () => {
                   <option value="oldest">Oldest</option>
                 </select>
               </div>
-             </div>
+            </div>
           </div>
         </div>
 
@@ -423,7 +428,7 @@ const Reporting = () => {
             <div className="table-responsive">
               <table className="table table-vcenter card-table">
                 <thead>
-                  <tr>
+                  <tr className="text-center">
                     <th>Report Name</th>
                     <th>Description</th>
                     <th>Period</th>
@@ -519,15 +524,17 @@ const Reporting = () => {
                               >
                                 <Trash2 size={18} />
                               </button>
+                              <button
+                                className="btn btn-ghost-blue btn-icon"
+                                onClick={() =>
+                                  router.push(
+                                    `/Dashboard/User/reports/view/${data?._id}`
+                                  )
+                                }
+                              >
+                                <Eye size={18} />
+                              </button>
                             </div>
-                           
-                          </td>
-                          <td>
-                          <Link href={`/Dashboard/User/reports/view/${data._id}`}>
-      <button className="btn btn-ghost-primary btn-icon me-1">
-        View
-      </button>
-    </Link>
                           </td>
                         </tr>
                       ))
