@@ -42,13 +42,13 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
     // Category filter
     if (selectedCategory !== "all") {
       const filterKey =
-          tab?.id === "equipement"
+        tab?.id === "equipement"
           ? "category"
           : tab?.id === "dechets"
           ? "type"
           : tab?.id === "transport"
-          ? "mode": 
-          tab?.id === "businessTravel"
+          ? "mode"
+          : tab?.id === "businessTravel"
           ? "mode"
           : null;
 
@@ -71,43 +71,47 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
     <div className="card">
       <div className="card-header">
         <div className="d-flex justify-content-between w-full align-items-center gap-3">
-          <div className="d-flex gap-2">
-            <div className="input-icon" style={{ width: "250px" }}>
+          <div className="d-flex flex-col gap-2">
+            <div className="input-icon " style={{ width: "350px" }}>
               <span className="input-icon-addon">
                 <Search size={16} />
               </span>
               <input
                 type="text"
-                className="form-control"
-                placeholder="Search..."
+                className="form-control w-100"
+                placeholder="Search here..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            {categories.length > 0 && (
-              <select
-                className="form-select"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="all">All Types</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            )}
+            <div className="flex items-center gap-2">
+              {categories.length > 0 && (
+                <select
+                  className="form-select "
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  style={{ width: "150px" }}
+                >
+                  <option value="all">All Types</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              )}
 
-            <select
-              className="form-select"
-              value={sortDate}
-              onChange={(e) => setSortDate(e.target.value)}
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-            </select>
+              <select
+                className="form-select "
+                value={sortDate}
+                style={{ width: "150px" }}
+                onChange={(e) => setSortDate(e.target.value)}
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
           </div>
           <button className="btn btn-primary" onClick={onAdd}>
             Add New
@@ -127,12 +131,16 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
           <tbody>
             {filteredData?.length === 0 ? (
               <tr>
-                <td colSpan={headers?.length} className="text-center text-muted">
+                <td
+                  colSpan={headers?.length}
+                  className="text-center text-muted"
+                >
                   No data available
                 </td>
               </tr>
             ) : (
-              filteredData?.slice(
+              filteredData
+                ?.slice(
                   (currentPage - 1) * itemsPerPage,
                   currentPage * itemsPerPage
                 )

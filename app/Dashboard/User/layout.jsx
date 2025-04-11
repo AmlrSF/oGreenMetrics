@@ -10,18 +10,24 @@ import VerificationRequired from "@/components/VerificationRequired";
 const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  let rolesNeedsToBeverified = ["régulier", "entreprise"];
+  const rolesNeedsToBeverified = ["régulier", "entreprise"];
   const [isLoading, setIsLoading] = useState(true);
   const { push } = useRouter();
 
-  const naviagteToLoginPage = () => {
-    push("/login");
+  // Initialize sidebar state from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sidebarCollapsed");
+      setIsCollapsed(saved ? JSON.parse(saved) : false);
+    }
+  }, []);
+
+  // Toggle sidebar function to pass to Navbar for mobile
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   useEffect(() => {
-    const savedSidebarState = localStorage.getItem('sidebarCollapsed');
-    setIsCollapsed(savedSidebarState ? JSON.parse(savedSidebarState) : false);
-
     const checkAuth = async () => {
       try {
         const response = await fetch("http://localhost:4000/auth", {
@@ -35,68 +41,55 @@ const DashboardLayout = ({ children }) => {
           setUser(data.user);
           setIsLoading(false);
         } else {
-          console.log("Invalid role or no user, redirecting to login");
           push("/login");
         }
       } catch (error) {
-        console.error("Authorization failed:", error);
         push("/login");
       }
     };
 
     checkAuth();
 
-    const handleStorageChange = () => {
-      const savedState = localStorage.getItem('sidebarCollapsed');
-      setIsCollapsed(savedState ? JSON.parse(savedState) : false);
+    // Listen for changes to localStorage across tabs
+    const handleStorageChange = (e) => {
+      if (e.key === "sidebarCollapsed") {
+        setIsCollapsed(e.newValue ? JSON.parse(e.newValue) : false);
+      }
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [push]);
 
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+  // Update localStorage when isCollapsed changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebarCollapsed", JSON.stringify(isCollapsed));
+    }
+  }, [isCollapsed]);
 
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (
-    user?.isVerified === false &&
-    rolesNeedsToBeverified.includes(user?.role)
-  ) {
-    return <VerificationRequired naviagteToLoginPage={naviagteToLoginPage} />;
-  }
+  if (isLoading) return <Loader />;
 
   return (
-    <div className="min-vh-100 d-flex">
-      <div 
-        className="position-fixed h-100"
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar
+        user={user}
+        isAdmin={user?.role === "Admin" || !!user?.AdminRoles}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
+      <main 
+        className="flex-1 flex flex-col overflow-auto transition-all duration-300"
         style={{ 
-          width: isCollapsed ? "5rem" : "16rem",
-          transition: "width 0.3s ease",
-          zIndex: 1030
+          marginLeft: isCollapsed ? "60px" : "260px",
+          transition: "margin-left 0.3s ease"
         }}
       >
-        <Sidebar user={user} isAdmin={false} />
-      </div>
-      
-      <div 
-        className="flex-grow-1"
-        style={{ 
-          marginLeft: isCollapsed ? "5rem" : "16rem",
-          transition: "margin-left 0.3s ease",
-          background: "#f9fafb",
-          minHeight: "100vh",
-          width: "100%"
-        }}
-      >
-        <Navbar user={user} />
-        <main className="p-3">
+        <Navbar user={user} isAdmin={user?.role === "Admin" || !!user?.AdminRoles} toggleSidebar={toggleSidebar} />
+        <div className="p-4 flex-1 overflow-auto">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

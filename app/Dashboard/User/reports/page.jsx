@@ -9,7 +9,10 @@ import {
   UserCheck,
   Trash2,
   FileTextIcon,
+  Eye,
 } from "lucide-react";
+
+import { useRouter } from "next/navigation";
 
 const Reporting = () => {
   const [reports, setReports] = useState([]);
@@ -32,6 +35,8 @@ const Reporting = () => {
     includeCharts: "yes",
     detailLevel: "summary",
   });
+
+  const router = useRouter();
 
   useEffect(() => {
     const initializeData = async () => {
@@ -108,8 +113,7 @@ const Reporting = () => {
   };
 
   const handleSubmit = async () => {
-
-    if(formData.Year == "") return 
+    if (formData.Year == "") return;
 
     let form = {
       ...formData,
@@ -118,24 +122,24 @@ const Reporting = () => {
 
     console.log(form);
 
-      try {
-        const response = await fetch("http://localhost:4000/createReport", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        });
+    try {
+      const response = await fetch("http://localhost:4000/createReport", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-        const data = await response.json();
-        console.log(data);
-        if (data.success) {
-          setModalOpen(false);
-          fetchReports(company._id);
-        }
-      } catch (error) {
-        console.error(error);
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        setModalOpen(false);
+        fetchReports(company._id);
       }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const fetchReports = async (id) => {
@@ -146,6 +150,7 @@ const Reporting = () => {
       });
       const data = await response.json();
       setReports(data?.data || []);
+      console.log(data?.data);
     } catch (error) {
       setError("Failed to fetch reports");
       console.error(error);
@@ -170,7 +175,7 @@ const Reporting = () => {
     if (report.scope1) scopes.push("Scope 1");
     if (report.scope2) scopes.push("Scope 2");
     if (report.scope3) scopes.push("Scope 3");
-    return scopes.join(", ") || "None";
+    return scopes;
   };
 
   const formatDate = (dateString) => {
@@ -356,7 +361,8 @@ const Reporting = () => {
         </div>
       )}
 
-      <div className="py-10 mb-5 d-flex leading-[0.1] border-b  justify-content-center align-items-start">
+      <div className="py-2 mb-4 d-flex 
+      border-b  justify-content-center align-items-start">
         <div>
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
             Reporting
@@ -400,7 +406,7 @@ const Reporting = () => {
                   <option value="oldest">Oldest</option>
                 </select>
               </div>
-             </div>
+            </div>
           </div>
         </div>
 
@@ -422,7 +428,7 @@ const Reporting = () => {
             <div className="table-responsive">
               <table className="table table-vcenter card-table">
                 <thead>
-                  <tr>
+                  <tr className="text-center">
                     <th>Report Name</th>
                     <th>Description</th>
                     <th>Period</th>
@@ -466,10 +472,20 @@ const Reporting = () => {
                             </div>
                           </td>
                           <td>
-                            <span className="badge bg-purple-lt">
-                              {getScopes(data)}
-                            </span>
+                            <div className="d-flex align-items-center gap-1">
+                              {getScopes(data).map((item, index) => {
+                                return (
+                                  <span
+                                    key={index}
+                                    className="badge bg-purple-lt"
+                                  >
+                                    {item}
+                                  </span>
+                                );
+                              })}
+                            </div>
                           </td>
+
                           <td>
                             <span className="badge flex items-center bg-blue-lt">
                               <div className="flex">
@@ -518,15 +534,17 @@ const Reporting = () => {
                               >
                                 <Trash2 size={18} />
                               </button>
+                              <button
+                                className="btn btn-ghost-blue btn-icon"
+                                onClick={() =>
+                                  router.push(
+                                    `/Dashboard/User/reports/view/${data?._id}`
+                                  )
+                                }
+                              >
+                                <Eye size={18} />
+                              </button>
                             </div>
-                           
-                          </td>
-                          <td>
-                          <Link href={`/Dashboard/User/reports/view/${data._id}`}>
-      <button className="btn btn-ghost-primary btn-icon me-1">
-        View
-      </button>
-    </Link>
                           </td>
                         </tr>
                       ))
