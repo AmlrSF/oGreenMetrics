@@ -14,7 +14,6 @@ import {
 
 import { useRouter } from "next/navigation";
 
-
 const Reporting = () => {
   const [reports, setReports] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -176,7 +175,7 @@ const Reporting = () => {
     if (report.scope1) scopes.push("Scope 1");
     if (report.scope2) scopes.push("Scope 2");
     if (report.scope3) scopes.push("Scope 3");
-    return scopes.join(", ") || "None";
+    return scopes;
   };
 
   const formatDate = (dateString) => {
@@ -472,10 +471,20 @@ const Reporting = () => {
                             </div>
                           </td>
                           <td>
-                            <span className="badge bg-purple-lt">
-                              {getScopes(data)}
-                            </span>
+                            <div className="d-flex align-items-center gap-1">
+                              {getScopes(data).map((item, index) => {
+                                return (
+                                  <span
+                                    key={index}
+                                    className="badge bg-purple-lt"
+                                  >
+                                    {item}
+                                  </span>
+                                );
+                              })}
+                            </div>
                           </td>
+
                           <td>
                             <span className="badge flex items-center bg-blue-lt">
                               <div className="flex">
