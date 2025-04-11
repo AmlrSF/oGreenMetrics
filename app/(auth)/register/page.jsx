@@ -8,7 +8,8 @@ const SignupPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [accountType, setAccountType] = useState("régulier");
   const [formData, setFormData] = useState({
-    prenom: "", nom: "", email: "", mot_de_passe: "", confirmPassword: "", role: "régulier", nom_entreprise: "", matricule_fiscale: "", num_tel: "", adresse: "", date_fondation: "", industrie: ""
+    prenom: "", nom: "", email: "", mot_de_passe: "", confirmPassword: "", role: "régulier",
+    nom_entreprise: "", matricule_fiscale: "", num_tel: "", adresse: "", date_fondation: "", industrie: "",country:""
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -61,6 +62,7 @@ const SignupPage = () => {
                     adresse: formData.adresse,
                     date_fondation: formData.date_fondation,
                     industrie: formData.industrie,
+                    country: formData.country,
                     userId: userData.user._id
                 }),
             });
@@ -298,6 +300,48 @@ const SignupPage = () => {
                       required 
                     />
                   </div>
+                  <div className="mb-3">
+  <label className="form-label small mb-1">
+    Country<span className="text-danger">*</span>
+  </label>
+  <select 
+    className="form-select" 
+    name="country"
+    value={formData.country}
+    onChange={handleChange}
+    required={accountType === "entreprise"}
+  >
+    <option value="">Sélectionnez un pays</option>
+    <option value="Sweden">Sweden</option>
+    <option value="Lithuania">Lithuania</option>
+    <option value="France">France</option>
+    <option value="Austria">Austria</option>
+    <option value="Latvia">Latvia</option>
+    <option value="Finland">Finland</option>
+    <option value="Slovakia">Slovakia</option>
+    <option value="Denmark">Denmark</option>
+    <option value="Belgium">Belgium</option>
+    <option value="Croatia">Croatia</option>
+    <option value="Luxembourg">Luxembourg</option>
+    <option value="Slovenia">Slovenia</option>
+    <option value="Italy">Italy</option>
+    <option value="Hungary">Hungary</option>
+    <option value="Spain">Spain</option>
+    <option value="United Kingdom">United Kingdom</option>
+    <option value="Romania">Romania</option>
+    <option value="Portugal">Portugal</option>
+    <option value="Ireland">Ireland</option>
+    <option value="Germany">Germany</option>
+    <option value="Bulgaria">Bulgaria</option>
+    <option value="Netherlands">Netherlands</option>
+    <option value="Czechia">Czechia</option>
+    <option value="Greece">Greece</option>
+    <option value="Malta">Malta</option>
+    <option value="Cyprus">Cyprus</option>
+    <option value="Poland">Poland</option>
+    <option value="Estonia">Estonia</option>
+  </select>
+</div>
                   
                   <div className="mb-3">
                     <label className="form-label small mb-1">
