@@ -50,7 +50,7 @@ const DashboardLayout = ({ children }) => {
 
     checkAuth();
 
-    // Listen for changes to localStorage across tabs
+    
     const handleStorageChange = (e) => {
       if (e.key === "sidebarCollapsed") {
         setIsCollapsed(e.newValue ? JSON.parse(e.newValue) : false);
@@ -61,7 +61,7 @@ const DashboardLayout = ({ children }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [push]);
 
-  // Update localStorage when isCollapsed changes
+ 
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("sidebarCollapsed", JSON.stringify(isCollapsed));

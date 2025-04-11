@@ -7,11 +7,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
-
 const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { push } = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sidebarCollapsed");
+      setIsCollapsed(saved ? JSON.parse(saved) : false);
+    }
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -24,7 +31,7 @@ const DashboardLayout = ({ children }) => {
         const data = await response.json();
         if (data?.user) {
           setUser(data?.user);
-
+          console.log(data?.data);
           if (data?.user?.role == "Admin") {
             push("/Dashboard/Admin");
           }
@@ -32,7 +39,7 @@ const DashboardLayout = ({ children }) => {
           if (data?.user?.AdminRoles) {
             let adminRole = data?.user?.AdminRoles;
             console.log(adminRole);
-            
+
             if (adminRole?.companyManagement == "00") {
               push("/Dashboard/Admin");
             }
@@ -58,21 +65,48 @@ const DashboardLayout = ({ children }) => {
     };
 
     checkAuth();
-  }, []);
+    const handleStorageChange = (e) => {
+      if (e.key === "sidebarCollapsed") {
+        setIsCollapsed(e.newValue ? JSON.parse(e.newValue) : false);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [push]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebarCollapsed", JSON.stringify(isCollapsed));
+    }
+  }, [isCollapsed]);
 
   if (isLoading) {
     return <Loader />;
-  } 
-    
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar user={user} isAdmin={true} />
-      <div className="flex flex-col flex-grow">
-        <Navbar user={user} />
+      <Sidebar
+        user={user}
+        isAdmin={user?.role === "Admin" || user?.AdminRoles}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
+      <div
+        
+        className="flex-1 flex flex-col overflow-auto transition-all duration-300"
+        style={{
+          marginLeft: isCollapsed ? "60px" : "260px",
+          transition: "margin-left 0.3s ease",
+        }}
+      >
+        <Navbar
+          user={user}
+          isAdmin={user?.role === "Admin" || user?.AdminRoles}
+        />
         <main className="flex-grow">{children}</main>
       </div>
-      <Toaster position="bottom-right" />
     </div>
   );
 };
