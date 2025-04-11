@@ -37,12 +37,9 @@ const Scope3 = () => {
             }
           );
 
-        const CompanyData = await CompanyResponse.json();
-          
-          
-          setCompany(CompanyData?.data);
-          
+          const CompanyData = await CompanyResponse.json();
 
+          setCompany(CompanyData?.data);
         } else {
           console.log("User not found");
         }
@@ -55,11 +52,9 @@ const Scope3 = () => {
     fetchData();
   }, []);
 
-
   useEffect(() => {
     fetchData(activeTab);
   }, [activeTab]);
-
 
   const fetchData = async () => {
     try {
@@ -70,7 +65,6 @@ const Scope3 = () => {
         }
       );
       const data = await response.json();
-      
 
       if (response.ok) {
         setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
@@ -100,11 +94,10 @@ const Scope3 = () => {
       });
 
       console.log(newFormData);
-      
 
       const responseData = await response.json();
 
-      console.log(responseData)
+      console.log(responseData);
 
       fetchData();
       toggleModal(false);
@@ -131,8 +124,7 @@ const Scope3 = () => {
 
   const handleUpdate = async (id) => {
     const itemToUpdate = tableData[activeTab].find((item) => item._id === id);
-    
-    
+
     if (itemToUpdate) {
       const updatedFormData = {};
       tabs[activeTab]?.fields.forEach((field) => {
@@ -159,15 +151,12 @@ const Scope3 = () => {
     e.preventDefault();
     setActiveTab(tabId);
     console.log(tabId);
-    
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  
 
   const renderFormFields = () => {
     const currentTab = tabs[activeTab];
@@ -252,13 +241,21 @@ const Scope3 = () => {
   };
 
   return (
-    <div className="container-xl py-4">
-      <div className="card mb-3">
-        <div className="card-body">
-          <h3 className="card-title text-success">Scope 3</h3>
-          <p className="text-muted">
+    <div className="container-xl ">
+      <div
+        className="py-2 mb-4 d-flex 
+      border-b  justify-content-start align-items-center"
+      >
+        <div>
+          <h3 className="text-[30px] font-bold" 
+          style={{ color: "#263589" }}>
+            Scope 3
+          </h3>
+          <p >
             <strong className="text-primary">Émissions indirectes</strong>{" "}
-            provenant de sources détenues ou contrôlées par une organisation.
+            issues des activités de la chaîne de valeur de l’organisation,
+            telles que l’achat de biens, les déplacements professionnels,
+            l’utilisation des produits vendus, etc.
           </p>
         </div>
       </div>
@@ -270,7 +267,9 @@ const Scope3 = () => {
               <li className="nav-item" key={tab?.id}>
                 <a
                   href={`#${tab?.id}`}
-                  className={`nav-link ${activeTab === tab?.id ? "active" : ""}`}
+                  className={`nav-link ${
+                    activeTab === tab?.id ? "active" : ""
+                  }`}
                   onClick={(e) => handleTabClick(tab?.id, e)}
                 >
                   {tab?.label}
@@ -283,7 +282,7 @@ const Scope3 = () => {
         <div className="card-body">
           <DataTable
             headers={tabs[activeTab]?.headers}
-            data={tableData[activeTab]  || []}
+            data={tableData[activeTab] || []}
             activeTab={activeTab}
             tab={tabs[[activeTab]]}
             onDelete={handleDelete}

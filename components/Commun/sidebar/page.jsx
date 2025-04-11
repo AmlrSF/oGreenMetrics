@@ -20,13 +20,15 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
 
   // Colors
   const colors = {
-    primary: "#8ebe21", // Main green
-    white: "#ffffff",
-    lightAccent: "#f0ffe0", // Very light green for hover/active states
-    darkAccent: "#5a7814", // Darker green for contrast
-    textDark: "#2c3e0e", // Very dark green for text
-    borderColor: "rgba(255, 255, 255, 0.15)", // Subtle white border
+    primary: "#ffffff", 
+    white: "#000", 
+    lightAccent: "#5a7814",
+    green: "#8ebe21",
+    darkAccent: "#f0ffe0", 
+    textDark: "#2c3e0e",
+    borderColor: "rgba(255, 255, 255, 0.15)", 
   };
+  
 
   useEffect(() => {
     if (isAdmin) {
@@ -95,7 +97,8 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
   return (
     <aside className="sidebar">
       <div
-        className="position-fixed top-0 start-0 bottom-0 overflow-y-auto shadow-lg"
+        className="position-fixed top-0 start-0 bottom-0 
+        overflow-y-auto shadow-lg"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -105,23 +108,23 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
           left: 0,
           height: "100vh",
           backgroundColor: colors.primary,
-          backgroundImage: "linear-gradient(135deg, #8ebe21 0%, #7aad15 100%)",
+         
         }}
       >
         <div
-          className="d-flex align-items-center p-[0.8rem] border-bottom"
+          className="d-flex align-items-center p-[0.8rem] "
           style={{
             justifyContent: isCollapsed ? "center" : "space-between",
-            backgroundColor: colors.white,
+            backgroundColor: colors.primary,
             borderBottom: `1px solid ${colors.borderColor}`,
           }}
         >
           {!isCollapsed && (
             <div className="d-flex align-items-start">
-              <span className="text-xl fw-bold text-primary">Green</span>{" "}
+              <span className="text-xl font-bold text-primary">Green</span>{" "}
               <span
-                className="text-xl fw-bold"
-                style={{ color: colors.primary }}
+                className="text-xl font-medium"
+                style={{ color: colors.green }}
               >
                 Metrics
               </span>
@@ -132,7 +135,7 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
             className="btn p-1 rounded-circle"
             style={{
               cursor: "pointer",
-              backgroundColor: colors.lightAccent,
+              backgroundColor: colors.green,
               color: colors.primary,
             }}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -159,12 +162,8 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
                             ? "items-center justify-center"
                             : "items-center"
                         } `}
-                      style={{
-                        backgroundColor:
-                          openDropdown === item.label || isDropdownActive(item)
-                            ? "rgba(255, 255, 255, 0.2)"
-                            : "transparent",
-                        color: colors.white,
+                      style={{            
+                        color:"#fff",
                         textAlign: "left",
                         fontWeight:
                           openDropdown === item.label || isDropdownActive(item)
@@ -178,26 +177,26 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
                       >
                         <item.icon
                           size={22}
-                          color={colors.white}
+                          
                           style={{
-                            opacity:
-                              openDropdown === item.label ||
-                              isDropdownActive(item)
-                                ? 1
-                                : 0.85,
+                            color: isLinkActive(item.href) ? colors.primary : colors.white,
+                          
                           }}
                         />
+
                         {!isCollapsed && (
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium" 
+                          style={{color: isLinkActive(item.href) ? colors.primary : colors.white}}>
                             {item.label}
                           </span>
                         )}
+
                       </div>
                       {!isCollapsed && (
                         <ChevronDown
                           className="ms-auto"
                           style={{
-                            color: colors.white,
+                            color: isLinkActive(item.href) ? colors.primary : colors.white,
                             opacity:
                               openDropdown === item.label ||
                               isDropdownActive(item)
@@ -231,18 +230,20 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
                         `}
                           style={{
                             backgroundColor: isLinkActive(child.href)
-                              ? "rgba(255, 255, 255, 0.25)"
-                              : "transparent",
-                            color: colors.white,
+                            ? "rgba(142, 190, 33, 1)"
+                            : "transparent",
+                            color: isLinkActive(child.href) ? colors.primary : colors.white,
                             opacity: isLinkActive(child.href) ? 1 : 0.85,
                             fontWeight: isLinkActive(child.href) ? 500 : 400,
                           }}
                         >
-                          <child.icon size={18} color={colors.white} />
-                          {!isCollapsed && <span>{child.label}</span>}
+                          <child.icon size={18} style={{color: isLinkActive(child.href) ? colors.primary : colors.white}}/>
+                          {!isCollapsed && <span className="font-normal" style={{color: isLinkActive(child.href) ? colors.primary : colors.white}}>{child.label}</span>}
+                          
                         </Link>
                       ))}
                     </div>
+                  
                   </>
                 ) : (
                   <Link
@@ -255,18 +256,18 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
                       } `}
                     style={{
                       backgroundColor: isLinkActive(item.href)
-                        ? "rgba(255, 255, 255, 0.2)"
-                        : "transparent",
-                      color: colors.white,
+                      ? "rgba(142, 190, 33, 1)"
+                      : "transparent",
+                      color: isLinkActive(item.href) ? colors.primary : colors.white,
                       opacity: isLinkActive(item.href) ? 1 : 0.85,
                       fontWeight: isLinkActive(item.href) ? 600 : 400,
 
                       gap: isCollapsed ? "0px" : "10px",
                     }}
                   >
-                    <item.icon size={22} className="" color={colors.white} />
+                    <item.icon size={22} className="" style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}} />
                     {!isCollapsed && (
-                      <span className="text-sm font-medium">{item.label}</span>
+                      <span className="text-sm font-medium" style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}}>{item.label}</span>
                     )}
                   </Link>
                 )}
@@ -297,18 +298,18 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
                        } `}
                       style={{
                         backgroundColor: isLinkActive(item.href)
-                          ? "rgba(255, 255, 255, 0.2)"
-                          : "transparent",
-                        color: colors.white,
+                          ? "rgba(142, 190, 33, 1)"
+                            : "transparent",
+                        color: isLinkActive(item.href) ? colors.primary : colors.white,
                         opacity: isLinkActive(item.href) ? 1 : 0.85,
                         fontWeight: isLinkActive(item.href) ? 600 : 400,
 
                         gap: isCollapsed ? "0px" : "10px",
                       }}
                     >
-                      <item.icon size={22} className="" color={colors.white} />
+                      <item.icon size={22} style={{color : isLinkActive(item.href) ? colors.primary : colors.white,}} />
                       {!isCollapsed && (
-                        <span className="text-sm font-medium">
+                        <span style={{color : isLinkActive(item.href) ? colors.primary : colors.white,}}  className="text-sm font-medium" >
                           {item.label}
                         </span>
                       )}
@@ -324,19 +325,14 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
             className="btn d-flex align-items-center 
             justify-content-center gap-2 w-100"
             style={{
-              backgroundColor: colors.darkAccent,
-              color: colors.white,
+              backgroundColor: colors.green,
+              color: colors.primary,
               border: "none",
               padding: "10px",
               borderRadius: "6px",
               fontWeight: 500,
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = colors.textDark;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = colors.darkAccent;
-            }}
+            
           >
             <LogOut size={20} />
             {!isCollapsed && (

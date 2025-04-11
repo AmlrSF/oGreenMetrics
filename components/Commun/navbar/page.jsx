@@ -15,7 +15,7 @@ const Navbar = ({ user, isAdmin }) => {
       className="navbar py-2 navbar-expand-lg"
       style={{ backgroundColor: "#8ebe21" }} // ✅ Set navbar bg here
     >
-      <div className="container-fluid d-flex 
+      <div className="container-xl d-flex 
       justify-content-end px-4">
         <div className="d-flex align-items-center gap-3">
           {/* Notification bell */}

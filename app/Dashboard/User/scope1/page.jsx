@@ -5,7 +5,11 @@ import { Plus, Search } from "lucide-react";
 const Scope1 = () => {
   const [activeTab, setActiveTab] = useState("Combustion de carburant");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [data, setData] = useState({ machines: [], products: [], totalEmissions: 0 });
+  const [data, setData] = useState({
+    machines: [],
+    products: [],
+    totalEmissions: 0,
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,7 +27,10 @@ const Scope1 = () => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    const endpoint = activeTab === "Combustion de carburant" ? "/fuelcombustion" : "/production";
+    const endpoint =
+      activeTab === "Combustion de carburant"
+        ? "/fuelcombustion"
+        : "/production";
     try {
       const response = await fetch(`http://localhost:4000${endpoint}`, {
         method: "GET",
@@ -31,10 +38,16 @@ const Scope1 = () => {
         headers: { "Content-Type": "application/json" },
       });
       if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Network response was not ok: ${response.status} ${response.statusText}`
+        );
       }
       const result = await response.json();
-      const record = result[0] || { machines: [], products: [], totalEmissions: 0 };
+      const record = result[0] || {
+        machines: [],
+        products: [],
+        totalEmissions: 0,
+      };
       setData({
         machines: record.machines || [],
         products: record.products || [],
@@ -66,24 +79,24 @@ const Scope1 = () => {
     const formData = new FormData(e.target);
     const newItem = {
       nom: formData.get("nom"),
-      quantite: parseFloat(formData.get("quantite"))
+      quantite: parseFloat(formData.get("quantite")),
     };
-    
+
     if (activeTab === "Combustion de carburant") {
       newItem.typeDeCarburant = formData.get("typeDeCarburant");
       newItem.modele = formData.get("modele") || "Standard";
-      
+
       const payload = { machines: [newItem] };
       try {
         const response = await fetch("http://localhost:4000/fuelcombustion", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
-        
+
         if (!response.ok) throw new Error("Failed to add fuel combustion");
-        
+
         toggleModal(false);
         fetchData();
       } catch (error) {
@@ -97,11 +110,11 @@ const Scope1 = () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
-        
+
         if (!response.ok) throw new Error("Failed to add production");
-        
+
         toggleModal(false);
         fetchData();
       } catch (error) {
@@ -116,23 +129,27 @@ const Scope1 = () => {
     const formData = new FormData(e.target);
     const updatedItem = {
       nom: formData.get("nom"),
-      quantite: parseFloat(formData.get("quantite"))
+      quantite: parseFloat(formData.get("quantite")),
     };
-    
+
     if (activeTab === "Combustion de carburant") {
       updatedItem.typeDeCarburant = formData.get("typeDeCarburant");
-      updatedItem.modele = formData.get("modele") || editingItem.modele || "Standard";
-      
+      updatedItem.modele =
+        formData.get("modele") || editingItem.modele || "Standard";
+
       try {
-        const response = await fetch(`http://localhost:4000/fuelcombustion/${editingItem._id}`, {
-          method: "PUT",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedItem)
-        });
-        
+        const response = await fetch(
+          `http://localhost:4000/fuelcombustion/${editingItem._id}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedItem),
+          }
+        );
+
         if (!response.ok) throw new Error("Failed to update fuel combustion");
-        
+
         toggleModal(false);
         fetchData();
       } catch (error) {
@@ -141,15 +158,18 @@ const Scope1 = () => {
       }
     } else {
       try {
-        const response = await fetch(`http://localhost:4000/production/${editingItem._id}`, {
-          method: "PUT",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedItem)
-        });
-        
+        const response = await fetch(
+          `http://localhost:4000/production/${editingItem._id}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedItem),
+          }
+        );
+
         if (!response.ok) throw new Error("Failed to update production");
-        
+
         toggleModal(false);
         fetchData();
       } catch (error) {
@@ -160,21 +180,24 @@ const Scope1 = () => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = activeTab === "Combustion de carburant" 
-      ? `/fuelcombustion/${id}` 
-      : `/production/${id}`;
-    
+    const endpoint =
+      activeTab === "Combustion de carburant"
+        ? `/fuelcombustion/${id}`
+        : `/production/${id}`;
+
     try {
       const response = await fetch(`http://localhost:4000${endpoint}`, {
         method: "DELETE",
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to delete item: ${response.status} - ${errorText}`);
+        throw new Error(
+          `Failed to delete item: ${response.status} - ${errorText}`
+        );
       }
-      
+
       setConfirmDelete(null);
       fetchData();
     } catch (error) {
@@ -184,18 +207,22 @@ const Scope1 = () => {
   };
 
   const filteredItems = () => {
-    let items = activeTab === "Combustion de carburant" ? data.machines : data.products;
-     
+    let items =
+      activeTab === "Combustion de carburant" ? data.machines : data.products;
+
     if (searchTerm) {
-      items = items.filter(item => 
-        item.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.modele && item.modele.toLowerCase().includes(searchTerm.toLowerCase())));
+      items = items.filter(
+        (item) =>
+          item.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (item.modele &&
+            item.modele.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
     }
-     
+
     if (activeTab === "Combustion de carburant" && fuelFilter !== "all") {
-      items = items.filter(item => item.typeDeCarburant === fuelFilter);
+      items = items.filter((item) => item.typeDeCarburant === fuelFilter);
     }
-    
+
     return items;
   };
 
@@ -212,15 +239,17 @@ const Scope1 = () => {
     if (error) {
       return (
         <div className="p-4 text-center text-danger">
-          <div className="alert alert-danger" role="alert">{error}</div>
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
         </div>
       );
     }
-    
+
     const items = filteredItems();
     const paginatedItems = paginateItems(items);
     const totalPages = Math.ceil(items.length / itemsPerPage);
-    
+
     return (
       <div className="table-container p-5">
         <div className="table-responsive">
@@ -250,7 +279,10 @@ const Scope1 = () => {
                   <tr key={index}>
                     <td>
                       <div className="d-flex align-items-center">
-                        <span className="avatar avatar-md text-white me-2" style={{ backgroundColor: "#263589" }}>
+                        <span
+                          className="avatar avatar-md text-white me-2"
+                          style={{ backgroundColor: "#263589" }}
+                        >
                           {item.nom.charAt(0)}
                         </span>
                         <div className="font-weight-medium">{item.nom}</div>
@@ -259,28 +291,52 @@ const Scope1 = () => {
                     {activeTab === "Combustion de carburant" && (
                       <>
                         <td>{item.modele}</td>
-                        <td className="text-secondary">{item.typeDeCarburant}</td>
+                        <td className="text-secondary">
+                          {item.typeDeCarburant}
+                        </td>
                       </>
                     )}
                     <td>
-                      <span className="badge bg-purple-lt">{item.quantite}</span>
+                      <span className="badge bg-purple-lt">
+                        {item.quantite}
+                      </span>
                     </td>
                     <td>
                       <div className="btn-list flex-nowrap">
-                        <button 
+                        <button
                           className="btn btn-ghost-primary btn-icon"
                           onClick={() => toggleModal(true, "edit", item)}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                           </svg>
                         </button>
-                        <button 
+                        <button
                           className="btn btn-ghost-danger btn-icon"
                           onClick={() => setConfirmDelete(item)}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path d="M3 6h18"></path>
                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -294,7 +350,12 @@ const Scope1 = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={activeTab === "Combustion de carburant" ? "5" : "3"} className="text-center text-secondary">
+                  <td
+                    colSpan={
+                      activeTab === "Combustion de carburant" ? "5" : "3"
+                    }
+                    className="text-center text-secondary"
+                  >
                     Aucune donnée disponible pour ce tableau
                   </td>
                 </tr>
@@ -306,18 +367,44 @@ const Scope1 = () => {
         {items.length > itemsPerPage && (
           <nav className="d-flex justify-content-center mt-4">
             <ul className="pagination">
-              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+              <li
+                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
                   Précédent
                 </button>
               </li>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <li key={page} className={`page-item ${currentPage === page ? "active" : ""}`}>
-                  <button className="page-link" onClick={() => setCurrentPage(page)}>{page}</button>
-                </li>
-              ))}
-              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <li
+                    key={page}
+                    className={`page-item ${
+                      currentPage === page ? "active" : ""
+                    }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  </li>
+                )
+              )}
+              <li
+                className={`page-item ${
+                  currentPage === totalPages ? "disabled" : ""
+                }`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
                   Suivant
                 </button>
               </li>
@@ -329,13 +416,19 @@ const Scope1 = () => {
   };
 
   return (
-    <div className="container-xl mt-3">
-      <div className="card mb-3">
-        <div className="card-body">
-          <h3 className="card-title text-success">Scope 1</h3>
-          <p className="card-subtitle">
-            <strong className="text-primary">Émissions directes</strong> provenant de sources détenues ou contrôlées par une organisation.
-          </p>
+    <div className="container-xl ">
+      <div
+        className="py-2 mb-4 d-flex 
+      border-b  justify-content-start align-items-center"
+      >
+        <div>
+          <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
+            Scope 1
+          </h3>
+          <div className="card-subtitle">
+           <strong className="text-primary">Émissions directes</strong> provenant de sources détenues ou contrôlées par
+            une organisation.
+          </div>
         </div>
       </div>
 
@@ -345,7 +438,9 @@ const Scope1 = () => {
             <li className="nav-item">
               <a
                 href="#Combustion de carburant"
-                className={`nav-link ${activeTab === "Combustion de carburant" ? "active" : ""}`}
+                className={`nav-link ${
+                  activeTab === "Combustion de carburant" ? "active" : ""
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   handleTabClick("Combustion de carburant");
@@ -357,7 +452,9 @@ const Scope1 = () => {
             <li className="nav-item">
               <a
                 href="#Production de produits"
-                className={`nav-link ${activeTab === "Production de produits" ? "active" : ""}`}
+                className={`nav-link ${
+                  activeTab === "Production de produits" ? "active" : ""
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   handleTabClick("Production de produits");
@@ -375,8 +472,8 @@ const Scope1 = () => {
               <div className="d-flex gap-2">
                 {activeTab === "Combustion de carburant" && (
                   <div className="input-group" style={{ width: "200px" }}>
-                    <select 
-                      className="form-select" 
+                    <select
+                      className="form-select"
                       value={fuelFilter}
                       onChange={(e) => setFuelFilter(e.target.value)}
                     >
@@ -401,7 +498,11 @@ const Scope1 = () => {
                   />
                 </div>
               </div>
-              <button type="button" className="btn btn-primary" onClick={() => toggleModal(true, "add")}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => toggleModal(true, "add")}
+              >
                 <Plus className="mr-2" size={16} />
                 Ajouter
               </button>
@@ -412,36 +513,48 @@ const Scope1 = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show"
+          tabIndex="-1"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {modalMode === "add" ? "Ajouter" : "Modifier"} {activeTab === "Combustion de carburant" ? "une machine" : "un produit"}
+                  {modalMode === "add" ? "Ajouter" : "Modifier"}{" "}
+                  {activeTab === "Combustion de carburant"
+                    ? "une machine"
+                    : "un produit"}
                 </h5>
-                <button type="button" className="btn-close" onClick={() => toggleModal(false)} aria-label="Close"></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => toggleModal(false)}
+                  aria-label="Close"
+                ></button>
               </div>
               <form onSubmit={modalMode === "add" ? handleAdd : handleEdit}>
                 <div className="modal-body">
                   <div className="mb-3">
                     <label className="form-label">Nom</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      name="nom" 
-                      defaultValue={editingItem?.nom || ""} 
-                      required 
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="nom"
+                      defaultValue={editingItem?.nom || ""}
+                      required
                     />
                   </div>
                   {activeTab === "Combustion de carburant" && (
                     <>
                       <div className="mb-3">
                         <label className="form-label">Modèle</label>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          name="modele" 
-                          defaultValue={editingItem?.modele || ""} 
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="modele"
+                          defaultValue={editingItem?.modele || ""}
                         />
                       </div>
                       <div className="mb-3">
@@ -452,7 +565,9 @@ const Scope1 = () => {
                           defaultValue={editingItem?.typeDeCarburant || ""}
                           required
                         >
-                          <option value="" disabled>Choisir un type de carburant</option>
+                          <option value="" disabled>
+                            Choisir un type de carburant
+                          </option>
                           <option value="Natural Gas">Natural Gas</option>
                           <option value="Diesel">Diesel</option>
                           <option value="Gasoline">Gasoline</option>
@@ -463,17 +578,21 @@ const Scope1 = () => {
                   )}
                   <div className="mb-3">
                     <label className="form-label">Quantité</label>
-                    <input 
-                      type="number" 
-                      className="form-control" 
-                      name="quantite" 
-                      defaultValue={editingItem?.quantite || ""} 
-                      required 
+                    <input
+                      type="number"
+                      className="form-control"
+                      name="quantite"
+                      defaultValue={editingItem?.quantite || ""}
+                      required
                     />
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-link link-secondary" onClick={() => toggleModal(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-link link-secondary"
+                    onClick={() => toggleModal(false)}
+                  >
                     Annuler
                   </button>
                   <button type="submit" className="btn btn-primary ms-auto">
@@ -487,21 +606,42 @@ const Scope1 = () => {
       )}
 
       {confirmDelete && (
-        <div className="modal show" tabIndex="-1" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show"
+          tabIndex="-1"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-sm" role="document">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Confirmer la suppression</h5>
-                <button type="button" className="btn-close" onClick={() => setConfirmDelete(null)} aria-label="Close"></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setConfirmDelete(null)}
+                  aria-label="Close"
+                ></button>
               </div>
               <div className="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer <strong>{confirmDelete.nom}</strong>? Cette action est irréversible.</p>
+                <p>
+                  Êtes-vous sûr de vouloir supprimer{" "}
+                  <strong>{confirmDelete.nom}</strong>? Cette action est
+                  irréversible.
+                </p>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-link link-secondary" onClick={() => setConfirmDelete(null)}>
+                <button
+                  type="button"
+                  className="btn btn-link link-secondary"
+                  onClick={() => setConfirmDelete(null)}
+                >
                   Annuler
                 </button>
-                <button type="button" className="btn btn-danger ms-auto" onClick={() => handleDelete(confirmDelete._id)}>
+                <button
+                  type="button"
+                  className="btn btn-danger ms-auto"
+                  onClick={() => handleDelete(confirmDelete._id)}
+                >
                   Supprimer
                 </button>
               </div>

@@ -361,7 +361,8 @@ const Reporting = () => {
         </div>
       )}
 
-      <div className="py-10 mb-5 d-flex leading-[0.1] border-b  justify-content-center align-items-start">
+      <div className="py-2 mb-4 d-flex 
+      border-b  justify-content-center align-items-start">
         <div>
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
             Reporting
