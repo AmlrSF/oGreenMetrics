@@ -104,6 +104,7 @@ const Scope1 = () => {
         setError(error.message);
       }
     } else {
+      newItem.ligneDeProduction = formData.get("ligneDeProduction");
       const payload = { products: [newItem] };
       try {
         const response = await fetch("http://localhost:4000/production", {
@@ -157,6 +158,7 @@ const Scope1 = () => {
         setError(error.message);
       }
     } else {
+      updatedItem.ligneDeProduction = formData.get("ligneDeProduction");
       try {
         const response = await fetch(
           `http://localhost:4000/production/${editingItem._id}`,
@@ -215,7 +217,9 @@ const Scope1 = () => {
         (item) =>
           item.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (item.modele &&
-            item.modele.toLowerCase().includes(searchTerm.toLowerCase()))
+            item.modele.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (item.ligneDeProduction &&
+            item.ligneDeProduction.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -267,6 +271,7 @@ const Scope1 = () => {
                 ) : (
                   <>
                     <th>Nom</th>
+                    <th>Ligne de Production</th>
                     <th>Quantité</th>
                     <th className="w-1">Action</th>
                   </>
@@ -288,13 +293,15 @@ const Scope1 = () => {
                         <div className="font-weight-medium">{item.nom}</div>
                       </div>
                     </td>
-                    {activeTab === "Combustion de carburant" && (
+                    {activeTab === "Combustion de carburant" ? (
                       <>
                         <td>{item.modele}</td>
                         <td className="text-secondary">
                           {item.typeDeCarburant}
                         </td>
                       </>
+                    ) : (
+                      <td className="text-secondary">{item.ligneDeProduction}</td>
                     )}
                     <td>
                       <span className="badge bg-purple-lt">
@@ -352,7 +359,7 @@ const Scope1 = () => {
                 <tr>
                   <td
                     colSpan={
-                      activeTab === "Combustion de carburant" ? "5" : "3"
+                      activeTab === "Combustion de carburant" ? "5" : "4"
                     }
                     className="text-center text-secondary"
                   >
@@ -416,17 +423,16 @@ const Scope1 = () => {
   };
 
   return (
-    <div className="container-xl ">
+    <div className="container-xl">
       <div
-        className="py-2 mb-4 d-flex 
-      border-b  justify-content-start align-items-center"
+        className="py-2 mb-4 d-flex border-b justify-content-start align-items-center"
       >
         <div>
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
             Scope 1
           </h3>
           <div className="card-subtitle">
-           <strong className="text-primary">Émissions directes</strong> provenant de sources détenues ou contrôlées par
+            <strong className="text-primary">Émissions directes</strong> provenant de sources détenues ou contrôlées par
             une organisation.
           </div>
         </div>
@@ -546,7 +552,7 @@ const Scope1 = () => {
                       required
                     />
                   </div>
-                  {activeTab === "Combustion de carburant" && (
+                  {activeTab === "Combustion de carburant" ? (
                     <>
                       <div className="mb-3">
                         <label className="form-label">Modèle</label>
@@ -575,6 +581,17 @@ const Scope1 = () => {
                         </select>
                       </div>
                     </>
+                  ) : (
+                    <div className="mb-3">
+                      <label className="form-label">Ligne de Production</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="ligneDeProduction"
+                        defaultValue={editingItem?.ligneDeProduction || ""}
+                        required
+                      />
+                    </div>
                   )}
                   <div className="mb-3">
                     <label className="form-label">Quantité</label>
