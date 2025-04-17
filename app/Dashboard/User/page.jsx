@@ -479,37 +479,31 @@ const CompanyDash = () => {
         </div>
       </div>
 
-      <div className="row row-deck row-cards mb-4">
-        <div className="col-sm-6 col-lg-4">
-          <EmissionCard
-            title="Émissions Scope 1"
-            icon={Factory}
-            value={processedEmissions.scope1.total}
-            color={COLORS[0]}
-            data={processedEmissions.scope1.data}
-            breakdown={processedEmissions.scope1.breakdown}
-          />
-        </div>
-        <div className="col-sm-6 col-lg-4">
-          <EmissionCard
-            title="Émissions Scope 2"
-            icon={Lightbulb}
-            value={processedEmissions.scope2.total}
-            color={COLORS[1]}
-            data={processedEmissions.scope2.data}
-            breakdown={processedEmissions.scope2.breakdown}
-          />
-        </div>
-        <div className="col-sm-6 col-lg-4">
-          <EmissionCard
-            title="Émissions Scope 3"
-            icon={Truck}
-            value={processedEmissions.scope3.total}
-            color={COLORS[2]}
-            data={processedEmissions.scope3.data}
-            breakdown={processedEmissions.scope3.breakdown}
-          />
-        </div>
+      <div className="container-card mb-4">
+        <EmissionCard
+          title="Émissions Scope 1"
+          icon={Factory}
+          value={processedEmissions.scope1.total}
+          color={COLORS[0]}
+          data={processedEmissions.scope1.data}
+          breakdown={processedEmissions.scope1.breakdown}
+        />
+        <EmissionCard
+          title="Émissions Scope 2"
+          icon={Lightbulb}
+          value={processedEmissions.scope2.total}
+          color={COLORS[1]}
+          data={processedEmissions.scope2.data}
+          breakdown={processedEmissions.scope2.breakdown}
+        />
+        <EmissionCard
+          title="Émissions Scope 3"
+          icon={Truck}
+          value={processedEmissions.scope3.total}
+          color={COLORS[2]}
+          data={processedEmissions.scope3.data}
+          breakdown={processedEmissions.scope3.breakdown}
+        />
       </div>
 
       <div className="row row-deck row-cards">
