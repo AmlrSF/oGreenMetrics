@@ -257,9 +257,9 @@ const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
           <TrendingUp className="icon-sm text-green" />
         </div>
 
-        <div style={{ height: "12rem" }}>
+        {/* <div style={{ height: "12rem" }}>
           <Bar data={barChartData} options={options} />
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -444,8 +444,9 @@ const CompanyDash = () => {
 
   return (
     <div className="container-xl">
-      <div className="page-header d-print-none mb-4">
-        <div className=" g-2 sm:flex flex-col sm:flex-row gap-10  align-items-center justify-content-between ">
+      <div className="page-header d-print-none mb-2">
+        <div className=" g-2 sm:flex flex-col sm:flex-row gap-10 
+         align-items-center justify-content-between ">
           <div className="col sm:mb-0 mb-2">
             <h2 className="page-title ">
               <BarChart3 className=" sm:block  hidden text-center sm:text-left icon me-2" />
@@ -479,7 +480,7 @@ const CompanyDash = () => {
         </div>
       </div>
 
-      <div className="container-card mb-4">
+      <div className="container-card mb-2">
         <EmissionCard
           title="Émissions Scope 1"
           icon={Factory}

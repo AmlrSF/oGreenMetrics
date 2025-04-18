@@ -1,111 +1,103 @@
-import React from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Facebook, Twitter, Linkedin, Instagram, MapPin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-dark text-white py-5">
-      <div className="container">
-        <div className="row mb-4">
-          <div className="col-lg-4 mb-4 mb-lg-0">
-            <Link href="/" className="d-inline-block mb-4">
+    <footer className="relative   bg-gray-900 z-[-10] pt-[250px]">
+      <div 
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "url('/footer.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+
+        }}
+      />
+      {/* Black overlay with 0.3 opacity */}
+      <div className="absolute inset-0 bg-black opacity-70" />
+      
+      <div className="relative  min-h-[25vh] container mx-auto px-4">
+        <div className="footer-section container-card-3 items-center ">
+          {/* Company Info */}
+          <div>
+            <Link href="/" className="inline-block mb-4">
               <Image 
-                src="/logo.png" 
+                src="/Group.png" 
                 alt="Green Metric" 
-                width={120} 
-                height={40} 
+                width={150} 
+                height={40}
+               
               />
             </Link>
-            <p className="small mb-4">
+            <p className="text-gray-400 text-sm mb-4">
               Plateforme de mesure de l'empreinte carbone pour les entreprises
             </p>
-            <div className="d-flex gap-2">
-              <Link href="#" className="text-white">
-                <i className="bi bi-facebook"></i>
-              </Link>
-              <Link href="#" className="text-white">
-                <i className="bi bi-twitter-x"></i>
-              </Link>
-              <Link href="#" className="text-white">
-                <i className="bi bi-linkedin"></i>
-              </Link>
-              <Link href="#" className="text-white">
-                <i className="bi bi-instagram"></i>
-              </Link>
+            <div className="flex space-x-4">
+              <SocialIcon Icon={Facebook} />
+              <SocialIcon Icon={Twitter} />
+              <SocialIcon Icon={Linkedin} />
+              <SocialIcon Icon={Instagram} />
             </div>
           </div>
-          
-          <div className="col-lg-2 col-md-4 mb-4 mb-md-0">
-            <h5 className="mb-3 small text-uppercase">Accueil</h5>
-            <ul className="list-unstyled">
-              <li className="mb-2">
-                <Link href="/" className="text-white-50 small text-decoration-none">Accueil</Link>
-              </li>
-              <li className="mb-2">
-                <Link href="/services" className="text-white-50 small text-decoration-none">Services</Link>
-              </li>
-              <li className="mb-2">
-                <Link href="/about" className="text-white-50 small text-decoration-none">À propos de nous</Link>
-              </li>
-              <li className="mb-2">
-                <Link href="/contact" className="text-white-50 small text-decoration-none">Contact</Link>
-              </li>
+
+          {/* Quick Links */}
+          <div className='min-w-[200px]'>
+            <h5 className="text-white uppercase text-sm font-medium mb-1">Accueil</h5>
+            <ul className="pl-4 ">
+              <FooterLink href="/" text="Accueil" />
+              <FooterLink href="/services" text="Services" />
+              <FooterLink href="/about" text="À propos de nous" />
+              <FooterLink href="/contact" text="Contact" />
             </ul>
           </div>
-          
-          <div className="col-lg-2 col-md-4 mb-4 mb-md-0">
-            <h5 className="mb-3 small text-uppercase">Mentions légales</h5>
-            <ul className="list-unstyled">
-              <li className="mb-2">
-                <Link href="/terms" className="text-white-50 small text-decoration-none">Conditions générales</Link>
-              </li>
-              <li className="mb-2">
-                <Link href="/privacy" className="text-white-50 small text-decoration-none">Politique de confidentialité</Link>
-              </li>
-              <li className="mb-2">
-                <Link href="/legal" className="text-white-50 small text-decoration-none">Mentions légales</Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div className="col-lg-4 col-md-4">
-            <h5 className="mb-3 small text-uppercase">Nous contacter</h5>
-            <p className="text-white-50 small mb-2">
-              <i className="bi bi-geo-alt me-2"></i> 123 rue de la Terre, 75000 Paris
-            </p>
-            <p className="text-white-50 small mb-2">
-              <i className="bi bi-telephone me-2"></i> +33 1 23 45 67 89
-            </p>
-            <p className="text-white-50 small mb-2">
-              <i className="bi bi-envelope me-2"></i> contact@greenmetric.com
-            </p>
+
+          {/* Contact */}
+          <div className='min-w-[200px]'>
+            <h5 className="text-white uppercase text-sm font-medium mb-1">Nous contacter</h5>
+            <div className="pl-4 ">
+              <ContactInfo Icon={MapPin} text="123 rue de la Terre, 75000 Paris" />
+              <ContactInfo Icon={Phone} text="+33 1 23 45 67 89" />
+              <ContactInfo Icon={Mail} text="contact@greenmetric.com" />
+            </div>
           </div>
         </div>
-        
-        <hr className="border-secondary" />
-        
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-          <p className="text-white-50 small mb-2 mb-md-0">
+
+        <hr className="border-black my-0 " />
+
+        {/* Bottom Bar */}
+        <div className="flex items-center justify-center py-2">
+          <p className="text-gray-400 text-sm mb-0">
             © GreenMetric 2025. Tous droits réservés.
           </p>
-          <div className="d-flex gap-2">
-            <Link href="#" className="text-white">
-              <i className="bi bi-facebook"></i>
-            </Link>
-            <Link href="#" className="text-white">
-              <i className="bi bi-twitter-x"></i>
-            </Link>
-            <Link href="#" className="text-white">
-              <i className="bi bi-linkedin"></i>
-            </Link>
-            <Link href="#" className="text-white">
-              <i className="bi bi-instagram"></i>
-            </Link>
-          </div>
         </div>
       </div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
+// Helper Components
+const SocialIcon = ({ Icon }) => (
+  <Link href="#" className="text-white hover:text-gray-300 transition-colors">
+    <Icon size={20} />
+  </Link>
+);
+
+const FooterLink = ({ href, text }) => (
+  <li>
+    <Link href={href} className="text-gray-400 text-sm hover:text-white transition-colors">
+      {text}
+    </Link>
+  </li>
+);
+
+const ContactInfo = ({ Icon, text }) => (
+  <p className="text-gray-400 text-sm mb-0 flex items-center">
+    <Icon size={16} className="mr-2" />
+    {text}
+  </p>
+);
+
+export default Footer;

@@ -14,18 +14,19 @@ const Partners = () => {
   ]
   
   return (
-    <section className="container my-5 py-4">
-      <h2 className="text-center mb-5">Nos partenaires</h2>
+    <section className="container min-h-[40vh] ">
+      <h2 className="text-center my-8 text-4xl font-bold">Nos partenaires</h2>
       
-      <div className="row justify-content-center">
+      <div className="d-flex gap-10 h-full mt-10 
+      justify-content-center items-center">
         {partners.map((partner, index) => (
-          <div className="col-md-3 col-6 text-center" key={index}>
+          <div className="mb-0 h-full" key={index}>
             <Image 
               src={partner.logo} 
               alt={partner.name} 
               width={150} 
               height={80} 
-              className="img-fluid mb-3"
+              className="img-fluid "
             />
           </div>
         ))}

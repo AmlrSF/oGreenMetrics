@@ -22,18 +22,19 @@ const Contact = () => {
   };
 
   return (
-    <section className="container my-5 py-5">
-      <h2 className="text-center mb-5">Contactez-nous</h2>
-      <div className="row justify-content-center">
+    <section className="container pt-14 z-50">
+    
+      <div className="row justify-content-center z-[999]
+       mt-10 mb-[-210px]">
         <div className="col-lg-8">
-          <div className="card shadow rounded-4 border-0">
-            <div className="card-body p-4 p-md-5">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
+          <div className="card shadow-md rounded-4 border-0">
+            <div className="card-body p-3">
+              <form onSubmit={handleSubmit} >
+                <div className="mb-2">
                   <label className="form-label">Email :</label>
                   <input type="email" className="form-control py-2" placeholder="Tapez votre adresse e-mail" required name="email" />
                 </div>
-                <div className="row mb-4">
+                <div className="row mb-2">
                   <div className="col-md-6 mb-3 mb-md-0">
                     <label className="form-label">Nom :</label>
                     <input type="text" className="form-control py-2" placeholder="Tapez votre nom" name="user_name" />
@@ -43,7 +44,7 @@ const Contact = () => {
                     <input type="text" className="form-control py-2" placeholder="Tapez votre prénom" name="user_firstname" />
                   </div>
                 </div>
-                <div className="mb-4">
+                <div className="mb-2">
                   <label className="form-label">
                     Quelle est la raison de votre contact aujourd'hui ?
                     <span className="text-danger">*</span>

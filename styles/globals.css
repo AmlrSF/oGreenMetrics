@@ -5,10 +5,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary-clr:#8EBE21;
+  --primary-clr: #8ebe21;
   --tblr-primary: var(--primary-clr);
 }
-
 
 body {
   color: var(--foreground);
@@ -16,21 +15,56 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.primary-clr{
-  color:var(--primary-clr);
+.primary-clr {
+  color: var(--primary-clr);
 }
 
-.primary-clr-bg{
-  background-color:var(--primary-clr);
+.primary-clr-bg {
+  background-color: var(--primary-clr);
 }
 
 a:hover {
   text-decoration: none !important;
 }
 
-
 .container-card {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 10px;
+}
+
+.navlinks a::after {
+  content: "";
+  width: 0%;
+  height: 4px;
+  background: #8ebe21;
+  position: absolute;
+  bottom: -5px;
+  border-radius: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: 0.3s ease-in-out;
+}
+
+.navlinks a:hover::after {
+  width: 130%;
+}
+
+.navlinks a.hoveredItem::after {
+  width: 130%;
+  
+}
+
+.navlinks:hover a{
+  color: #8ebe21;
+}
+
+.footer-section div > ul > a {
+  margin-bottom: 0px;
+}
+
+.container-card-3{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
 }

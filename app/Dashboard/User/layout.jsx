@@ -14,7 +14,7 @@ const DashboardLayout = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { push } = useRouter();
 
-  // Initialize sidebar state from localStorage
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("sidebarCollapsed");
@@ -22,7 +22,7 @@ const DashboardLayout = ({ children }) => {
     }
   }, []);
 
-  // Toggle sidebar function to pass to Navbar for mobile
+  
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -74,7 +74,6 @@ const DashboardLayout = ({ children }) => {
     <div className="flex h-screen overflow-hidden">
       <Sidebar
         user={user}
-        isAdmin={user?.role === "Admin" || !!user?.AdminRoles}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
       />
