@@ -3,13 +3,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
 import {
-  Calendar,
-  BarChart2,
-  UserX,
-  UserCheck,
-  Trash2,
-  FileTextIcon,
-  Eye,
+  Calendar, BarChart2, UserX, UserCheck, Trash2, FileTextIcon,  Eye,
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
@@ -194,9 +188,7 @@ const Reporting = () => {
               <div className="modal-header">
                 <h5 className="modal-title">Generate New Report</h5>
                 <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setModalOpen(false)}
+                  type="button"   className="btn-close" onClick={() => setModalOpen(false)}
                 ></button>
               </div>
 
@@ -204,22 +196,14 @@ const Reporting = () => {
                 <div className="mb-3">
                   <label className="form-label">Report Name</label>
                   <input
-                    type="text"
-                    name="name"
-                    className="form-control"
-                    value={formData.name}
-                    onChange={handleInputChange}
+                    type="text" name="name" className="form-control" value={formData.name} onChange={handleInputChange}
                   />
                 </div>
 
                 <div className="mb-3">
                   <label className="form-label">Description</label>
                   <textarea
-                    name="description"
-                    className="form-control"
-                    rows="3"
-                    value={formData.description}
-                    onChange={handleInputChange}
+                    name="description" className="form-control" rows="3" value={formData.description} onChange={handleInputChange}
                   />
                 </div>
 
@@ -228,31 +212,19 @@ const Reporting = () => {
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
                       <input
-                        type="checkbox"
-                        name="scope1"
-                        className="form-selectgroup-input"
-                        checked={formData.scope1}
-                        onChange={handleInputChange}
+                        type="checkbox" name="scope1" className="form-selectgroup-input" checked={formData.scope1} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Scope 1</span>
                     </label>
                     <label className="form-selectgroup-item">
                       <input
-                        type="checkbox"
-                        name="scope2"
-                        className="form-selectgroup-input"
-                        checked={formData.scope2}
-                        onChange={handleInputChange}
+                        type="checkbox" name="scope2" className="form-selectgroup-input" checked={formData.scope2} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Scope 2</span>
                     </label>
                     <label className="form-selectgroup-item">
                       <input
-                        type="checkbox"
-                        name="scope3"
-                        className="form-selectgroup-input"
-                        checked={formData.scope3}
-                        onChange={handleInputChange}
+                        type="checkbox" name="scope3" className="form-selectgroup-input" checked={formData.scope3} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Scope 3</span>
                     </label>
@@ -283,23 +255,13 @@ const Reporting = () => {
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
                       <input
-                        type="radio"
-                        name="includeCharts"
-                        value="yes"
-                        className="form-selectgroup-input"
-                        checked={formData.includeCharts === "yes"}
-                        onChange={handleInputChange}
+                        type="radio" name="includeCharts" value="yes" className="form-selectgroup-input" checked={formData.includeCharts === "yes"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Yes</span>
                     </label>
                     <label className="form-selectgroup-item">
                       <input
-                        type="radio"
-                        name="includeCharts"
-                        value="no"
-                        className="form-selectgroup-input"
-                        checked={formData.includeCharts === "no"}
-                        onChange={handleInputChange}
+                        type="radio" name="includeCharts" value="no" className="form-selectgroup-input" checked={formData.includeCharts === "no"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">No</span>
                     </label>
@@ -515,19 +477,7 @@ const Reporting = () => {
                           </td>
                           <td>
                             <div className="btn-list flex-nowrap">
-                              <button
-                                className={`btn btn-ghost-${
-                                  data.status === "pending"
-                                    ? "danger"
-                                    : "success"
-                                } btn-icon`}
-                              >
-                                {data.status === "pending" ? (
-                                  <UserX size={18} />
-                                ) : (
-                                  <UserCheck size={18} />
-                                )}
-                              </button>
+
                               <button
                                 onClick={() => deleteReport(data?._id)}
                                 className="btn btn-ghost-danger btn-icon"
@@ -581,16 +531,7 @@ const Reporting = () => {
                     }
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="icon"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M15 6l-6 6l6 6" />
@@ -601,8 +542,7 @@ const Reporting = () => {
                   <span
                     className="page-link"
                     style={{
-                      backgroundColor: "#263589",
-                      borderColor: "#263589",
+                      backgroundColor: "#263589",  borderColor: "#263589",
                     }}
                   >
                     {currentPage}
@@ -620,16 +560,7 @@ const Reporting = () => {
                     }
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="icon"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      xmlns="http://www.w3.org/2000/svg"   className="icon"    width="24"   height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M9 6l6 6l-6 6" />
