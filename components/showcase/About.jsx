@@ -3,10 +3,10 @@ import Image from 'next/image'
 
 const About = () => {
   return (
-    <section className="container my-5 py-5">
-      <h2 className="text-center mb-5">À propos de nous</h2>
+    <section className="container min-h-screen my-5 py-5">
+      <h2 className="text-center text-4xl font-bold mb-10">À propos de nous</h2>
       
-      <div className="row align-items-center mb-5">
+      <div className="row align-items-start mb-5">
         <div className="col-lg-5">
           <Image 
             src="/factory.png" 
@@ -17,8 +17,9 @@ const About = () => {
           />
         </div>
         <div className="col-lg-7">
-          <h3 className="fw-bold mb-3">Notre Engagement pour un Avenir Durable</h3>
-          <p className="mb-4">
+          <h3 className="fw-bold text-2xl
+           font-medium mb-1">Notre Engagement pour un Avenir Durable</h3>
+          <p className="mb-4 text-sm text-muted">
             Chez GreenMetric, nous nous engageons à aider les entreprises à mesurer leur
             empreinte carbone et à trouver des solutions pour la réduire. Grâce à l'utilisation
             de technologies de pointe et à notre expertise dans le domaine du développement
@@ -28,7 +29,7 @@ const About = () => {
           </p>
           
           <div className="mb-4">
-            <h5 className="text-success fw-bold">Expertise</h5>
+            <h5 className="text-success text-lg fw-bold mb-0">Expertise</h5>
             <p className="small text-muted">
               Comprendre à votre côté: d'accompagner les entreprises dans la réduction
               de leur impact environnemental à travers des outils simples et une stratégie pour
@@ -37,7 +38,7 @@ const About = () => {
           </div>
           
           <div className="mb-4">
-            <h5 className="text-success fw-bold">Valeurs</h5>
+            <h5 className="text-success text-lg fw-bold mb-0">Valeurs</h5>
             <p className="small text-muted">
               Nous encourageons un monde où chaque entreprise prend des décisions
               responsables pour protéger notre planète et garantir un avenir plus durable
@@ -46,7 +47,7 @@ const About = () => {
           </div>
           
           <div>
-            <h5 className="text-success fw-bold">Approche</h5>
+            <h5 className="text-success text-lg fw-bold mb-0">Approche</h5>
             <p className="small text-muted">
               Transparence, innovation et responsabilité sont au cœur de notre démarche.
               Nous croyons en la puissance de la collaboration et de l'engagement à agir

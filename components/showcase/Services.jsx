@@ -21,17 +21,18 @@ const Services = () => {
   ]
   
   return (
-    <section className="container-fluid bg-light py-5">
+    <section className=" bg-[#8ebe21] py-5">
       <div className="container">
-        <h2 className="text-center mb-3">Nos services</h2>
-        <p className="text-center text-muted mb-5">
+        <h2 className="text-center font-bold text-white
+         text-4xl mb-1">Nos services</h2>
+        <p className="text-center text-white mb-5">
           Mesurez, gérez et réduisez votre empreinte carbone avec notre solution et un accompagnement adapté
         </p>
         
         <div className="row g-4">
           {serviceCards.map((service, index) => (
             <div className="col-md-4" key={index}>
-              <div className="card h-100 text-center border-0 p-4">
+              <div className="card h-100 text-center rounded-xl border-0 p-4">
                 <div className="d-flex justify-content-center mb-3">
                   <div className="rounded-circle bg-white p-3 shadow-sm">
                     <Image 

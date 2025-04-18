@@ -18,9 +18,9 @@ export default function RootLayout({ children }) {
       <Navbar />
       <Hero />
       <Calculator />
-      <About />
-      <Services />
       <Partners/>
+      <Services />
+      <About />
       <Testimonials/>
       <Contact />
       <Footer />

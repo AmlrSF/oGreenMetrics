@@ -34,6 +34,7 @@ const Reporting = () => {
     Year: "",
     includeCharts: "yes",
     detailLevel: "summary",
+    includeRecomondations: "yes",
   });
 
   const router = useRouter();
@@ -201,7 +202,7 @@ const Reporting = () => {
               </div>
 
               <div className="modal-body">
-                <div className="mb-3">
+                <div className="s">
                   <label className="form-label">Report Name</label>
                   <input
                     type="text"
@@ -212,7 +213,7 @@ const Reporting = () => {
                   />
                 </div>
 
-                <div className="mb-3">
+                <div className="s">
                   <label className="form-label">Description</label>
                   <textarea
                     name="description"
@@ -223,7 +224,7 @@ const Reporting = () => {
                   />
                 </div>
 
-                <div className="mb-3">
+                <div className="s">
                   <label className="form-label">Scope Selection</label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
@@ -259,7 +260,7 @@ const Reporting = () => {
                   </div>
                 </div>
 
-                <div className="row mb-3">
+                <div className="row s">
                   <div className="col-6">
                     <label className="form-label">Select Year</label>
                     <select
@@ -278,7 +279,7 @@ const Reporting = () => {
                   </div>
                 </div>
 
-                <div className="mb-3">
+                <div className="s">
                   <label className="form-label">Include Charts</label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
@@ -305,8 +306,35 @@ const Reporting = () => {
                     </label>
                   </div>
                 </div>
+                <div className="s">
+                  <label className="form-label">Include Recomendation</label>
+                  <div className="form-selectgroup">
+                    <label className="form-selectgroup-item">
+                      <input
+                        type="radio"
+                        name="includeRecomondations"
+                        value="yes"
+                        className="form-selectgroup-input"
+                        checked={formData.includeRecomondations === "yes"}
+                        onChange={handleInputChange}
+                      />
+                      <span className="form-selectgroup-label">Yes</span>
+                    </label>
+                    <label className="form-selectgroup-item">
+                      <input
+                        type="radio"
+                        name="includeRecomondations"
+                        value="no"
+                        className="form-selectgroup-input"
+                        checked={formData.includeRecomondations === "no"}
+                        onChange={handleInputChange}
+                      />
+                      <span className="form-selectgroup-label">No</span>
+                    </label>
+                  </div>
+                </div>
 
-                <div className="mb-3">
+                <div className="s">
                   <label className="form-label">Detail Level</label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
@@ -361,8 +389,10 @@ const Reporting = () => {
         </div>
       )}
 
-      <div className="py-2 mb-4 d-flex 
-      border-b  justify-content-center align-items-start">
+      <div
+        className="py-2 mb-4 d-flex 
+      border-b  justify-content-center align-items-start"
+      >
         <div>
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
             Reporting
@@ -434,6 +464,7 @@ const Reporting = () => {
                     <th>Period</th>
                     <th>Scopes</th>
                     <th>Charts</th>
+                    <th>Recomondations</th>
                     <th>Detail Level</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -487,12 +518,32 @@ const Reporting = () => {
                           </td>
 
                           <td>
-                            <span className="badge flex items-center bg-blue-lt">
+                            <span
+                              className="badge flex
+                             items-center bg-blue-lt"
+                            >
                               <div className="flex">
                                 <BarChart2 size={14} className="me-1" />
                                 {data.includeCharts ? "Yes" : "No"}
                               </div>
                             </span>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              <span
+                                className="badge mx-auto flex justify-center
+                            items-center
+                             bg-pink-lt"
+                              >
+                                <div
+                                  className="flex items-center
+                               w-full justify-center"
+                                >
+                                  <BarChart2 size={14} className="me-1" />
+                                  {data.includeRecomondations ? "Yes" : "No"}
+                                </div>
+                              </span>
+                            </div>
                           </td>
                           <td>
                             <span className="badge bg-green-lt">

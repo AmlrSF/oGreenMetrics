@@ -1,40 +1,154 @@
-import React from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Menu, User2, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
-  return (
-    <nav className="container-fluid py-3">
-      <div className="container d-flex justify-content-between align-items-center">
-        <Link href="/" className="navbar-brand">
-          <Image src="/logo.png" alt="Green Metric" width={120} height={40} />
-        </Link>
-        
-        <div className="d-flex align-items-center">
-          <ul className="nav me-4">
-            <li className="nav-item">
-              <Link href="/" className="nav-link">Accueil</Link>
-            </li>
-            <li className="nav-item">
-              <Link href="/services" className="nav-link">Services</Link>
-            </li>
-            <li className="nav-item">
-              <Link href="/about" className="nav-link">À propos de nous</Link>
-            </li>
-            <li className="nav-item">
-              <Link href="/contact" className="nav-link">Contact</Link>
-            </li>
-          </ul>
-          
-         
-          
-          <Link href="/login" className="btn btn-success rounded-pill px-4">
-          Commencez
-          </Link>
-        </div>
-      </div>
-    </nav>
-  )
-}
+  const [isOpen, setIsOpen] = useState(false);
 
-export default Navbar
+  const menuItems = [
+    { href: "/", label: "Accueil" },
+    { href: "/services", label: "Services" },
+    { href: "/about", label: "À propos" },
+    { href: "/contact", label: "Contact" },
+  ];
+
+  const menuVariants = {
+    closed: {
+      opacity: 0,
+      x: "100%",
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut",
+      },
+    },
+    open: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut",
+      },
+    },
+  };
+
+  return (
+    <div className="position-relative bg-white shadow sticky-top">
+      <nav className="container">
+        <div className="d-flex justify-content-between align-items-center">
+          <Link href="/" className="position-relative z-index-5">
+            <Image
+              src="/logo.png"
+              alt="Green Metric"
+              width={120}
+              height={40}
+              priority
+            />
+          </Link>
+
+          {/* Desktop Menu */}
+          <div className="d-none d-md-flex">
+            <ul className="list-unstyled m-0 d-flex align-items-center gap-5">
+              {menuItems.map((item) => (
+                <li key={item.href}  className="navlinks nav-item position-relative">
+                  <Link
+                    href={item.href}
+                    className="nav-link text-muted hover-primary fw-medium"
+                  >
+                    {item.label} 
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="d-flex align-items-center gap-3">
+            <div className="d-none d-md-flex align-items-center justify-content-center gap-2">
+              <User2 width={35} height={35} />
+              <div className="d-flex flex-column align-items-start">
+                <p className="m-0 small fw-medium">Bonjour</p>
+                <p className="m-0 small">Contactez-vous</p>
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="d-none d-md-flex btn btn-primary fw-bold"
+              style={{ backgroundColor: "#8EBE21", borderColor: "#8EBE21" }}
+            >
+              Commencez
+            </Link>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="d-md-none position-relative z-index-5 btn btn-link p-2"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? (
+              <X className="icon text-white" />
+            ) : (
+              <Menu className="icon text-muted" />
+            )}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={menuVariants}
+            className="position-fixed top-0 end-0 bottom-0 start-0 z-index-4 d-md-none"
+            style={{ backgroundColor: "#8EBE21" }}
+          >
+            <div className="d-flex flex-column align-items-center justify-content-center h-100">
+              <ul className="list-unstyled text-center">
+                {menuItems.map((item) => (
+                  <motion.li
+                    key={item.href}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ delay: 0.1 }}
+                    className="mb-4"
+                  >
+                    <Link
+                      href={item.href}
+                      className="text-white fs-1 fw-medium text-decoration-none"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  </motion.li>
+                ))}
+                <motion.li
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Link
+                    href="/login"
+                    className="btn btn-light rounded-3 px-4 py-2 fs-5 fw-medium"
+                    style={{ color: "#8EBE21" }}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Commencez
+                  </Link>
+                </motion.li>
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default Navbar;

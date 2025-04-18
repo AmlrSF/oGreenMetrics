@@ -10,15 +10,16 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
-import { userMenuItems, menuItems } from "@/lib/Data";
+import { userMenuItems, menuItems, websiteMenuItems  } from "@/lib/Data";
+//here is three data
 
-const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
+const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const router = useRouter();
   const pathname = usePathname();
   const [items, setItems] = useState([]);
 
-  // Colors
+  
   const colors = {
     primary: "#ffffff", 
     white: "#000", 
@@ -30,34 +31,47 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
   };
   
 
-  useEffect(() => {
-    if (isAdmin) {
-      if (user?.role === "Admin") {
-        setItems(
-          menuItems.filter(
-            (item) => item.label !== "Profile" && item.label !== "Settings"
-          )
-        );
-      } else if (user?.AdminRoles) {
-        const filteredMenuItems = menuItems.filter((item) => {
-          if (!item?.service) return true;
-          return user.AdminRoles[item?.service] !== "00";
-        });
 
-        setItems(
-          filteredMenuItems.filter(
-            (item) => item.label !== "Profile" && item.label !== "Settings"
-          )
-        );
-      }
-    } else {
+
+  useEffect(() => {
+    if (user?.role === "Admin") {
+      
+      setItems(
+        menuItems.filter(
+          (item) => item.label !== "Profile" && item.label !== "Settings"
+        )
+      );
+    } 
+    else if (user?.AdminRoles) {
+      const filteredMenuItems = adminMenuItems.filter((item) => {
+        if (!item?.service) return true;
+        return user.AdminRoles[item?.service] !== "00";
+      });
+      
+      setItems(
+        filteredMenuItems.filter(
+          (item) => item.label !== "Profile" && item.label !== "Settings"
+        )
+      );
+    } 
+    else if (user?.role === "entreprise") {
       setItems(
         userMenuItems.filter(
           (item) => item.label !== "Profile" && item.label !== "Settings"
         )
       );
+    } 
+    else if (user?.role === "régulier") {
+      setItems(
+        websiteMenuItems.filter(
+          (item) => item.label !== "Profile" && item.label !== "Settings"
+        )
+      );
+    } 
+    else {
+      setItems([]);
     }
-  }, [isAdmin, user]);
+  }, [user?.role, user?.AdminRoles]);
 
   const toggleCollapse = () => {
     const newState = !isCollapsed;
@@ -282,7 +296,7 @@ const Sidebar = ({ user, isAdmin, isCollapsed, setIsCollapsed }) => {
         >
           <ul className="nav flex-column gap-2 mb-3">
             {["Profile", "Settings"].map((label) => {
-              const item = (isAdmin ? menuItems : userMenuItems).find(
+              const item = (user?.role == "Admin" ? menuItems : user?.role == "entreprise" ? userMenuItems : websiteMenuItems).find(
                 (i) => i.label === label
               );
               return (

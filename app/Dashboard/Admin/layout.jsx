@@ -89,7 +89,6 @@ const DashboardLayout = ({ children }) => {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar
         user={user}
-        isAdmin={user?.role === "Admin" || user?.AdminRoles}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
       />
