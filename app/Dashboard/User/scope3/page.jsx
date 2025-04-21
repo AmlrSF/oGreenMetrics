@@ -66,7 +66,7 @@ const Scope3 = () => {
   }, []);
 
   useEffect(() => {
-    fetchData(activeTab);
+    fetchData();
   }, [activeTab]);
 
   const fetchData = async () => {
@@ -91,6 +91,9 @@ const Scope3 = () => {
     e.preventDefault();
 
     const newFormData = { ...formData, company_id: Company?._id, scopeType };
+
+    console.log(newFormData);
+    
 
     try {
       const method = isEditing ? "PUT" : "POST";
@@ -177,11 +180,11 @@ const Scope3 = () => {
     return currentTab?.fields.map((field, index) => {
       // Cas spécial pour le type de transport avec options dynamiques
       if (
-        field.name === "type" &&
-        (activeTab === "transport" || activeTab === "businessTravel") &&
+        (field.name === "type" || field.name === "sousType" )&&
+        (activeTab === "transport" || activeTab === "businessTravel" || activeTab==="biens-services") &&
         field.dynamicOptions
       ) {
-        const transportMode = formData.mode;
+        const transportMode = formData.mode || formData.type;
         const availableOptions = transportMode
           ? field.dynamicOptions[transportMode] || []
           : [];
