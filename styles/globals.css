@@ -68,3 +68,15 @@ a:hover {
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
 }
+
+.container-card-4{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.container-card-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 10px;
+}
