@@ -1,15 +1,8 @@
 "use client";
-import React, { useState, useEffect, useContext } from "react";
-import { toast } from "react-hot-toast";
- 
-export const NotificationContext = React.createContext({
-  notifications: [],
-  addNotification: () => {},
-  markAsRead: () => {},
-  markAllRead: () => {},
-});
 
-export const useNotifications = () => useContext(NotificationContext);
+import React, { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
+import { useNotifications } from "@/components/Commun/context/NotificationContext";
 
 const GoalsPage = () => {
   const [company, setCompany] = useState(null);
@@ -22,162 +15,104 @@ const GoalsPage = () => {
   });
   const [goalsList, setGoalsList] = useState([]);
   const [newGoal, setNewGoal] = useState({
-    name: 'Objectif de Réduction Carbone',
+    name: "Objectif de Réduction Carbone",
     year: new Date().getFullYear(),
     scope1Goal: 0,
     scope2Goal: 0,
     scope3Goal: 0,
-    description: '',
+    description: "",
   });
   const [selectedScopes, setSelectedScopes] = useState({
     scope1: false,
     scope2: false,
-    scope3: false
+    scope3: false,
   });
   const [validationErrors, setValidationErrors] = useState({
-    scope1Goal: '',
-    scope2Goal: '',
-    scope3Goal: '',
-    general: ''
+    scope1Goal: "",
+    scope2Goal: "",
+    scope3Goal: "",
+    general: "",
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
+  const [alertMessage, setAlertMessage] = useState("");
   const [editingGoal, setEditingGoal] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [notifications, setNotifications] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
-
-  // Add notification function
-  const addNotification = (notification) => {
-    const newNotification = {
-      id: Date.now().toString(), // Use a more robust ID in production
-      read: false,
-      time: new Date().toLocaleString(),
-      ...notification
-    };
-    setNotifications(prev => [newNotification, ...prev]);
-    
-    // Also show a toast for immediate feedback
-    toast.success(notification.message);
-    
-    // Store in localStorage (optional - for persistence between page reloads)
-    const storedNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    localStorage.setItem('notifications', JSON.stringify([newNotification, ...storedNotifications]));
-  };
-
-  // Mark notification as read
-  const markAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-    
-    // Update localStorage
-    const storedNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    localStorage.setItem('notifications', JSON.stringify(
-      storedNotifications.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    ));
-  };
-
-  // Mark all notifications as read
-  const markAllRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, read: true }))
-    );
-    
-    // Update localStorage
-    const storedNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    localStorage.setItem('notifications', JSON.stringify(
-      storedNotifications.map(notif => ({ ...notif, read: true }))
-    ));
-  };
+  const { addNotification } = useNotifications(); // Use the notification context
 
   const sumEmissions = (arr) => {
     if (!arr || !Array.isArray(arr)) return 0;
     return arr.reduce((sum, item) => sum + parseFloat(item.emissions || 0), 0);
   };
-  
+
   const handleGoalChange = (field, value) => {
-    // Update the goal
     let newValue = value;
-    if (field === 'year') {
+    if (field === "year") {
       newValue = parseInt(value) || new Date().getFullYear();
-    } else if (['scope1Goal', 'scope2Goal', 'scope3Goal'].includes(field)) {
+    } else if (["scope1Goal", "scope2Goal", "scope3Goal"].includes(field)) {
       newValue = parseFloat(value) || 0;
-      
-      // Validate the value in real-time
-      const scopeNumber = field.replace('scope', '').replace('Goal', '');
+
+      const scopeNumber = field.replace("scope", "").replace("Goal", "");
       const currentValue = currentEmissions[`scope${scopeNumber}`];
-      
+
       if (newValue > 0 && newValue >= currentValue) {
-        setValidationErrors(prev => ({
+        setValidationErrors((prev) => ({
           ...prev,
-          [field]: `L'objectif doit être inférieur aux émissions actuelles (${currentValue} tCO₂e)`
+          [field]: `L'objectif doit être inférieur aux émissions actuelles (${currentValue} tCO₂e)`,
         }));
       } else {
-        setValidationErrors(prev => ({
+        setValidationErrors((prev) => ({
           ...prev,
-          [field]: ''
+          [field]: "",
         }));
       }
     }
-    
-    setNewGoal(prev => ({
+
+    setNewGoal((prev) => ({
       ...prev,
-      [field]: newValue
+      [field]: newValue,
     }));
   };
 
   const toggleScope = (scopeNumber) => {
     const scopeKey = `scope${scopeNumber}`;
-    
-    setSelectedScopes(prev => {
+
+    setSelectedScopes((prev) => {
       const newState = { ...prev, [scopeKey]: !prev[scopeKey] };
-      
-      // If scope is being deselected, reset its goal value and validation error
+
       if (!newState[scopeKey]) {
-        setNewGoal(prevGoal => ({
+        setNewGoal((prevGoal) => ({
           ...prevGoal,
-          [`${scopeKey}Goal`]: 0
+          [`${scopeKey}Goal`]: 0,
         }));
-        
-        setValidationErrors(prevErrors => ({
+
+        setValidationErrors((prevErrors) => ({
           ...prevErrors,
-          [`${scopeKey}Goal`]: ''
+          [`${scopeKey}Goal`]: "",
         }));
       }
-      
+
       return newState;
     });
   };
 
   const fetchAndCalculateEmissions = async (companyId) => {
     try {
-      const reportRes = await fetch(
-        `http://localhost:4000/report/full/${companyId}`
-      );
+      const reportRes = await fetch(`http://localhost:4000/report/full/${companyId}`);
       const reportJson = await reportRes.json();
       const reportData = reportJson.data;
 
-      const scope1Fuel =
-        reportData.scope1Data?.fuelCombution?.[0]?.totalEmissions || 0;
-      const scope1Production =
-        reportData.scope1Data?.production?.[0]?.totalEmissions || 0;
+      const scope1Fuel = reportData.scope1Data?.fuelCombution?.[0]?.totalEmissions || 0;
+      const scope1Production = reportData.scope1Data?.production?.[0]?.totalEmissions || 0;
       const scope1 = parseFloat(scope1Fuel) + parseFloat(scope1Production);
 
       const scope2Heating = reportData.scope2Data?.heating?.totalEmissions || 0;
       const scope2Cooling = reportData.scope2Data?.cooling?.totalEmissions || 0;
-      const scope2Energy =
-        reportData.scope2Data?.energyConsumption?.emissions || 0;
+      const scope2Energy = reportData.scope2Data?.energyConsumption?.emissions || 0;
       const scope2 =
-        parseFloat(scope2Heating) +
-        parseFloat(scope2Cooling) +
-        parseFloat(scope2Energy);
+        parseFloat(scope2Heating) + parseFloat(scope2Cooling) + parseFloat(scope2Energy);
 
       const scope3 =
         sumEmissions(reportData.scope3Data?.transport) +
@@ -201,89 +136,81 @@ const GoalsPage = () => {
   };
 
   const validateGoals = () => {
-    // Reset validation errors
     const errors = {
-      scope1Goal: '',
-      scope2Goal: '',
-      scope3Goal: '',
-      general: ''
+      scope1Goal: "",
+      scope2Goal: "",
+      scope3Goal: "",
+      general: "",
     };
-    
-    // Name validation
-    if (newGoal.name.trim() === '') {
-      errors.general = 'Le nom de l\'objectif est requis';
+
+    if (newGoal.name.trim() === "") {
+      errors.general = "Le nom de l'objectif est requis";
       setValidationErrors(errors);
       return { valid: false, messages: [errors.general] };
     }
-    
-    // Check if at least one scope is selected
+
     const hasSelectedScope = selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3;
     if (!hasSelectedScope) {
-      errors.general = 'Veuillez sélectionner au moins un scope';
+      errors.general = "Veuillez sélectionner au moins un scope";
       setValidationErrors(errors);
       return { valid: false, messages: [errors.general] };
     }
-    
-    // Validate each selected scope has a valid goal value
+
     let hasValidGoal = false;
-    
+
     if (selectedScopes.scope1) {
       if (newGoal.scope1Goal <= 0) {
-        errors.scope1Goal = 'Veuillez entrer une valeur d\'objectif supérieure à 0';
+        errors.scope1Goal = "Veuillez entrer une valeur d'objectif supérieure à 0";
       } else if (newGoal.scope1Goal >= currentEmissions.scope1) {
         errors.scope1Goal = `L'objectif doit être inférieur aux émissions actuelles (${currentEmissions.scope1} tCO₂e)`;
       } else {
         hasValidGoal = true;
       }
     }
-    
+
     if (selectedScopes.scope2) {
       if (newGoal.scope2Goal <= 0) {
-        errors.scope2Goal = 'Veuillez entrer une valeur d\'objectif supérieure à 0';
+        errors.scope2Goal = "Veuillez entrer une valeur d'objectif supérieure à 0";
       } else if (newGoal.scope2Goal >= currentEmissions.scope2) {
         errors.scope2Goal = `L'objectif doit être inférieur aux émissions actuelles (${currentEmissions.scope2} tCO₂e)`;
       } else {
         hasValidGoal = true;
       }
     }
-    
+
     if (selectedScopes.scope3) {
       if (newGoal.scope3Goal <= 0) {
-        errors.scope3Goal = 'Veuillez entrer une valeur d\'objectif supérieure à 0';
+        errors.scope3Goal = "Veuillez entrer une valeur d'objectif supérieure à 0";
       } else if (newGoal.scope3Goal >= currentEmissions.scope3) {
         errors.scope3Goal = `L'objectif doit être inférieur aux émissions actuelles (${currentEmissions.scope3} tCO₂e)`;
       } else {
         hasValidGoal = true;
       }
     }
-    
-    // Make sure at least one selected scope has a valid goal
+
     if (!hasValidGoal) {
       if (!errors.general) {
-        errors.general = 'Au moins un scope sélectionné doit avoir un objectif valide';
+        errors.general = "Au moins un scope sélectionné doit avoir un objectif valide";
       }
       setValidationErrors(errors);
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         messages: [
           errors.general,
           errors.scope1Goal,
           errors.scope2Goal,
-          errors.scope3Goal
-        ].filter(Boolean) 
+          errors.scope3Goal,
+        ].filter(Boolean),
       };
     }
-    
+
     setValidationErrors(errors);
-    return { 
-      valid: true, 
-      messages: [] 
-    };
+    return { valid: true, messages: [] };
   };
 
   const handleAddGoal = async (e) => {
     e.preventDefault();
-    
+
     if (!company?._id) {
       toast.error("Entreprise non trouvée");
       return;
@@ -291,24 +218,22 @@ const GoalsPage = () => {
 
     const { valid, messages } = validateGoals();
     if (!valid) {
-      messages.forEach(msg => toast.error(msg));
+      messages.forEach((msg) => toast.error(msg));
       return;
     }
 
-    try { 
+    try {
       const payload = {
         ...newGoal,
         company_id: company._id,
-        // Only include goals for selected scopes
         scope1Goal: selectedScopes.scope1 ? newGoal.scope1Goal : 0,
         scope2Goal: selectedScopes.scope2 ? newGoal.scope2Goal : 0,
         scope3Goal: selectedScopes.scope3 ? newGoal.scope3Goal : 0,
       };
-      
-      // Calculate total goal from selected scopes
-      payload.totalGoal = 
-        (selectedScopes.scope1 ? parseFloat(newGoal.scope1Goal) : 0) + 
-        (selectedScopes.scope2 ? parseFloat(newGoal.scope2Goal) : 0) + 
+
+      payload.totalGoal =
+        (selectedScopes.scope1 ? parseFloat(newGoal.scope1Goal) : 0) +
+        (selectedScopes.scope2 ? parseFloat(newGoal.scope2Goal) : 0) +
         (selectedScopes.scope3 ? parseFloat(newGoal.scope3Goal) : 0);
 
       const res = await fetch("http://localhost:4000/goals/new", {
@@ -320,35 +245,29 @@ const GoalsPage = () => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      
-      // Clear form
+
       setNewGoal({
-        name: 'Objectif de Réduction Carbone',
+        name: "Objectif de Réduction Carbone",
         year: new Date().getFullYear(),
         scope1Goal: 0,
         scope2Goal: 0,
         scope3Goal: 0,
-        description: '',
+        description: "",
       });
-      
-      // Reset selected scopes
+
       setSelectedScopes({
         scope1: false,
         scope2: false,
-        scope3: false
+        scope3: false,
       });
-      
-      // Close modal
+
       setShowAddModal(false);
-      
-      // Show success alert
-      setAlertMessage('Objectif ajouté avec succès!');
+
+      setAlertMessage("Objectif ajouté avec succès!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
-      
-      // Refresh goals list
+
       fetchGoals(company._id);
-      
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
     }
@@ -356,50 +275,53 @@ const GoalsPage = () => {
 
   const handleUpdateGoal = async (e) => {
     e.preventDefault();
-    
+
     if (!editingGoal?._id) {
       toast.error("Aucun objectif sélectionné pour la mise à jour");
       return;
     }
 
-    // Validate that all goal values are valid
     let hasError = false;
     let errorMessages = [];
-    
+
     if (editingGoal.scope1Goal > 0 && editingGoal.scope1Goal >= currentEmissions.scope1) {
-      errorMessages.push(`L'objectif Scope 1 doit être inférieur aux émissions actuelles (${currentEmissions.scope1} tCO₂e)`);
+      errorMessages.push(
+        `L'objectif Scope 1 doit être inférieur aux émissions actuelles (${currentEmissions.scope1} tCO₂e)`
+      );
       hasError = true;
     }
-    
+
     if (editingGoal.scope2Goal > 0 && editingGoal.scope2Goal >= currentEmissions.scope2) {
-      errorMessages.push(`L'objectif Scope 2 doit être inférieur aux émissions actuelles (${currentEmissions.scope2} tCO₂e)`);
+      errorMessages.push(
+        `L'objectif Scope 2 doit être inférieur aux émissions actuelles (${currentEmissions.scope2} tCO₂e)`
+      );
       hasError = true;
     }
-    
+
     if (editingGoal.scope3Goal > 0 && editingGoal.scope3Goal >= currentEmissions.scope3) {
-      errorMessages.push(`L'objectif Scope 3 doit être inférieur aux émissions actuelles (${currentEmissions.scope3} tCO₂e)`);
+      errorMessages.push(
+        `L'objectif Scope 3 doit être inférieur aux émissions actuelles (${currentEmissions.scope3} tCO₂e)`
+      );
       hasError = true;
     }
-    
-    // Make sure at least one scope has a goal
+
     if (editingGoal.scope1Goal <= 0 && editingGoal.scope2Goal <= 0 && editingGoal.scope3Goal <= 0) {
       errorMessages.push("Au moins un scope doit avoir une valeur d'objectif supérieure à 0");
       hasError = true;
     }
-    
+
     if (hasError) {
-      errorMessages.forEach(msg => toast.error(msg));
+      errorMessages.forEach((msg) => toast.error(msg));
       return;
     }
 
     try {
-      // Calculate the updated total goal
       const updatedGoal = {
         ...editingGoal,
-        totalGoal: 
-          parseFloat(editingGoal.scope1Goal || 0) + 
-          parseFloat(editingGoal.scope2Goal || 0) + 
-          parseFloat(editingGoal.scope3Goal || 0)
+        totalGoal:
+          parseFloat(editingGoal.scope1Goal || 0) +
+          parseFloat(editingGoal.scope2Goal || 0) +
+          parseFloat(editingGoal.scope3Goal || 0),
       };
 
       const res = await fetch(`http://localhost:4000/goals/${editingGoal._id}`, {
@@ -411,18 +333,14 @@ const GoalsPage = () => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error updating goal");
-      
-      // Close modal
+
       setShowEditModal(false);
-      
-      // Show success alert
-      setAlertMessage('Objectif mis à jour avec succès!');
+
+      setAlertMessage("Objectif mis à jour avec succès!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
-      
-      // Refresh goals list
+
       fetchGoals(company._id);
-      
     } catch (err) {
       console.error("Update error:", err);
       toast.error(`Erreur: ${err.message}`);
@@ -430,10 +348,10 @@ const GoalsPage = () => {
   };
 
   const handleDeleteGoal = async (goalId) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet objectif?')) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet objectif?")) {
       return;
     }
-    
+
     try {
       const res = await fetch(`http://localhost:4000/goals/${goalId}`, {
         method: "DELETE",
@@ -444,49 +362,44 @@ const GoalsPage = () => {
         const data = await res.json();
         throw new Error(data.message);
       }
-      
-      // Show success alert
-      setAlertMessage('Objectif supprimé avec succès!');
+
+      setAlertMessage("Objectif supprimé avec succès!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
-      
-      // Refresh goals list
+
       fetchGoals(company._id);
-      
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
     }
   };
 
-  // Check if any goals have been achieved
   const checkAchievedGoals = (goals, emissions) => {
     const achievedGoals = [];
     
-    goals.forEach(goal => {
-      const previousStatus = goal.status || 'pending';
-      
-      // Check if all selected scopes are achieved
-      // Logic: Goal is achieved when the current emissions are LESS than or equal to goal value
+    goals.forEach((goal) => {
       const isScope1Achieved = goal.scope1Goal === 0 || emissions.scope1 <= goal.scope1Goal;
       const isScope2Achieved = goal.scope2Goal === 0 || emissions.scope2 <= goal.scope2Goal;
       const isScope3Achieved = goal.scope3Goal === 0 || emissions.scope3 <= goal.scope3Goal;
       
       const allScopesAchieved = isScope1Achieved && isScope2Achieved && isScope3Achieved;
       
-      // If the goal is newly achieved, add it to the list
-      if (allScopesAchieved && previousStatus !== 'achieved') {
+      // Only consider this a newly achieved goal if:
+      // 1. It's now achieved
+      // 2. It was previously not marked as achieved
+      // 3. We haven't already sent a notification for it
+      if (allScopesAchieved && goal.status !== "achieved") {
         achievedGoals.push({
           ...goal,
-          newlyAchieved: true
+          newlyAchieved: true,
         });
         
-        // Update the goal status on the server
+        // Update the goal status in the database
         fetch(`http://localhost:4000/goals/${goal._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ ...goal, status: 'achieved' }),
-        }).catch(error => console.error("Error updating goal status:", error));
+          body: JSON.stringify({ ...goal, status: "achieved" }),
+        }).catch((error) => console.error("Error updating goal status:", error));
       }
     });
     
@@ -497,60 +410,89 @@ const GoalsPage = () => {
     try {
       const res = await fetch(`http://localhost:4000/goals/all/${companyId}`);
       const data = await res.json();
-      
+  
       if (data.success && Array.isArray(data.data)) {
-        // Check for newly achieved goals
-        const achievedGoals = checkAchievedGoals(data.data, currentEmissions);
-        
-        // Update the goals list with status information
-        const updatedGoals = data.data.map(goal => {
-          // Logic: Goal is achieved when the current emissions are LESS than or equal to goal value
+        // First update the statuses based on current emissions
+        const updatedGoals = data.data.map((goal) => {
           const isScope1Achieved = goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
           const isScope2Achieved = goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
           const isScope3Achieved = goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
-          
-          let status = 'pending';
+  
+          let status = "pending";
           if (isScope1Achieved && isScope2Achieved && isScope3Achieved) {
-            status = 'achieved';
+            status = "achieved";
           } else {
-            // Calculate progress - how close we are to achieving the goal
             const totalScopes = [
               goal.scope1Goal > 0 ? 1 : 0,
-              goal.scope2Goal > 0 ? 1 : 0, 
-              goal.scope3Goal > 0 ? 1 : 0
+              goal.scope2Goal > 0 ? 1 : 0,
+              goal.scope3Goal > 0 ? 1 : 0,
             ].reduce((a, b) => a + b, 0);
-            
-            // Calculate progress percentage correctly
-            // Progress = how much of the reduction needed has been achieved
-            const scope1Progress = goal.scope1Goal > 0 ? 
-              Math.min(100, Math.max(0, ((currentEmissions.scope1 - goal.scope1Goal) / (goal.initialScope1 || currentEmissions.scope1)) * 100)) : 0;
-            const scope2Progress = goal.scope2Goal > 0 ? 
-              Math.min(100, Math.max(0, ((currentEmissions.scope2 - goal.scope2Goal) / (goal.initialScope2 || currentEmissions.scope2)) * 100)) : 0;
-            const scope3Progress = goal.scope3Goal > 0 ? 
-              Math.min(100, Math.max(0, ((currentEmissions.scope3 - goal.scope3Goal) / (goal.initialScope3 || currentEmissions.scope3)) * 100)) : 0;
-            
-            const totalProgress = totalScopes > 0 ? 
-              (scope1Progress + scope2Progress + scope3Progress) / totalScopes : 0;
-            
-            status = totalProgress > 50 ? 'in-progress' : 'pending';
+  
+            const scope1Progress =
+              goal.scope1Goal > 0
+                ? Math.min(
+                    100,
+                    Math.max(
+                      0,
+                      ((currentEmissions.scope1 - goal.scope1Goal) /
+                        (goal.initialScope1 || currentEmissions.scope1)) *
+                        100
+                    )
+                  )
+                : 0;
+            const scope2Progress =
+              goal.scope2Goal > 0
+                ? Math.min(
+                    100,
+                    Math.max(
+                      0,
+                      ((currentEmissions.scope2 - goal.scope2Goal) /
+                        (goal.initialScope2 || currentEmissions.scope2)) *
+                        100
+                    )
+                  )
+                : 0;
+            const scope3Progress =
+              goal.scope3Goal > 0
+                ? Math.min(
+                    100,
+                    Math.max(
+                      0,
+                      ((currentEmissions.scope3 - goal.scope3Goal) /
+                        (goal.initialScope3 || currentEmissions.scope3)) *
+                        100
+                    )
+                  )
+                : 0;
+  
+            const totalProgress =
+              totalScopes > 0 ? (scope1Progress + scope2Progress + scope3Progress) / totalScopes : 0;
+  
+            status = totalProgress > 50 ? "in-progress" : "pending";
           }
-          
+  
           return {
             ...goal,
-            status
+            status,
           };
         });
-        
+  
         setGoalsList(updatedGoals);
         
-        // Create notifications for newly achieved goals
-        achievedGoals.forEach(goal => {
-          addNotification({
-            type: 'achievement',
-            title: 'Objectif atteint! 🎉',
-            message: `Vous avez atteint votre objectif de réduction d'émissions "${goal.name}"!`,
-            time: new Date().toLocaleString()
-          });
+        // Then check which goals have newly been achieved
+        const achievedGoals = checkAchievedGoals(data.data, currentEmissions);
+        
+        // Send notifications for newly achieved goals
+        achievedGoals.forEach((goal) => {
+          if (goal.newlyAchieved) {
+            addNotification({
+              type: "achievement",
+              title: "Objectif atteint! 🎉",
+              message: `Vous avez atteint votre objectif de réduction d'émissions "${goal.name}"!`,
+              goalId: goal._id, // Add goal ID to prevent duplicate notifications
+              time: new Date().toLocaleString(),
+            });
+          }
         });
       }
     } catch (error) {
@@ -579,13 +521,7 @@ const GoalsPage = () => {
         const emissions = await fetchAndCalculateEmissions(compData.data._id);
         setCurrentEmissions(emissions);
 
-        // Fetch all goals
         await fetchGoals(compData.data._id);
-        
-        // Load stored notifications
-        const storedNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-        setNotifications(storedNotifications);
-        
       } catch (err) {
         console.error(err);
         toast.error("Échec de la récupération des données");
@@ -595,58 +531,57 @@ const GoalsPage = () => {
     };
 
     fetchData();
-    
-    // Set up periodic check for achieved goals (every 30 minutes)
+
     const intervalId = setInterval(() => {
       if (company?._id) {
         fetchAndCalculateEmissions(company._id)
-          .then(emissions => {
+          .then((emissions) => {
             setCurrentEmissions(emissions);
             fetchGoals(company._id);
           })
-          .catch(error => console.error("Error in periodic check:", error));
+          .catch((error) => console.error("Error in periodic check:", error));
       }
     }, 30 * 60 * 1000);
-    
+
     return () => clearInterval(intervalId);
-  }, []);
+  }, [company]);
 
   const getScopeColor = (scope) => {
-    switch(scope) {
-      case 1: return "bg-red";
-      case 2: return "bg-blue";
-      case 3: return "bg-green";
-      default: return "bg-azure";
+    switch (scope) {
+      case 1:
+        return "bg-red";
+      case 2:
+        return "bg-blue";
+      case 3:
+        return "bg-green";
+      default:
+        return "bg-azure";
     }
   };
 
   const getGoalStatus = (goal) => {
-    // Logic: Goal is achieved when the current emissions are LESS than or equal to goal value
     const isScope1Achieved = goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
     const isScope2Achieved = goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
     const isScope3Achieved = goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
-    
+
     if (isScope1Achieved && isScope2Achieved && isScope3Achieved) {
-      return { status: 'achieved', badgeClass: 'bg-success' };
+      return { status: "achieved", badgeClass: "bg-success" };
     } else {
-      // Calculate progress - how close each scope is to the goal
       let activeScopes = 0;
       let totalProgress = 0;
-      
+
       if (goal.scope1Goal > 0) {
         activeScopes++;
-        // Only calculate progress if emissions are above goal (otherwise it's already achieved)
         if (currentEmissions.scope1 > goal.scope1Goal) {
-          // Calculate the reduction needed and how much has been achieved
           const reductionNeeded = (goal.initialScope1 || currentEmissions.scope1) - goal.scope1Goal;
           const reductionAchieved = (goal.initialScope1 || currentEmissions.scope1) - currentEmissions.scope1;
           const progressPercent = (reductionAchieved / reductionNeeded) * 100;
           totalProgress += Math.min(100, Math.max(0, progressPercent));
         } else {
-          totalProgress += 100; // This scope is already achieved
+          totalProgress += 100;
         }
       }
-      
+
       if (goal.scope2Goal > 0) {
         activeScopes++;
         if (currentEmissions.scope2 > goal.scope2Goal) {
@@ -658,7 +593,7 @@ const GoalsPage = () => {
           totalProgress += 100;
         }
       }
-      
+
       if (goal.scope3Goal > 0) {
         activeScopes++;
         if (currentEmissions.scope3 > goal.scope3Goal) {
@@ -670,59 +605,57 @@ const GoalsPage = () => {
           totalProgress += 100;
         }
       }
-      
+
       const averageProgress = activeScopes > 0 ? totalProgress / activeScopes : 0;
-      
+
       if (averageProgress > 75) {
-        return { status: 'in-progress', badgeClass: 'bg-warning' };
+        return { status: "in-progress", badgeClass: "bg-warning" };
       } else {
-        return { status: 'pending', badgeClass: 'bg-danger' };
+        return { status: "pending", badgeClass: "bg-danger" };
       }
     }
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric'
+    return date.toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const handleEditGoal = (goal) => {
-     setEditingGoal({
+    setEditingGoal({
       ...goal,
       scope1Goal: parseFloat(goal.scope1Goal || 0),
       scope2Goal: parseFloat(goal.scope2Goal || 0),
       scope3Goal: parseFloat(goal.scope3Goal || 0),
-      totalGoal: parseFloat(goal.totalGoal || 0)
+      totalGoal: parseFloat(goal.totalGoal || 0),
     });
     setShowEditModal(true);
   };
 
-  // Calculate current total goal value for preview
   const calculateTotalGoal = () => {
     return (
-      (selectedScopes.scope1 ? parseFloat(newGoal.scope1Goal || 0) : 0) + 
-      (selectedScopes.scope2 ? parseFloat(newGoal.scope2Goal || 0) : 0) + 
+      (selectedScopes.scope1 ? parseFloat(newGoal.scope1Goal || 0) : 0) +
+      (selectedScopes.scope2 ? parseFloat(newGoal.scope2Goal || 0) : 0) +
       (selectedScopes.scope3 ? parseFloat(newGoal.scope3Goal || 0) : 0)
     ).toFixed(2);
   };
 
-  // Calculate potential reduction
   const calculatePotentialReduction = () => {
     const totalGoal = parseFloat(calculateTotalGoal());
     const reduction = currentEmissions.total - totalGoal;
     return {
-      amount: reduction > 0 ? reduction.toFixed(2) : '0.00',
-      percentage: reduction > 0 && currentEmissions.total > 0 
-        ? ((reduction / currentEmissions.total) * 100).toFixed(1) 
-        : '0.0'
+      amount: reduction > 0 ? reduction.toFixed(2) : "0.00",
+      percentage:
+        reduction > 0 && currentEmissions.total > 0
+          ? ((reduction / currentEmissions.total) * 100).toFixed(1)
+          : "0.0",
     };
   };
 
-  // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentGoals = goalsList.slice(indexOfFirstItem, indexOfLastItem);
@@ -741,20 +674,31 @@ const GoalsPage = () => {
             </div>
             <div className="col-auto ms-auto d-print-none">
               <div className="btn-list">
-                <button 
-                  type="button" 
-                  className="btn btn-primary d-none d-sm-inline-block" 
+                <button
+                  type="button"
+                  className="btn btn-primary d-none d-sm-inline-block"
                   onClick={() => setShowAddModal(true)}
                 >
                   Ajouter un nouvel objectif
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-primary d-sm-none btn-icon" 
+                <button
+                  type="button"
+                  className="btn btn-primary d-sm-none btn-icon"
                   onClick={() => setShowAddModal(true)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M12 5l0 14" />
                     <path d="M5 12l14 0" />
                   </svg>
@@ -764,12 +708,22 @@ const GoalsPage = () => {
           </div>
         </div>
 
-        {/* Success Alert */}
         {showSuccessAlert && (
           <div className="alert alert-success alert-dismissible" role="alert">
             <div className="d-flex">
               <div>
-                <svg xmlns="http://www.w3.org/2000/svg" className="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="icon alert-icon"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <path d="M5 12l5 5l10 -10"></path>
                 </svg>
@@ -781,14 +735,8 @@ const GoalsPage = () => {
         )}
 
         <div className="page-body">
-          {loading ? (
-            <div className="card">
-              <div className="card-body text-center py-4">
-                <div className="spinner-border text-blue" role="status"></div>
-                <div className="mt-3">Chargement des données d'émission...</div>
-              </div>
-            </div>
-          ) : (
+          
+           
             <div className="row row-cards">
               <div className="col-md-12">
                 <div className="card">
@@ -803,7 +751,18 @@ const GoalsPage = () => {
                             <div className="row align-items-center">
                               <div className="col-auto">
                                 <span className="bg-red text-white avatar">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-factory" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="icon icon-tabler icon-tabler-factory"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="2"
+                                    stroke="currentColor"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                     <path d="M4 21c1.147 -4.02 1.983 -8.027 2 -12h6c.017 3.973 .853 7.98 2 12"></path>
                                     <path d="M12.5 13h4.5c.025 2.612 .894 5.296 2 8"></path>
@@ -816,9 +775,7 @@ const GoalsPage = () => {
                                 <div className="font-weight-medium">
                                   Scope 1: {currentEmissions.scope1} tCO₂e
                                 </div>
-                                <div className="text-muted">
-                                  Émissions directes
-                                </div>
+                                <div className="text-muted">Émissions directes</div>
                               </div>
                             </div>
                           </div>
@@ -830,7 +787,18 @@ const GoalsPage = () => {
                             <div className="row align-items-center">
                               <div className="col-auto">
                                 <span className="bg-blue text-white avatar">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-bolt" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="icon icon-tabler icon-tabler-bolt"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="2"
+                                    stroke="currentColor"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                     <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path>
                                   </svg>
@@ -854,7 +822,18 @@ const GoalsPage = () => {
                             <div className="row align-items-center">
                               <div className="col-auto">
                                 <span className="bg-green text-white avatar">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-truck" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="icon icon-tabler icon-tabler-truck"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="2"
+                                    stroke="currentColor"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                     <path d="M4 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
                                     <path d="M16 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
@@ -867,9 +846,7 @@ const GoalsPage = () => {
                                 <div className="font-weight-medium">
                                   Scope 3: {currentEmissions.scope3} tCO₂e
                                 </div>
-                                <div className="text-muted">
-                                  Autres émissions indirectes
-                                </div>
+                                <div className="text-muted">Autres émissions indirectes</div>
                               </div>
                             </div>
                           </div>
@@ -882,7 +859,18 @@ const GoalsPage = () => {
                           <div className="row align-items-center">
                             <div className="col-auto">
                               <span className="bg-azure text-white avatar">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-world" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="icon icon-tabler icon-tabler-world"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
                                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                   <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
                                   <path d="M3.6 9h16.8"></path>
@@ -896,9 +884,7 @@ const GoalsPage = () => {
                               <div className="font-weight-medium">
                                 Émissions Totales: {currentEmissions.total} tCO₂e
                               </div>
-                              <div className="text-muted">
-                                Empreinte carbone globale
-                              </div>
+                              <div className="text-muted">Empreinte carbone globale</div>
                             </div>
                           </div>
                         </div>
@@ -917,7 +903,18 @@ const GoalsPage = () => {
                     {goalsList.length === 0 ? (
                       <div className="empty">
                         <div className="empty-icon">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-target" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="icon icon-tabler icon-tabler-target"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                            stroke="currentColor"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                             <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
                             <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"></path>
@@ -929,12 +926,23 @@ const GoalsPage = () => {
                           Commencez par ajouter votre premier objectif de réduction d'émissions
                         </p>
                         <div className="empty-action">
-                          <button 
-                            className="btn btn-primary" 
+                          <button
+                            className="btn btn-primary"
                             onClick={() => setShowAddModal(true)}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="icon"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              strokeWidth="2"
+                              stroke="currentColor"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                               <path d="M12 5l0 14" />
                               <path d="M5 12l14 0" />
                             </svg>
@@ -959,13 +967,16 @@ const GoalsPage = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {currentGoals.map(goal => {
-                              // Calculate status directly to ensure it's correct
-                              const isScope1Achieved = goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
-                              const isScope2Achieved = goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
-                              const isScope3Achieved = goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
-                              const allScopesAchieved = isScope1Achieved && isScope2Achieved && isScope3Achieved;
-                              
+                            {currentGoals.map((goal) => {
+                              const isScope1Achieved =
+                                goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
+                              const isScope2Achieved =
+                                goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
+                              const isScope3Achieved =
+                                goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
+                              const allScopesAchieved =
+                                isScope1Achieved && isScope2Achieved && isScope3Achieved;
+
                               return (
                                 <tr key={goal._id}>
                                   <td>
@@ -984,7 +995,7 @@ const GoalsPage = () => {
                                         {goal.scope1Goal} tCO₂e
                                         {isScope1Achieved && " ✓"}
                                       </span>
-                                    ) : '-'}
+                                    ) : "-"}
                                   </td>
                                   <td>
                                     {goal.scope2Goal > 0 ? (
@@ -992,7 +1003,7 @@ const GoalsPage = () => {
                                         {goal.scope2Goal} tCO₂e
                                         {isScope2Achieved && " ✓"}
                                       </span>
-                                    ) : '-'}
+                                    ) : "-"}
                                   </td>
                                   <td>
                                     {goal.scope3Goal > 0 ? (
@@ -1000,11 +1011,13 @@ const GoalsPage = () => {
                                         {goal.scope3Goal} tCO₂e
                                         {isScope3Achieved && " ✓"}
                                       </span>
-                                    ) : '-'}
+                                    ) : "-"}
                                   </td>
                                   <td>{goal.totalGoal.toFixed(1)} tCO₂e</td>
                                   <td>
-                                    {allScopesAchieved && <span className="badge bg-green-lt">Atteint</span>}
+                                    {allScopesAchieved && (
+                                      <span className="badge bg-green-lt">Atteint</span>
+                                    )}
                                     {!allScopesAchieved && (
                                       <span className="badge bg-yellow-lt">En cours</span>
                                     )}
@@ -1012,7 +1025,7 @@ const GoalsPage = () => {
                                   <td className="text-muted">{formatDate(goal.createdAt)}</td>
                                   <td>
                                     <div className="btn-list flex-nowrap">
-                                      <button 
+                                      <button
                                         className="btn btn-sm btn-icon btn-ghost-secondary"
                                         onClick={() => handleEditGoal(goal)}
                                       >
@@ -1031,7 +1044,7 @@ const GoalsPage = () => {
                                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
                                       </button>
-                                      <button 
+                                      <button
                                         className="btn btn-sm btn-icon btn-ghost-secondary text-danger"
                                         onClick={() => handleDeleteGoal(goal._id)}
                                       >
@@ -1062,32 +1075,71 @@ const GoalsPage = () => {
                         </table>
                       </div>
                     )}
-                    
-                    {/* Pagination */}
+
                     {goalsList.length > 0 && (
                       <div className="card-footer d-flex align-items-center">
                         <p className="m-0 text-muted">
-                          Affichage de <span>{indexOfFirstItem + 1}</span> à <span>{Math.min(indexOfLastItem, goalsList.length)}</span> sur <span>{goalsList.length}</span> entrées
+                          Affichage de <span>{indexOfFirstItem + 1}</span> à{" "}
+                          <span>{Math.min(indexOfLastItem, goalsList.length)}</span> sur{" "}
+                          <span>{goalsList.length}</span> entrées
                         </p>
                         <ul className="pagination m-0 ms-auto">
-                          <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                            <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                            <button
+                              className="page-link"
+                              onClick={() => setCurrentPage(currentPage - 1)}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="icon"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                strokeWidth="2"
+                                stroke="currentColor"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                 <path d="M15 6l-6 6l6 6"></path>
                               </svg>
                             </button>
                           </li>
-                          
+
                           {Array.from({ length: totalPages }, (_, i) => (
-                            <li className={`page-item ${currentPage === i + 1 ? 'active' : ''}`} key={i}>
-                              <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
+                            <li
+                              className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                              key={i}
+                            >
+                              <button
+                                className="page-link"
+                                onClick={() => setCurrentPage(i + 1)}
+                              >
+                                {i + 1}
+                              </button>
                             </li>
                           ))}
-                          
-                          <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                            <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+
+                          <li
+                            className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                          >
+                            <button
+                              className="page-link"
+                              onClick={() => setCurrentPage(currentPage + 1)}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="icon"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                strokeWidth="2"
+                                stroke="currentColor"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                 <path d="M9 6l6 6l-6 6"></path>
                               </svg>
@@ -1100,18 +1152,26 @@ const GoalsPage = () => {
                 </div>
               </div>
             </div>
-          )}
+           
         </div>
       </div>
 
-      {/* Add Goal Modal */}
       {showAddModal && (
-        <div className="modal modal-blur show" style={{display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)'}} tabIndex="-1" role="dialog">
+        <div
+          className="modal modal-blur show"
+          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          tabIndex="-1"
+          role="dialog"
+        >
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Ajouter un nouvel objectif de réduction d'émissions</h5>
-                <button type="button" className="btn-close" onClick={() => setShowAddModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowAddModal(false)}
+                ></button>
               </div>
               <form onSubmit={handleAddGoal}>
                 <div className="modal-body">
@@ -1122,7 +1182,7 @@ const GoalsPage = () => {
                       className="form-control"
                       placeholder="Ex: Objectif de réduction carbone 2025"
                       value={newGoal.name}
-                      onChange={(e) => handleGoalChange('name', e.target.value)}
+                      onChange={(e) => handleGoalChange("name", e.target.value)}
                       required
                     />
                   </div>
@@ -1135,7 +1195,7 @@ const GoalsPage = () => {
                       max={new Date().getFullYear() + 30}
                       className="form-control"
                       value={newGoal.year}
-                      onChange={(e) => handleGoalChange('year', e.target.value)}
+                      onChange={(e) => handleGoalChange("year", e.target.value)}
                       required
                     />
                   </div>
@@ -1149,7 +1209,9 @@ const GoalsPage = () => {
                   <div className="form-label mb-2">Sélectionnez les scopes pour définir des objectifs</div>
                   <div className="form-selectgroup-boxes row mb-3">
                     <div className="col-md-4">
-                      <label className={`form-selectgroup-item ${selectedScopes.scope1 ? 'active' : ''}`}>
+                      <label
+                        className={`form-selectgroup-item ${selectedScopes.scope1 ? "active" : ""}`}
+                      >
                         <input
                           type="checkbox"
                           name="scope-1"
@@ -1172,7 +1234,9 @@ const GoalsPage = () => {
                       </label>
                     </div>
                     <div className="col-md-4">
-                      <label className={`form-selectgroup-item ${selectedScopes.scope2 ? 'active' : ''}`}>
+                      <label
+                        className={`form-selectgroup-item ${selectedScopes.scope2 ? "active" : ""}`}
+                      >
                         <input
                           type="checkbox"
                           name="scope-2"
@@ -1195,7 +1259,9 @@ const GoalsPage = () => {
                       </label>
                     </div>
                     <div className="col-md-4">
-                      <label className={`form-selectgroup-item ${selectedScopes.scope3 ? 'active' : ''}`}>
+                      <label
+                        className={`form-selectgroup-item ${selectedScopes.scope3 ? "active" : ""}`}
+                      >
                         <input
                           type="checkbox"
                           name="scope-3"
@@ -1227,17 +1293,18 @@ const GoalsPage = () => {
                         step="0.01"
                         min="0.01"
                         max={currentEmissions.scope1 - 0.01}
-                        className={`form-control ${validationErrors.scope1Goal ? 'is-invalid' : ''}`}
+                        className={`form-control ${validationErrors.scope1Goal ? "is-invalid" : ""}`}
                         placeholder="Émissions cibles en tCO₂e"
                         value={newGoal.scope1Goal}
-                        onChange={(e) => handleGoalChange('scope1Goal', e.target.value)}
+                        onChange={(e) => handleGoalChange("scope1Goal", e.target.value)}
                         required={selectedScopes.scope1}
                       />
                       {validationErrors.scope1Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope1Goal}</div>
                       ) : (
                         <small className="form-hint">
-                          Votre objectif doit être inférieur aux émissions actuelles ({currentEmissions.scope1} tCO₂e)
+                          Votre objectif doit être inférieur aux émissions actuelles (
+                          {currentEmissions.scope1} tCO₂e)
                         </small>
                       )}
                     </div>
@@ -1251,17 +1318,18 @@ const GoalsPage = () => {
                         step="0.01"
                         min="0.01"
                         max={currentEmissions.scope2 - 0.01}
-                        className={`form-control ${validationErrors.scope2Goal ? 'is-invalid' : ''}`}
+                        className={`form-control ${validationErrors.scope2Goal ? "is-invalid" : ""}`}
                         placeholder="Émissions cibles en tCO₂e"
                         value={newGoal.scope2Goal}
-                        onChange={(e) => handleGoalChange('scope2Goal', e.target.value)}
+                        onChange={(e) => handleGoalChange("scope2Goal", e.target.value)}
                         required={selectedScopes.scope2}
                       />
                       {validationErrors.scope2Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope2Goal}</div>
                       ) : (
                         <small className="form-hint">
-                          Votre objectif doit être inférieur aux émissions actuelles ({currentEmissions.scope2} tCO₂e)
+                          Votre objectif doit être inférieur aux émissions actuelles (
+                          {currentEmissions.scope2} tCO₂e)
                         </small>
                       )}
                     </div>
@@ -1275,17 +1343,18 @@ const GoalsPage = () => {
                         step="0.01"
                         min="0.01"
                         max={currentEmissions.scope3 - 0.01}
-                        className={`form-control ${validationErrors.scope3Goal ? 'is-invalid' : ''}`}
+                        className={`form-control ${validationErrors.scope3Goal ? "is-invalid" : ""}`}
                         placeholder="Émissions cibles en tCO₂e"
                         value={newGoal.scope3Goal}
-                        onChange={(e) => handleGoalChange('scope3Goal', e.target.value)}
+                        onChange={(e) => handleGoalChange("scope3Goal", e.target.value)}
                         required={selectedScopes.scope3}
                       />
                       {validationErrors.scope3Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope3Goal}</div>
                       ) : (
                         <small className="form-hint">
-                          Votre objectif doit être inférieur aux émissions actuelles ({currentEmissions.scope3} tCO₂e)
+                          Votre objectif doit être inférieur aux émissions actuelles (
+                          {currentEmissions.scope3} tCO₂e)
                         </small>
                       )}
                     </div>
@@ -1298,7 +1367,7 @@ const GoalsPage = () => {
                       rows="3"
                       placeholder="Décrivez votre stratégie de réduction"
                       value={newGoal.description}
-                      onChange={(e) => handleGoalChange('description', e.target.value)}
+                      onChange={(e) => handleGoalChange("description", e.target.value)}
                     ></textarea>
                   </div>
 
@@ -1306,7 +1375,18 @@ const GoalsPage = () => {
                     <div className="alert alert-info" role="alert">
                       <div className="d-flex">
                         <div>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="icon alert-icon"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                            stroke="currentColor"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                             <path d="M12 9h.01"></path>
                             <path d="M11 12h1v4h1"></path>
@@ -1319,10 +1399,12 @@ const GoalsPage = () => {
                             Objectif total: {calculateTotalGoal()} tCO₂e
                           </div>
                           <div className="text-muted">
-                            Réduction potentielle: {calculatePotentialReduction().amount} tCO₂e ({calculatePotentialReduction().percentage}%)
+                            Réduction potentielle: {calculatePotentialReduction().amount} tCO₂e (
+                            {calculatePotentialReduction().percentage}%)
                           </div>
                           <div className="text-muted mt-2">
-                            <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos émissions actuelles seront inférieures ou égales à la valeur cible.
+                            <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos
+                            émissions actuelles seront inférieures ou égales à la valeur cible.
                           </div>
                         </div>
                       </div>
@@ -1330,15 +1412,30 @@ const GoalsPage = () => {
                   )}
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-link link-secondary" onClick={() => setShowAddModal(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-link link-secondary"
+                    onClick={() => setShowAddModal(false)}
+                  >
                     Annuler
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="btn btn-primary ms-auto"
                     disabled={!(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3)}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="icon"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M12 5l0 14" />
                       <path d="M5 12l14 0" />
@@ -1352,14 +1449,22 @@ const GoalsPage = () => {
         </div>
       )}
 
-      {/* Edit Goal Modal */}
       {showEditModal && editingGoal && (
-        <div className="modal modal-blur show" style={{display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)'}} tabIndex="-1" role="dialog">
+        <div
+          className="modal modal-blur show"
+          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          tabIndex="-1"
+          role="dialog"
+        >
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Modifier l'objectif de réduction d'émissions</h5>
-                <button type="button" className="btn-close" onClick={() => setShowEditModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowEditModal(false)}
+                ></button>
               </div>
               <form onSubmit={handleUpdateGoal}>
                 <div className="modal-body">
@@ -1369,7 +1474,7 @@ const GoalsPage = () => {
                       type="text"
                       className="form-control"
                       value={editingGoal.name}
-                      onChange={(e) => setEditingGoal({...editingGoal, name: e.target.value})}
+                      onChange={(e) => setEditingGoal({ ...editingGoal, name: e.target.value })}
                       required
                     />
                   </div>
@@ -1382,7 +1487,12 @@ const GoalsPage = () => {
                       max={new Date().getFullYear() + 30}
                       className="form-control"
                       value={editingGoal.year}
-                      onChange={(e) => setEditingGoal({...editingGoal, year: parseInt(e.target.value) || new Date().getFullYear()})}
+                      onChange={(e) =>
+                        setEditingGoal({
+                          ...editingGoal,
+                          year: parseInt(e.target.value) || new Date().getFullYear(),
+                        })
+                      }
                       required
                     />
                   </div>
@@ -1393,7 +1503,8 @@ const GoalsPage = () => {
                         <label className="form-label">
                           Objectif Scope 1 (tCO₂e)
                           <span className="form-label-description">
-                            {editingGoal.scope1Goal > 0 && currentEmissions.scope1 > 0 && 
+                            {editingGoal.scope1Goal > 0 &&
+                              currentEmissions.scope1 > 0 &&
                               `${((1 - editingGoal.scope1Goal / currentEmissions.scope1) * 100).toFixed(1)}% de réduction`}
                           </span>
                         </label>
@@ -1406,13 +1517,21 @@ const GoalsPage = () => {
                           value={editingGoal.scope1Goal}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
-                            setEditingGoal({...editingGoal, scope1Goal: value});
+                            setEditingGoal({ ...editingGoal, scope1Goal: value });
                           }}
                         />
-                        <small className={`form-hint ${editingGoal.scope1Goal >= currentEmissions.scope1 && editingGoal.scope1Goal > 0 ? 'text-danger' : ''}`}>
-                          {editingGoal.scope1Goal >= currentEmissions.scope1 && editingGoal.scope1Goal > 0 
-                            ? 'L\'objectif doit être inférieur aux émissions actuelles' 
-                            : 'Émissions actuelles: ' + currentEmissions.scope1 + ' tCO₂e'}
+                        <small
+                          className={`form-hint ${
+                            editingGoal.scope1Goal >= currentEmissions.scope1 &&
+                            editingGoal.scope1Goal > 0
+                              ? "text-danger"
+                              : ""
+                          }`}
+                        >
+                          {editingGoal.scope1Goal >= currentEmissions.scope1 &&
+                          editingGoal.scope1Goal > 0
+                            ? "L'objectif doit être inférieur aux émissions actuelles"
+                            : "Émissions actuelles: " + currentEmissions.scope1 + " tCO₂e"}
                         </small>
                       </div>
                     </div>
@@ -1421,7 +1540,8 @@ const GoalsPage = () => {
                         <label className="form-label">
                           Objectif Scope 2 (tCO₂e)
                           <span className="form-label-description">
-                            {editingGoal.scope2Goal > 0 && currentEmissions.scope2 > 0 && 
+                            {editingGoal.scope2Goal > 0 &&
+                              currentEmissions.scope2 > 0 &&
                               `${((1 - editingGoal.scope2Goal / currentEmissions.scope2) * 100).toFixed(1)}% de réduction`}
                           </span>
                         </label>
@@ -1434,13 +1554,21 @@ const GoalsPage = () => {
                           value={editingGoal.scope2Goal}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
-                            setEditingGoal({...editingGoal, scope2Goal: value});
+                            setEditingGoal({ ...editingGoal, scope2Goal: value });
                           }}
                         />
-                        <small className={`form-hint ${editingGoal.scope2Goal >= currentEmissions.scope2 && editingGoal.scope2Goal > 0 ? 'text-danger' : ''}`}>
-                          {editingGoal.scope2Goal >= currentEmissions.scope2 && editingGoal.scope2Goal > 0
-                            ? 'L\'objectif doit être inférieur aux émissions actuelles' 
-                            : 'Émissions actuelles: ' + currentEmissions.scope2 + ' tCO₂e'}
+                        <small
+                          className={`form-hint ${
+                            editingGoal.scope2Goal >= currentEmissions.scope2 &&
+                            editingGoal.scope2Goal > 0
+                              ? "text-danger"
+                              : ""
+                          }`}
+                        >
+                          {editingGoal.scope2Goal >= currentEmissions.scope2 &&
+                          editingGoal.scope2Goal > 0
+                            ? "L'objectif doit être inférieur aux émissions actuelles"
+                            : "Émissions actuelles: " + currentEmissions.scope2 + " tCO₂e"}
                         </small>
                       </div>
                     </div>
@@ -1449,7 +1577,8 @@ const GoalsPage = () => {
                         <label className="form-label">
                           Objectif Scope 3 (tCO₂e)
                           <span className="form-label-description">
-                            {editingGoal.scope3Goal > 0 && currentEmissions.scope3 > 0 && 
+                            {editingGoal.scope3Goal > 0 &&
+                              currentEmissions.scope3 > 0 &&
                               `${((1 - editingGoal.scope3Goal / currentEmissions.scope3) * 100).toFixed(1)}% de réduction`}
                           </span>
                         </label>
@@ -1462,13 +1591,21 @@ const GoalsPage = () => {
                           value={editingGoal.scope3Goal}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
-                            setEditingGoal({...editingGoal, scope3Goal: value});
+                            setEditingGoal({ ...editingGoal, scope3Goal: value });
                           }}
                         />
-                        <small className={`form-hint ${editingGoal.scope3Goal >= currentEmissions.scope3 && editingGoal.scope3Goal > 0 ? 'text-danger' : ''}`}>
-                          {editingGoal.scope3Goal >= currentEmissions.scope3 && editingGoal.scope3Goal > 0
-                            ? 'L\'objectif doit être inférieur aux émissions actuelles' 
-                            : 'Émissions actuelles: ' + currentEmissions.scope3 + ' tCO₂e'}
+                        <small
+                          className={`form-hint ${
+                            editingGoal.scope3Goal >= currentEmissions.scope3 &&
+                            editingGoal.scope3Goal > 0
+                              ? "text-danger"
+                              : ""
+                          }`}
+                        >
+                          {editingGoal.scope3Goal >= currentEmissions.scope3 &&
+                          editingGoal.scope3Goal > 0
+                            ? "L'objectif doit être inférieur aux émissions actuelles"
+                            : "Émissions actuelles: " + currentEmissions.scope3 + " tCO₂e"}
                         </small>
                       </div>
                     </div>
@@ -1479,15 +1616,28 @@ const GoalsPage = () => {
                     <textarea
                       className="form-control"
                       rows="3"
-                      value={editingGoal.description || ''}
-                      onChange={(e) => setEditingGoal({...editingGoal, description: e.target.value})}
+                      value={editingGoal.description || ""}
+                      onChange={(e) =>
+                        setEditingGoal({ ...editingGoal, description: e.target.value })
+                      }
                     ></textarea>
                   </div>
 
                   <div className="alert alert-info" role="alert">
                     <div className="d-flex">
                       <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="icon alert-icon"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="currentColor"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                           <path d="M12 9h.01"></path>
                           <path d="M11 12h1v4h1"></path>
@@ -1495,63 +1645,49 @@ const GoalsPage = () => {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="alert-title">Aperçu de l'objectif</h4>
+                        <h4 className="alert-title">Aperçu de l'objectif modifié</h4>
                         <div className="text-muted">
-                          Objectif total: {(
-                            parseFloat(editingGoal.scope1Goal || 0) + 
-                            parseFloat(editingGoal.scope2Goal || 0) + 
-                            parseFloat(editingGoal.scope3Goal || 0)
-                          ).toFixed(2)} tCO₂e
+                          Objectif total: {editingGoal.totalGoal.toFixed(2)} tCO₂e
                         </div>
                         <div className="text-muted">
-                          Réduction potentielle: {(
-                            currentEmissions.total - (
-                              parseFloat(editingGoal.scope1Goal || 0) + 
-                              parseFloat(editingGoal.scope2Goal || 0) + 
-                              parseFloat(editingGoal.scope3Goal || 0)
-                            )
-                          ).toFixed(2)} tCO₂e ({(
-                            ((currentEmissions.total - (
-                              parseFloat(editingGoal.scope1Goal || 0) + 
-                              parseFloat(editingGoal.scope2Goal || 0) + 
-                              parseFloat(editingGoal.scope3Goal || 0)
-                            )) / currentEmissions.total) * 100
-                          ).toFixed(1)}%)
+                          Réduction potentielle: {(currentEmissions.total - editingGoal.totalGoal).toFixed(2)} tCO₂e (
+                          {currentEmissions.total > 0
+                            ? ((1 - editingGoal.totalGoal / currentEmissions.total) * 100).toFixed(1)
+                            : 0.0}%)
                         </div>
                         <div className="text-muted mt-2">
-                          <strong>Statut:</strong> {
-                            (currentEmissions.scope1 <= editingGoal.scope1Goal || editingGoal.scope1Goal === 0) && 
-                            (currentEmissions.scope2 <= editingGoal.scope2Goal || editingGoal.scope2Goal === 0) && 
-                            (currentEmissions.scope3 <= editingGoal.scope3Goal || editingGoal.scope3Goal === 0) 
-                              ? "Atteint" 
-                              : "En cours"
-                          }
+                          <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos
+                          émissions actuelles seront inférieures ou égales à la valeur cible.
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-link link-secondary" onClick={() => setShowEditModal(false)}>
+                  <button
+                    type="button"
+                    className="btn btn-link link-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
                     Annuler
                   </button>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary ms-auto"
-                    disabled={
-                      (editingGoal.scope1Goal >= currentEmissions.scope1 && editingGoal.scope1Goal > 0) ||
-                      (editingGoal.scope2Goal >= currentEmissions.scope2 && editingGoal.scope2Goal > 0) ||
-                      (editingGoal.scope3Goal >= currentEmissions.scope3 && editingGoal.scope3Goal > 0) ||
-                      (editingGoal.scope1Goal <= 0 && editingGoal.scope2Goal <= 0 && editingGoal.scope3Goal <= 0)
-                    }
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-device-floppy" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                      <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"></path>
-                      <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                      <path d="M14 4l0 4l-6 0l0 -4"></path>
+                  <button type="submit" className="btn btn-primary ms-auto">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="icon"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l5 5l10 -10" />
                     </svg>
-                    Enregistrer les modifications
+                    Mettre à jour l'objectif
                   </button>
                 </div>
               </form>
