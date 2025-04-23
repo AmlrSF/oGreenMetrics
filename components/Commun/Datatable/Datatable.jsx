@@ -10,6 +10,9 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  //console.log(data);
+  
+
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const getUniqueValues = (key) => {
@@ -24,6 +27,10 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
       : tab?.id === "transport"
       ? getUniqueValues("mode")
       : tab?.id === "businessTravel"
+      ? getUniqueValues("mode")
+      : tab?.id === "biens-services"
+      ? getUniqueValues("type")
+      : tab?.id === "employesTransport"
       ? getUniqueValues("mode")
       : [];
 
@@ -50,6 +57,10 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
           ? "mode"
           : tab?.id === "businessTravel"
           ? "mode"
+            : tab?.id === "biens-services"
+          ? "type"
+            : tab?.id === "employesTransport"
+          ? "mode"
           : null;
 
       if (filterKey) {
@@ -70,7 +81,8 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   return (
     <div className="card">
       <div className="card-header">
-        <div className="d-flex justify-content-between w-full align-items-center gap-3">
+        <div className="d-flex flex-col sm:flex-row justify-content-between 
+          w-full align-items-start sm:align-items-center gap-3">
           <div className="d-flex flex-col gap-2">
             <div className="input-icon " style={{ width: "350px" }}>
               <span className="input-icon-addon">
@@ -151,8 +163,16 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                         row[
                           header.toLowerCase() === "createdat"
                             ? "createdAt"
-                            : header.toLowerCase()
+                            : header === "sousType" ? header 
+                            : header === "Nombre d'employés"? "nombreEmployes" 
+                            : header === "Bus" ? "nomBus" 
+                            : header.toLowerCase()  
                         ];
+                        
+                       
+                        
+                        
+                        
 
                       if (header.toLowerCase() === "createdat" && cellValue) {
                         cellValue = formatDate(cellValue);

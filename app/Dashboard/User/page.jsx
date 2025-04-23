@@ -112,6 +112,14 @@ const processEmissionsData = (data, days = 7) => {
     (data?.scope3Data?.businessTravel?.reduce(
       (sum, item) => sum + parseFloat(item.emissions || 0),
       0
+    ) || 0) +
+    (data?.scope3Data?.purchasedGood?.reduce(
+      (sum, item) => sum + parseFloat(item.emissions || 0),
+      0
+    ) || 0) +
+    (data?.scope3Data?.employesTransport?.reduce(
+      (sum, item) => sum + parseFloat(item.emissions || 0),
+      0
     ) || 0);
 
   return {
@@ -195,49 +203,30 @@ const processEmissionsData = (data, days = 7) => {
               0
             ) || 0,
         },
+        {
+          source: "Transport d'employes",
+          value:
+            data?.scope3Data?.employesTransport?.reduce(
+              (sum, item) => sum + parseFloat(item.emissions || 0),
+              0
+            ) || 0,
+        },
+        {
+          source: "purchased Goods And Service",
+          value:
+            data?.scope3Data?.purchasedGood?.reduce(
+              (sum, item) => sum + parseFloat(item.emissions || 0),
+              0
+            ) || 0,
+        },
       ],
     },
   };
 };
 
 const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
-  const barChartData = {
-    labels: breakdown.map((item) => item.source),
-    datasets: [
-      {
-        label: title,
-        data: breakdown.map((item) => item.value),
-        backgroundColor: color,
-        borderColor: color,
-        borderWidth: 1,
-      },
-    ],
-  };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: "Emissions (tCO₂e)",
-        },
-      },
-      x: {
-        title: {
-          display: true,
-          text: formatDate(new Date()),
-        },
-      },
-    },
-  };
+ 
 
   return (
     <div className="card">
@@ -303,6 +292,8 @@ const CompanyDash = () => {
         method: "GET",
       });
       const data = await response.json();
+      console.log(data);
+      
       setEmissionData(data?.data);
     } catch (error) {
       console.error("Failed to fetch reports:", error);

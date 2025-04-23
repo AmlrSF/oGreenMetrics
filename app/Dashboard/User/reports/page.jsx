@@ -428,7 +428,7 @@ const Reporting = () => {
                     <th>Charts</th>
                     <th>Recomondations</th>
                     <th>Detail Level</th>
-                    <th>Status</th>
+                   
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -512,20 +512,7 @@ const Reporting = () => {
                               {data.detailLevel}
                             </span>
                           </td>
-                          <td>
-                            <span
-                              className={`badge ${
-                                data.status === "pending"
-                                  ? "bg-yellow-lt"
-                                  : data.status === "completed"
-                                  ? "bg-success-lt"
-                                  : "bg-secondary-lt"
-                              }`}
-                            >
-                              {data.status.charAt(0).toUpperCase() +
-                                data.status.slice(1)}
-                            </span>
-                          </td>
+                      
                           <td>
                             <div className="btn-list flex-nowrap">
 
