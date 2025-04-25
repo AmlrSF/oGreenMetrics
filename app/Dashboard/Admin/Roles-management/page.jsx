@@ -134,10 +134,13 @@ const Page = () => {
       <div className="py-10 mb-5 border-b flex justify-between items-center">
         <div className="flex flex-col justify-start">
           <h3 className="text-[30px] font-bold text-[#263589]">
-            Role Administration
+            Administration des rôles
           </h3>
-          <div className="text-gray-600">Manage user roles efficiently.</div>
+          <div className="text-gray-600">
+            Gérez les rôles des utilisateurs efficacement.
+          </div>
         </div>
+
         {userAccess == "10" ? (
           <></>
         ) : (
@@ -155,9 +158,9 @@ const Page = () => {
           <table className="table table-vcenter card-table">
             <thead>
               <tr>
-                <th>Role Name</th>
+                <th>Nom du rôle</th>
                 <th>Description</th>
-                <th>Role</th>
+                <th>Rôle</th>
                 {userAccess == "10" ? <></> : <th className="w-1"> Action </th>}
               </tr>
             </thead>
@@ -287,12 +290,11 @@ const Page = () => {
         </div>
         <div className="card-footer d-flex align-items-center">
           <p className="m-0 text-secondary">
-            Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-            <span>
-              {Math.min(currentPage * itemsPerPage, roles.length)}
-            </span>{" "}
-            of <span>{roles.length}</span> entries
+            Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span> à{" "}
+            <span>{Math.min(currentPage * itemsPerPage, roles.length)}</span>{" "}
+            sur <span>{roles.length}</span> entrées
           </p>
+
           <ul className="pagination m-0 ms-auto">
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
               <button
@@ -367,7 +369,7 @@ const Page = () => {
           >
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Add New Role</h5>
+                <h5 className="modal-title">Ajouter un nouveau rôle</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -377,11 +379,11 @@ const Page = () => {
               <form onSubmit={handleAddRole}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Role Name</label>
+                    <label className="form-label">Nom du rôle</label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Role name"
+                      placeholder="Nom du rôle"
                       value={newRole.name}
                       onChange={(e) =>
                         setNewRole({ ...newRole, name: e.target.value })
@@ -395,7 +397,7 @@ const Page = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Role description"
+                      placeholder="Description du rôle"
                       value={newRole.description}
                       onChange={(e) =>
                         setNewRole({ ...newRole, description: e.target.value })
@@ -407,10 +409,10 @@ const Page = () => {
                   <div className="mb-3">
                     <label className="form-label">Permissions</label>
                     <div className="border p-3 rounded">
-                      {/* User Management */}
+                      {/* Gestion des utilisateurs */}
                       <div className="mb-2">
                         <strong className="text-secondary">
-                          User Management
+                          Gestion des utilisateurs
                         </strong>
                         <div className="form-check">
                           <input
@@ -421,7 +423,7 @@ const Page = () => {
                               handlePermissionChange("userManagement", "read")
                             }
                           />
-                          <label className="form-check-label">Read</label>
+                          <label className="form-check-label">Lecture</label>
                         </div>
                         <div className="form-check">
                           <input
@@ -432,14 +434,14 @@ const Page = () => {
                               handlePermissionChange("userManagement", "write")
                             }
                           />
-                          <label className="form-check-label">Write</label>
+                          <label className="form-check-label">Écriture</label>
                         </div>
                       </div>
 
-                      {/* Role Management */}
+                      {/* Gestion des rôles */}
                       <div className="mb-2">
                         <strong className="text-secondary">
-                          Role Management
+                          Gestion des rôles
                         </strong>
                         <div className="form-check">
                           <input
@@ -450,7 +452,7 @@ const Page = () => {
                               handlePermissionChange("roleManagement", "read")
                             }
                           />
-                          <label className="form-check-label">Read</label>
+                          <label className="form-check-label">Lecture</label>
                         </div>
                         <div className="form-check">
                           <input
@@ -461,14 +463,14 @@ const Page = () => {
                               handlePermissionChange("roleManagement", "write")
                             }
                           />
-                          <label className="form-check-label">Write</label>
+                          <label className="form-check-label">Écriture</label>
                         </div>
                       </div>
 
-                      {/* Company Management */}
+                      {/* Gestion des entreprises */}
                       <div className="mb-2">
                         <strong className="text-secondary">
-                          Company Management
+                          Gestion des entreprises
                         </strong>
                         <div className="form-check">
                           <input
@@ -482,7 +484,7 @@ const Page = () => {
                               )
                             }
                           />
-                          <label className="form-check-label">Read</label>
+                          <label className="form-check-label">Lecture</label>
                         </div>
                         <div className="form-check">
                           <input
@@ -496,7 +498,7 @@ const Page = () => {
                               )
                             }
                           />
-                          <label className="form-check-label">Write</label>
+                          <label className="form-check-label">Écriture</label>
                         </div>
                       </div>
                     </div>
@@ -509,14 +511,14 @@ const Page = () => {
                     className="btn btn-link"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    Cancel
+                    Annuler
                   </button>
                   <button
                     type="submit"
                     className="btn text-white"
                     style={{ backgroundColor: "#263589" }}
                   >
-                    {loading ? "Creating..." : "Create Role"}
+                    {loading ? "Création en cours..." : "Créer le rôle"}
                   </button>
                 </div>
               </form>

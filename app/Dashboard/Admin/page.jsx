@@ -38,34 +38,35 @@ const CompanyDash = () => {
 
   const stats = [
     {
-      title: "Companies",
+      title: "Entreprises", // Companies
       value: companyCount,
       icon: Building2,
       trend: "+12%",
       color: "primary",
     },
     {
-      title: "Reports",
+      title: "Rapports", // Reports
       value: reportCount,
       icon: FileText,
       trend: "+8%",
       color: "purple",
     },
     {
-      title: "Users",
+      title: "Utilisateurs", // Users
       value: userCount,
       icon: Users,
       trend: "+15%",
       color: "green",
     },
     {
-      title: "Admins",
+      title: "Admins", // Admins
       value: adminCount,
       icon: TrendingUp,
       trend: "+5%",
       color: "orange",
     },
   ];
+  
 
   return (
     <div className="page-body">
@@ -73,7 +74,7 @@ const CompanyDash = () => {
         <div className="page-header mb-4">
           <div className="row align-items-center">
             <div className="col">
-              <h2 className="page-title">Dashboard Overview</h2>
+              <h2 className="page-title">Aperçu du Tableau de Bord</h2>
             </div>
           </div>
         </div>

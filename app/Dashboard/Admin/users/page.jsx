@@ -20,7 +20,7 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [userAccess, setUserAccess] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false); 
+  const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [RoleFilter, setRoleFilter] = useState("all");
@@ -137,7 +137,7 @@ const Page = () => {
     }
 
     setFilteredUsers(result);
-  }, [currentFilter, RoleFilter,sortOrder , users]);
+  }, [currentFilter, RoleFilter, sortOrder, users]);
 
   return (
     <div className="container-xl  h-full">
@@ -154,13 +154,13 @@ const Page = () => {
                     size={48}
                     className="text-yellow-500 mb-2 mx-auto"
                   />
-                  <h3>Are you sure?</h3>
+                  <h3>Êtes-vous sûr ?</h3>
                   <div className="text-muted">
                     {modalType === "approve"
                       ? selectedUser.isVerified
-                        ? "Do you want to disapprove this user?"
-                        : "Do you want to approve this user?"
-                      : "Do you want to delete this user?"}
+                        ? "Voulez-vous désapprouver cet utilisateur ?"
+                        : "Voulez-vous approuver cet utilisateur ?"
+                      : "Voulez-vous supprimer cet utilisateur ?"}
                   </div>
                   <div className="text-muted mt-2">
                     <strong>
@@ -177,7 +177,7 @@ const Page = () => {
                         className="btn w-100"
                         onClick={() => setModalOpen(false)}
                       >
-                        Cancel
+                        Annuler
                       </button>
                     </div>
                     <div className="col">
@@ -197,9 +197,9 @@ const Page = () => {
                       >
                         {modalType === "approve"
                           ? selectedUser.isVerified
-                            ? "Disapprove"
-                            : "Approve"
-                          : "Delete"}
+                            ? "Désapprouver"
+                            : "Approuver"
+                          : "Supprimer"}
                       </button>
                     </div>
                   </div>
@@ -217,26 +217,26 @@ const Page = () => {
 
       <div className="py-10  mb-5 d-flex leading-[0.1] border-b flex-column justify-content-center align-items-start">
         <h3 className=" text-[30px] font-bold" style={{ color: "#263589" }}>
-          User Administration
+          Administration des utilisateurs
         </h3>
         <div className="card-subtitle">
-          Manage users, roles, and permissions efficiently.
+          Gérez les utilisateurs, les rôles et les permissions efficacement.
         </div>
       </div>
       <div className="card pt-5">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary d-flex align-items-center">
-              Show
+              Afficher
               <div className="mx-2 d-flex gap-2">
                 <select
                   className="form-select form-select-sm"
                   value={currentFilter}
                   onChange={(e) => setCurrentFilter(e.target.value)}
                 >
-                  <option value="all">All Users</option>
-                  <option value="verified">Verified</option>
-                  <option value="unverified">Unverified</option>
+                  <option value="all">Tous les utilisateurs</option>
+                  <option value="verified">Vérifiés</option>
+                  <option value="unverified">Non vérifiés</option>
                 </select>
 
                 <select
@@ -244,8 +244,8 @@ const Page = () => {
                   value={RoleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >
-                  <option value="all">All Roles</option>
-                  <option value="régulier">Regular</option>
+                  <option value="all">Tous les rôles</option>
+                  <option value="régulier">Régulier</option>
                   <option value="Entreprise">Entreprise</option>
                 </select>
 
@@ -254,12 +254,13 @@ const Page = () => {
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
                 >
-                  <option value="latest">Newest</option>
-                  <option value="oldest">Oldest</option>
+                  <option value="latest">Les plus récents</option>
+                  <option value="oldest">Les plus anciens</option>
                 </select>
               </div>
-              entries
+              entrées
             </div>
+            
           </div>
         </div>
 
@@ -282,11 +283,11 @@ const Page = () => {
               <table className="table table-vcenter card-table">
                 <thead>
                   <tr>
-                    <th>User</th>
+                    <th>Utilisateur</th>
                     <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Created At</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Créé le</th>
                     {userAccess == "10" ? (
                       <></>
                     ) : (
@@ -297,79 +298,85 @@ const Page = () => {
                 <tbody>
                   {filteredUsers.length > 0 ? (
                     filteredUsers
-                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) 
-                    .map((user, index) => (
-                      <tr key={user.id || index}>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <span
-                              className="avatar avatar-md text-white me-2"
-                              style={{ backgroundColor: "#263589" }}
-                            >
-                              {user.photo_de_profil ? (
-                                <img
-                                  src={user.photo_de_profil}
-                                  alt={`${user.prenom} ${user.nom}`}
-                                />
-                              ) : (
-                                getInitials(user.prenom, user.nom)
-                              )}
-                            </span>
-                            <div className="flex-fill">
-                              <div className="font-weight-medium">
-                                {user.prenom} {user.nom}
+                      .slice(
+                        (currentPage - 1) * itemsPerPage,
+                        currentPage * itemsPerPage
+                      )
+                      .map((user, index) => (
+                        <tr key={user.id || index}>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              <span
+                                className="avatar avatar-md text-white me-2"
+                                style={{ backgroundColor: "#263589" }}
+                              >
+                                {user.photo_de_profil ? (
+                                  <img
+                                  className="w-full h-full rounded-sm object-fit-cover"
+                                    src={user.photo_de_profil}
+                                    alt={`${user.prenom} ${user.nom}`}
+                                  />
+                                ) : (
+                                  getInitials(user.prenom, user.nom)
+                                )}
+                              </span>
+                              <div className="flex-fill">
+                                <div className="font-weight-medium">
+                                  {user.prenom} {user.nom}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="text-secondary">{user.email}</td>
-                        <td>
-                          <span className="badge bg-purple-lt">
-                            {user.role === "entreprise"
-                              ? "Enterprise"
-                              : "Regular"}
-                          </span>
-                        </td>
-                        <td>
-                          <span
-                            className={`badge ${
-                              user.isVerified ? "bg-success-lt" : "bg-danger-lt"
-                            }`}
-                          >
-                            {user.isVerified ? "Verified" : "Unverified"}
-                          </span>
-                        </td>
-                        <td className="text-secondary">
-                          {formatDate(user.createdAt)}
-                        </td>
-                        {userAccess == "10" ? (
-                          <></>
-                        ) : (
-                          <td>
-                            <div className="btn-list flex-nowrap">
-                              <button
-                                onClick={() => openModal("approve", user)}
-                                className={`btn btn-ghost-${
-                                  user.isVerified ? "danger" : "success"
-                                } btn-icon`}
-                              >
-                                {user.isVerified ? (
-                                  <UserX size={18} />
-                                ) : (
-                                  <UserCheck size={18} />
-                                )}
-                              </button>
-                              <button
-                                onClick={() => openModal("delete", user)}
-                                className="btn btn-ghost-danger btn-icon"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
                           </td>
-                        )}
-                      </tr>
-                    ))
+                          <td className="text-secondary">{user.email}</td>
+                          <td>
+                            <span className="badge bg-purple-lt">
+                              {user.role === "entreprise"
+                                ? "Enterprise"
+                                : "Regular"}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`badge ${
+                                user.isVerified
+                                  ? "bg-success-lt"
+                                  : "bg-danger-lt"
+                              }`}
+                            >
+                              {user.isVerified ? "Verified" : "Unverified"}
+                            </span>
+                          </td>
+                          <td className="text-secondary">
+                            {formatDate(user.createdAt)}
+                          </td>
+                          {userAccess == "10" ? (
+                            <></>
+                          ) : (
+                            <td>
+                              <div className="btn-list flex-nowrap">
+                                <button
+                                  onClick={() => openModal("approve", user)}
+                                  className={`btn btn-ghost-${
+                                    user.isVerified ? "danger" : "success"
+                                  } btn-icon`}
+                                >
+                                  {user.isVerified ? (
+                                    <UserX size={18} />
+                                  ) : (
+                                    <UserCheck size={18} />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => openModal("delete", user)}
+                                  className="btn btn-ghost-danger btn-icon"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))
                   ) : (
                     <tr>
                       <td colSpan={6} className="text-center text-secondary">
@@ -383,11 +390,11 @@ const Page = () => {
 
             <div className="card-footer d-flex align-items-center">
               <p className="m-0 text-secondary">
-                Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+              Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span> à{" "}
                 <span>
                   {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
                 </span>{" "}
-                of <span>{filteredUsers.length}</span> entries
+                sur <span>{filteredUsers.length}</span> entrées
               </p>
               <ul className="pagination m-0 ms-auto">
                 <li

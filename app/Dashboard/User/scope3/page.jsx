@@ -48,11 +48,10 @@ const Scope3 = () => {
             }
           );
           const data = await response.json();
-    
+
           if (response.ok) {
             setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
           }
-
         } else {
           console.log("User not found");
         }
@@ -93,7 +92,6 @@ const Scope3 = () => {
     const newFormData = { ...formData, company_id: Company?._id, scopeType };
 
     console.log(newFormData);
-    
 
     try {
       const method = isEditing ? "PUT" : "POST";
@@ -180,8 +178,10 @@ const Scope3 = () => {
     return currentTab?.fields.map((field, index) => {
       // Cas spécial pour le type de transport avec options dynamiques
       if (
-        (field.name === "type" || field.name === "sousType" )&&
-        (activeTab === "transport" || activeTab === "businessTravel" || activeTab==="biens-services") &&
+        (field.name === "type" || field.name === "sousType") &&
+        (activeTab === "transport" ||
+          activeTab === "businessTravel" ||
+          activeTab === "biens-services") &&
         field.dynamicOptions
       ) {
         const transportMode = formData.mode || formData.type;
@@ -263,11 +263,10 @@ const Scope3 = () => {
       border-b  justify-content-start align-items-center"
       >
         <div>
-          <h3 className="text-[30px] font-bold" 
-          style={{ color: "#263589" }}>
+          <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
             Scope 3
           </h3>
-          <p >
+          <p>
             <strong className="text-primary">Émissions indirectes</strong>{" "}
             issues des activités de la chaîne de valeur de l’organisation,
             telles que l’achat de biens, les déplacements professionnels,
@@ -297,6 +296,7 @@ const Scope3 = () => {
 
         <div className="card-body">
           <DataTable
+            dataHeader={tabs[activeTab]?.dataHeader}
             headers={tabs[activeTab]?.headers}
             data={tableData[activeTab] || []}
             activeTab={activeTab}

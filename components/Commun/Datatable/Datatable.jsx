@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
 import { Trash2, Edit2, Search } from "lucide-react";
 
-const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
+const DataTable = ({ headers,dataHeader, data, tab, onDelete, onUpdate, onAdd }) => {
   const [filteredData, setFilteredData] = useState(data);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDate, setSortDate] = useState("newest");
@@ -105,7 +105,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   style={{ width: "150px" }}
                 >
-                  <option value="all">All Types</option>
+                  <option value="all">Tous les Types</option>
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
@@ -120,13 +120,13 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                 style={{ width: "150px" }}
                 onChange={(e) => setSortDate(e.target.value)}
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
+                <option value="newest">Les plus récents</option>
+                <option value="oldest">Les plus anciens</option>
               </select>
             </div>
           </div>
           <button className="btn btn-primary" onClick={onAdd}>
-            Add New
+          Ajouter un nouveau
           </button>
         </div>
       </div>
@@ -135,7 +135,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
         <table className="table table-vcenter card-table">
           <thead>
             <tr>
-              {headers?.map((header, index) => (
+              {dataHeader?.map((header, index) => (
                 <th key={index}>{header}</th>
               ))}
             </tr>
@@ -147,7 +147,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                   colSpan={headers?.length}
                   className="text-center text-muted"
                 >
-                  No data available
+                  Aucun données disponible.
                 </td>
               </tr>
             ) : (
@@ -217,7 +217,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
 
       <div className="card-footer d-flex align-items-center">
         <p className="m-0 text-secondary">
-          Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+          Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> à{" "}
           <span>
             {Math.min(currentPage * itemsPerPage, filteredData.length)}
           </span>{" "}

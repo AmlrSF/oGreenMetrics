@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, ShieldX, Trash2,AlertTriangle, Eye } from "lucide-react";
+import { ShieldCheck, ShieldX, Trash2, AlertTriangle, Eye } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
 
@@ -51,8 +51,6 @@ const Page = () => {
       console.log(data);
       setCompanies(data?.data);
       setFilteredCompanies(data?.data);
-
-      
     } catch (error) {
       setError("Failed to load companies");
     }
@@ -132,14 +130,12 @@ const Page = () => {
                     size={48}
                     className="text-yellow-500 mb-2 mx-auto"
                   />
-                  <h3>Are you sure?</h3>
+                  <h3>Êtes-vous sûr ?</h3>
                   <div className="text-muted">
-                    Do you want to delete this company?
+                    Voulez-vous supprimer cette entreprise ?
                   </div>
                   <div className="text-muted mt-2">
-                    <strong>
-                      {selectedCompany.nom_entreprise}
-                    </strong>
+                    <strong>{selectedCompany.nom_entreprise}</strong>
                   </div>
                 </div>
               </div>
@@ -151,17 +147,15 @@ const Page = () => {
                         className="btn w-100"
                         onClick={() => setModalOpen(false)}
                       >
-                        Cancel
+                        Annuler
                       </button>
                     </div>
                     <div className="col">
                       <button
-                        className="btn w-100  btn-danger"
-                        onClick={
-                          ()=>handleDeleteCompany(selectedCompany)
-                        }
+                        className="btn w-100 btn-danger"
+                        onClick={() => handleDeleteCompany(selectedCompany)}
                       >
-                        Delete
+                        Supprimer
                       </button>
                     </div>
                   </div>
@@ -176,13 +170,12 @@ const Page = () => {
           ></div>
         </div>
       )}
-
       <div className="py-10 mb-5 d-flex leading-[0.1] border-b flex-column justify-content-center align-items-start">
         <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
-          Company Administration
+          Administration des entreprises
         </h3>
         <div className="card-subtitle">
-          Manage company verification statuses efficiently.
+          Gérez efficacement les statuts de vérification des entreprises.
         </div>
       </div>
 
@@ -190,19 +183,19 @@ const Page = () => {
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary">
-              Show
+              Afficher
               <div className="mx-2 d-inline-block">
                 <select
                   className="form-select form-select-sm"
                   value={currentFilter}
                   onChange={(e) => setCurrentFilter(e.target.value)}
                 >
-                  <option value="all">All Companies</option>
-                  <option value="verified">Verified</option>
-                  <option value="unverified">Unverified</option>
+                  <option value="all">Toutes les entreprises</option>
+                  <option value="verified">Vérifiées</option>
+                  <option value="unverified">Non vérifiées</option>
                 </select>
               </div>
-              entries
+              entrées
             </div>
           </div>
         </div>
@@ -226,12 +219,11 @@ const Page = () => {
               <table className="table table-vcenter card-table">
                 <thead>
                   <tr>
-                    <th>Company Owner</th>
-                    <th>Company</th>
-                    <th>Contact Email</th>
-                    <th>Industry</th>
-
-                    <th>Registration Date</th>
+                    <th>Propriétaire de l'entreprise</th>
+                    <th>Entreprise</th>
+                    <th>Email de contact</th>
+                    <th>Industrie</th>
+                    <th>Date d'inscription</th>
                     {userAccess == "10" ? (
                       <></>
                     ) : (
@@ -242,63 +234,68 @@ const Page = () => {
                 <tbody>
                   {filteredCompanies.length > 0 ? (
                     filteredCompanies
-                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                    .map((company, index) => (
-                      <tr key={company._id || index}>
-                        <td className="d-flex align-items-center">
-                          <span
-                            className="avatar avatar-sm text-white me-2"
-                            style={{ backgroundColor: "#263589" }}
-                          >
-                            {getInitials(
-                              company.userId?.nom,
-                              company.userId?.prenom
-                            )}
-                          </span>
-                          <p className="text-[10px] mb-0">
-                            {company.userId?.nom} {company.userId?.prenom}
-                          </p>
-                        </td>
-                        <td className="text-secondary ">
-                          <div className="d-flex align-items-center">
-                            <div className="flex-fill">
-                              <div className="font-weight-medium">
-                                {company.nom_entreprise}
+                      .slice(
+                        (currentPage - 1) * itemsPerPage,
+                        currentPage * itemsPerPage
+                      )
+                      .map((company, index) => (
+                        <tr key={company._id || index}>
+                          <td className="d-flex align-items-center">
+                            <span
+                              className="avatar avatar-sm text-white me-2"
+                              style={{ backgroundColor: "#263589" }}
+                            >
+                              {getInitials(
+                                company.userId?.nom,
+                                company.userId?.prenom
+                              )}
+                            </span>
+                            <p className="text-[10px] mb-0">
+                              {company.userId?.nom} {company.userId?.prenom}
+                            </p>
+                          </td>
+                          <td className="text-secondary ">
+                            <div className="d-flex align-items-center">
+                              <div className="flex-fill">
+                                <div className="font-weight-medium">
+                                  {company.nom_entreprise}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="text-secondary">{company.email}</td>
-                        <td>
-                          <span className="badge bg-purple-lt">
-                            {company.industrie}
-                          </span>
-                        </td>
-                        <td className="text-secondary">
-                          {formatDate(company.createdAt)}
-                        </td>
-                        {userAccess == "10" ? (
-                          <></>
-                        ) : (
-                          <td>
-                            <div className="btn-list flex-nowrap">
-                            <button
-                                 onClick={() => navigateToCompanyDetails(company._id)}
-                                className="btn btn-ghost-blue btn-icon"
-                              >
-                                <Eye size={18} />
-                              </button>
-                              <button
-                                 onClick={() => openModal(company)}
-                                className="btn btn-ghost-danger btn-icon"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
                           </td>
-                        )}
-                      </tr>
-                    ))
+                          <td className="text-secondary">{company.email}</td>
+                          <td>
+                            <span className="badge bg-purple-lt">
+                              {company.industrie}
+                            </span>
+                          </td>
+                          <td className="text-secondary">
+                            {formatDate(company.createdAt)}
+                          </td>
+                          {userAccess == "10" ? (
+                            <></>
+                          ) : (
+                            <td>
+                              <div className="btn-list flex-nowrap">
+                                <button
+                                  onClick={() =>
+                                    navigateToCompanyDetails(company._id)
+                                  }
+                                  className="btn btn-ghost-blue btn-icon"
+                                >
+                                  <Eye size={18} />
+                                </button>
+                                <button
+                                  onClick={() => openModal(company)}
+                                  className="btn btn-ghost-danger btn-icon"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))
                   ) : (
                     <tr>
                       <td colSpan={7} className="text-center text-secondary">
@@ -312,14 +309,15 @@ const Page = () => {
 
             <div className="card-footer d-flex align-items-center">
               <p className="m-0 text-secondary">
-                Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+                Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span>{" "}
+                à{" "}
                 <span>
                   {Math.min(
                     currentPage * itemsPerPage,
                     filteredCompanies.length
                   )}
                 </span>{" "}
-                of <span>{filteredCompanies.length}</span> entries
+                sur <span>{filteredCompanies.length}</span> entrées
               </p>
               <ul className="pagination m-0 ms-auto">
                 <li

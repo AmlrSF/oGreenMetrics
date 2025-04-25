@@ -183,10 +183,10 @@ const Page = () => {
          justify-content-center align-items-start"
         >
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
-            Users Administration
+            Administration des utilisateurs
           </h3>
           <div className="card-subtitle">
-            Manage roles, and permissions efficiently.
+            Gérez efficacement les rôles et les permissions.
           </div>
         </div>
         {userAccess == "10" ? (
@@ -197,7 +197,7 @@ const Page = () => {
             onClick={() => setIsModalOpen(true)}
             style={{ backgroundColor: "#8EBE21" }}
           >
-            <Plus size={18} className="mr-2" /> Add User
+            <Plus size={18} className="mr-2" /> Ajouter un utilisateur
           </button>
         )}
       </div>
@@ -206,23 +206,23 @@ const Page = () => {
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary d-flex align-items-center">
-              Show
+              Afficher
               <div className="mx-2 d-flex gap-2">
                 <select
                   className="form-select form-select-sm"
                   value={currentFilter}
                   onChange={(e) => setCurrentFilter(e.target.value)}
                 >
-                  <option value="all">All Users</option>
-                  <option value="verified">Verified</option>
-                  <option value="unverified">Unverified</option>
+                  <option value="all">Tous les utilisateurs</option>
+                  <option value="verified">Vérifiés</option>
+                  <option value="unverified">Non vérifiés</option>
                 </select>
                 <select
                   className="form-select form-select-sm"
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
                 >
-                  <option value="">All Roles</option>
+                  <option value="">Tous les rôles</option>
                   {roles.map((role) => (
                     <option key={role._id} value={role.name}>
                       {role.name}
@@ -234,11 +234,11 @@ const Page = () => {
                   value={SortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
                 >
-                  <option value="latest">Oldest</option>
-                  <option value="oldest">Newest</option>
+                  <option value="latest">Les plus anciens</option>
+                  <option value="oldest">Les plus récents</option>
                 </select>
               </div>
-              entries
+              entrées
             </div>
           </div>
         </div>
@@ -262,11 +262,11 @@ const Page = () => {
               <table className="table table-vcenter card-table">
                 <thead>
                   <tr>
-                    <th>User</th>
+                    <th>Utilisateur</th>
                     <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Created At</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Créé le</th>
                     {userAccess == "10" ? (
                       <></>
                     ) : (
@@ -351,7 +351,7 @@ const Page = () => {
                   ) : (
                     <tr>
                       <td colSpan={6} className="text-center text-secondary">
-                        No users found.
+                        Aucun utilisateur trouvé.
                       </td>
                     </tr>
                   )}
@@ -361,11 +361,12 @@ const Page = () => {
 
             <div className="card-footer d-flex align-items-center">
               <p className="m-0 text-secondary">
-                Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+                Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span>{" "}
+                à{" "}
                 <span>
                   {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
                 </span>{" "}
-                of <span>{filteredUsers.length}</span> entries
+                sur <span>{filteredUsers.length}</span> entrées
               </p>
               <ul className="pagination m-0 ms-auto">
                 <li
@@ -419,7 +420,7 @@ const Page = () => {
           >
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Add New User</h5>
+                <h5 className="modal-title">Ajouter un nouvel utilisateur</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -433,7 +434,7 @@ const Page = () => {
                     <input
                       type="email"
                       className="form-control"
-                      placeholder="Email address"
+                      placeholder="Adresse e-mail"
                       value={newUser.email}
                       onChange={(e) =>
                         setNewUser({ ...newUser, email: e.target.value })
@@ -442,11 +443,11 @@ const Page = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">First Name</label>
+                    <label className="form-label">Prénom</label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="First name"
+                      placeholder="Prénom"
                       value={newUser.prenom}
                       onChange={(e) =>
                         setNewUser({ ...newUser, prenom: e.target.value })
@@ -455,11 +456,11 @@ const Page = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Last Name</label>
+                    <label className="form-label">Nom</label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Last name"
+                      placeholder="Nom"
                       value={newUser.nom}
                       onChange={(e) =>
                         setNewUser({ ...newUser, nom: e.target.value })
@@ -468,7 +469,7 @@ const Page = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Role</label>
+                    <label className="form-label">Rôle</label>
                     <select
                       className="form-select"
                       value={newUser.role}
@@ -476,7 +477,7 @@ const Page = () => {
                         setNewUser({ ...newUser, AdminRoles: e.target.value })
                       }
                     >
-                      <option value="">Select a role</option>
+                      <option value="">Sélectionner un rôle</option>
                       {roles.map((role) => (
                         <option key={role._id} value={role._id}>
                           {role.name}
@@ -485,11 +486,11 @@ const Page = () => {
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Password</label>
+                    <label className="form-label">Mot de passe</label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="mod de passe"
+                      placeholder="Mot de passe"
                       value={newUser.mot_de_passe}
                       onChange={(e) =>
                         setNewUser({ ...newUser, mot_de_passe: e.target.value })
@@ -501,10 +502,10 @@ const Page = () => {
                 <div className="modal-footer">
                   <button
                     type="button"
-                    className="btn   btn-outline"
+                    className="btn btn-outline"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    Cancel
+                    Annuler
                   </button>
                   <a
                     type="button"
@@ -512,14 +513,14 @@ const Page = () => {
                     style={{ backgroundColor: "#8EBE21" }}
                     href="/Dashboard/Admin/Roles-management"
                   >
-                    Create Role
+                    Créer un rôle
                   </a>
                   <button
                     type="submit"
                     className="btn text-white"
                     style={{ backgroundColor: "#263589" }}
                   >
-                    Create user
+                    Créer un utilisateur
                   </button>
                 </div>
               </form>
