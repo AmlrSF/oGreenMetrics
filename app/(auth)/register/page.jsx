@@ -1,9 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const SignupPage = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [accountType, setAccountType] = useState("régulier");
@@ -82,6 +84,7 @@ const SignupPage = () => {
             role: accountType, nom_entreprise: "", matricule_fiscale: "",
             num_tel: "", adresse: "", date_fondation: "", industrie: ""
         });
+        router.push("/");
     } catch (err) {
         setError("Failed to connect to the server");
         console.error(err);
@@ -301,48 +304,47 @@ const SignupPage = () => {
                     />
                   </div>
                   <div className="mb-3">
-  <label className="form-label small mb-1">
-    Country<span className="text-danger">*</span>
-  </label>
-  <select 
-    className="form-select" 
-    name="country"
-    value={formData.country}
-    onChange={handleChange}
-    required={accountType === "entreprise"}
-  >
-    <option value="">Sélectionnez un pays</option>
-    <option value="Sweden">Sweden</option>
-    <option value="Lithuania">Lithuania</option>
-    <option value="France">France</option>
-    <option value="Austria">Austria</option>
-    <option value="Latvia">Latvia</option>
-    <option value="Finland">Finland</option>
-    <option value="Slovakia">Slovakia</option>
-    <option value="Denmark">Denmark</option>
-    <option value="Belgium">Belgium</option>
-    <option value="Croatia">Croatia</option>
-    <option value="Luxembourg">Luxembourg</option>
-    <option value="Slovenia">Slovenia</option>
-    <option value="Italy">Italy</option>
-    <option value="Hungary">Hungary</option>
-    <option value="Spain">Spain</option>
-    <option value="United Kingdom">United Kingdom</option>
-    <option value="Romania">Romania</option>
-    <option value="Portugal">Portugal</option>
-    <option value="Ireland">Ireland</option>
-    <option value="Germany">Germany</option>
-    <option value="Bulgaria">Bulgaria</option>
-    <option value="Netherlands">Netherlands</option>
-    <option value="Czechia">Czechia</option>
-    <option value="Greece">Greece</option>
-    <option value="Malta">Malta</option>
-    <option value="Cyprus">Cyprus</option>
-    <option value="Poland">Poland</option>
-    <option value="Estonia">Estonia</option>
-  </select>
-</div>
-                  
+                    <label className="form-label small mb-1">
+                      Country<span className="text-danger">*</span>
+                    </label>
+                    <select 
+                      className="form-select" 
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      required={accountType === "entreprise"}
+                    >
+                      <option value="">Sélectionnez un pays</option>
+                      <option value="Sweden">Sweden</option>
+                      <option value="Lithuania">Lithuania</option>
+                      <option value="France">France</option>
+                      <option value="Austria">Austria</option>
+                      <option value="Latvia">Latvia</option>
+                      <option value="Finland">Finland</option>
+                      <option value="Slovakia">Slovakia</option>
+                      <option value="Denmark">Denmark</option>
+                      <option value="Belgium">Belgium</option>
+                      <option value="Croatia">Croatia</option>
+                      <option value="Luxembourg">Luxembourg</option>
+                      <option value="Slovenia">Slovenia</option>
+                      <option value="Italy">Italy</option>
+                      <option value="Hungary">Hungary</option>
+                      <option value="Spain">Spain</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Romania">Romania</option>
+                      <option value="Portugal">Portugal</option>
+                      <option value="Ireland">Ireland</option>
+                      <option value="Germany">Germany</option>
+                      <option value="Bulgaria">Bulgaria</option>
+                      <option value="Netherlands">Netherlands</option>
+                      <option value="Czechia">Czechia</option>
+                      <option value="Greece">Greece</option>
+                      <option value="Malta">Malta</option>
+                      <option value="Cyprus">Cyprus</option>
+                      <option value="Poland">Poland</option>
+                      <option value="Estonia">Estonia</option>
+                    </select>
+                  </div> 
                   <div className="mb-3">
                     <label className="form-label small mb-1">
                       Date de fondation<span className="text-danger">*</span>
@@ -357,55 +359,55 @@ const SignupPage = () => {
                     />
                   </div>
                   <div className="mb-3">
-  <div className="form-label">Industrie<span className="text-danger">*</span></div>
-  <select 
-    className="form-select" 
-    name="industrie"
-    value={formData.industrie}
-    onChange={handleChange}
-    required
-  >
-    <option value="">Sélectionnez une industrie</option>
-    <optgroup label="Mineral Industry">
-      <option value="Cement production">Cement production</option>
-      <option value="Lime production">Lime production</option>
-      <option value="Glass Production">Glass Production</option>
-    </optgroup>
-    <optgroup label="Chemical Industry">
-      <option value="Ammonia Production">Ammonia Production</option>
-      <option value="Soda Ash Production">Soda Ash Production</option>
-      <option value="Carbide Production">Carbide Production</option>
-    </optgroup>
-    <optgroup label="Metal Industry">
-      <option value="Iron and Steel Production">Iron and Steel Production</option>
-      <option value="Magnesium production">Magnesium production</option>
-      <option value="Lead Production">Lead Production</option>
-      <option value="Zinc Production">Zinc Production</option>
-    </optgroup>
-    <optgroup label="Buildings">
-      <option value="Natural gas heating">Natural gas heating</option>
-      <option value="Oil heating">Oil heating</option>
-      <option value="Commercial buildings operations">Commercial buildings operations</option>
-    </optgroup>
-    <optgroup label="Agriculture">
-      <option value="Rice cultivation">Rice cultivation</option>
-      <option value="Fertilizer application">Fertilizer application</option>
-      <option value="Agricultural soil management">Agricultural soil management</option>
-    </optgroup>
-    <optgroup label="Waste Sector">
-      <option value="Municipal solid waste treatment">Municipal solid waste treatment</option>
-      <option value="Wastewater treatment">Wastewater treatment</option>
-      <option value="Composting">Composting</option>
-      <option value="Incineration">Incineration</option>
-    </optgroup>
-    <optgroup label="EU Importers">
-      <option value="Cement">Cement</option>
-      <option value="Iron and steel">Iron and steel</option>
-      <option value="Aluminum">Aluminum</option>
-      <option value="Fertilizers">Fertilizers</option>
-    </optgroup>
-  </select>
-</div>
+                    <div className="form-label">Industrie<span className="text-danger">*</span></div>
+                    <select 
+                      className="form-select" 
+                      name="industrie"
+                      value={formData.industrie}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Sélectionnez une industrie</option>
+                      <optgroup label="Mineral Industry">
+                        <option value="Cement production">Cement production</option>
+                        <option value="Lime production">Lime production</option>
+                        <option value="Glass Production">Glass Production</option>
+                      </optgroup>
+                      <optgroup label="Chemical Industry">
+                        <option value="Ammonia Production">Ammonia Production</option>
+                        <option value="Soda Ash Production">Soda Ash Production</option>
+                        <option value="Carbide Production">Carbide Production</option>
+                      </optgroup>
+                      <optgroup label="Metal Industry">
+                        <option value="Iron and Steel Production">Iron and Steel Production</option>
+                        <option value="Magnesium production">Magnesium production</option>
+                        <option value="Lead Production">Lead Production</option>
+                        <option value="Zinc Production">Zinc Production</option>
+                      </optgroup>
+                      <optgroup label="Buildings">
+                        <option value="Natural gas heating">Natural gas heating</option>
+                        <option value="Oil heating">Oil heating</option>
+                        <option value="Commercial buildings operations">Commercial buildings operations</option>
+                      </optgroup>
+                      <optgroup label="Agriculture">
+                        <option value="Rice cultivation">Rice cultivation</option>
+                        <option value="Fertilizer application">Fertilizer application</option>
+                        <option value="Agricultural soil management">Agricultural soil management</option>
+                      </optgroup>
+                      <optgroup label="Waste Sector">
+                        <option value="Municipal solid waste treatment">Municipal solid waste treatment</option>
+                        <option value="Wastewater treatment">Wastewater treatment</option>
+                        <option value="Composting">Composting</option>
+                        <option value="Incineration">Incineration</option>
+                      </optgroup>
+                      <optgroup label="EU Importers">
+                        <option value="Cement">Cement</option>
+                        <option value="Iron and steel">Iron and steel</option>
+                        <option value="Aluminum">Aluminum</option>
+                        <option value="Fertilizers">Fertilizers</option>
+                      </optgroup>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
@@ -422,7 +424,7 @@ const SignupPage = () => {
               </div>
             )}
             
-            <button type="submit" className="btn btn-success w-100 mt-4">S'inscrire</button>
+            <button type="submit" className="btn btn-success w-100 mt-4" >S'inscrire</button>
           </form>
         </div>
         
