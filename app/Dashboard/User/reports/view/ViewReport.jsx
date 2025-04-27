@@ -332,7 +332,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Emissions by Scope'
+              text: 'Émissions par Scope'
             }
           }
         }
@@ -342,15 +342,15 @@ const ViewReport = ({ id }) => {
     // Emissions by Source Chart
     if (emissionsBySourceChartRef.current && activeTab === "overview") {
       const sources = [
-        { name: 'Fuel Combustion', value: scope1Details.fuelEmissions },
+        { name: 'Combustion de carburants ', value: scope1Details.fuelEmissions },
         { name: 'Production', value: scope1Details.productionEmissions },
-        { name: 'Cooling', value: scope2Details.coolingEmissions },
-        { name: 'Heating', value: scope2Details.heatingEmissions },
-        { name: 'Electricity', value: scope2Details.energyConsumptionEmissions },
-        { name: 'Business Travel', value: scope3Details.businessTravelEmissions },
-        { name: 'Transportation', value: scope3Details.transportEmissions },
-        { name: 'Waste', value: scope3Details.wasteEmissions },
-        { name: 'Capital Goods', value: scope3Details.capitalGoodEmissions }
+        { name: 'Refroidissement', value: scope2Details.coolingEmissions },
+        { name: 'Chauffage', value: scope2Details.heatingEmissions },
+        { name: 'Électricité', value: scope2Details.energyConsumptionEmissions },
+        { name: 'Déplacements professionnels', value: scope3Details.businessTravelEmissions },
+        { name: 'Transports', value: scope3Details.transportEmissions },
+        { name: 'Déchets', value: scope3Details.wasteEmissions },
+        { name: ' Biens déquipement', value: scope3Details.capitalGoodEmissions }
       ];
 
       // Sort by emission value descending
@@ -361,7 +361,7 @@ const ViewReport = ({ id }) => {
         data: {
           labels: sources.map(s => s.name),
           datasets: [{
-            label: 'tCO₂e',
+            label: 'tCO₂',
             data: sources.map(s => s.value),
             backgroundColor: '#328E6E',
             borderWidth: 1
@@ -374,21 +374,20 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Emissions by Source'
+              text: 'Émissions par source'
             }
           }
         }
       });
     }
-
-    // Emission Intensity Chart (new replacement chart)
+ 
     if (emissionIntensityChartRef.current && activeTab === "overview") {
       // Sample emission intensity data (per process/activity)
       const intensityData = [
-        { name: 'Manufacturing', value: emissionTotals.total * 0.4 / 100 },
-        { name: 'Office Operations', value: emissionTotals.total * 0.15 / 100 },
-        { name: 'Transportation', value: emissionTotals.total * 0.25 / 100 },
-        { name: 'Heating & Cooling', value: emissionTotals.total * 0.2 / 100 }
+        { name: 'Fabrication', value: emissionTotals.total * 0.4 / 100 },
+        { name: 'Opérations de bureau', value: emissionTotals.total * 0.15 / 100 },
+        { name: 'Transport', value: emissionTotals.total * 0.25 / 100 },
+        { name: 'Chauffage et refroidissement', value: emissionTotals.total * 0.2 / 100 }
       ];
       
       newCharts.emissionIntensity = new Chart(emissionIntensityChartRef.current, {
@@ -396,7 +395,7 @@ const ViewReport = ({ id }) => {
         data: {
           labels: intensityData.map(d => d.name),
           datasets: [{
-            label: 'Emission Intensity (tCO₂e per unit)',
+            label: 'Intensité des émissions (tCO₂ par unité)',
             data: intensityData.map(d => d.value),
             backgroundColor: [
               '#328E6E',
@@ -413,7 +412,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Emission Intensity by Activity'
+              text: 'Intensité des émissions par activité'
             }
           }
         }
@@ -437,7 +436,7 @@ const ViewReport = ({ id }) => {
         data: {
           labels: comparisonData.labels,
           datasets: [{
-            label: 'Carbon Footprint (tCO₂e)',
+            label: 'Carbon Footprint (tCO₂)',
             data: comparisonData.values,
             backgroundColor: [
               '#67AE6E',
@@ -464,9 +463,9 @@ const ViewReport = ({ id }) => {
     if (emissionsByCategoryChartRef.current && activeTab === "overview") {
       // Create category data
       const categoryData = {
-        labels: ['Fuel Combustion', 'Production Processes', 'Transportation', 'Heating and cooling'],
+        labels: ['Combustion de carburant', 'Processus de production', 'Transport', 'Chauffage et refroidissement'],
         datasets: [{
-          label: 'tCO₂e',
+          label: 'tCO₂',
           data: [
             scope1Details.fuelEmissions,
             scope1Details.productionEmissions,
@@ -492,7 +491,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Emissions by Category'
+              text: 'Émissions par catégorie'
             }
           }
         }
@@ -504,7 +503,7 @@ const ViewReport = ({ id }) => {
       newCharts.scope1Breakdown = new Chart(scope1BreakdownChartRef.current, {
         type: 'pie',
         data: {
-          labels: ['Fuel Combustion', 'Production Processes'],
+          labels: ['Combustion de carburant', 'Processus de production'],
           datasets: [{
             data: [scope1Details.fuelEmissions, scope1Details.productionEmissions],
             backgroundColor: ['#206bc4', '#4299e1'],
@@ -517,7 +516,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Scope 1 Emissions Breakdown'
+              text: 'Répartition des émissions de Scope 1'
             }
           }
         }
@@ -548,7 +547,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Emissions by Fuel Type'
+              text: 'Émissions par type de carburant'
             }
           }
         }
@@ -568,7 +567,7 @@ const ViewReport = ({ id }) => {
         data: {
           labels: intensityData.map(d => d.type),
           datasets: [{
-            label: 'Emission Intensity (kgCO₂e per unit)',
+            label: 'Intensité des émissions (kgCO₂e par unité)',
             data: intensityData.map(d => d.intensity),
             backgroundColor: '#4299e1',
             borderWidth: 1
@@ -580,7 +579,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Fuel Emission Intensity'
+              text: ' Intensité des émissions de carburant '
             }
           }
         }
@@ -592,7 +591,7 @@ const ViewReport = ({ id }) => {
       newCharts.scope2Breakdown = new Chart(scope2BreakdownChartRef.current, {
         type: 'doughnut',
         data: {
-          labels: ['Cooling Systems', 'Heating Systems', 'Electricity Consumption'],
+          labels: ['Systèmes de refroidissement', 'Systèmes de chauffage', 'Consommation délectricité'],
           datasets: [{
             data: [
               scope2Details.coolingEmissions,
@@ -609,7 +608,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Scope 2 Emissions Breakdown'
+              text: 'Répartition des émissions de Scope 2 '
             }
           }
         }
@@ -620,8 +619,8 @@ const ViewReport = ({ id }) => {
     if (electricitySourceChartRef.current && activeTab === "scope2") {
       // Sample electricity source data
       const sourceData = [
-        { source: 'Grid Electricity', value: scope2Details.energyConsumptionEmissions * 0.85 },
-        { source: 'Renewable Energy', value: scope2Details.energyConsumptionEmissions * 0.15 }
+        { source: 'Électricité', value: scope2Details.energyConsumptionEmissions * 0.85 },
+        { source: 'énergie renouvelable', value: scope2Details.energyConsumptionEmissions * 0.15 }
       ];
       
       newCharts.electricitySource = new Chart(electricitySourceChartRef.current, {
@@ -640,7 +639,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Electricity Sources'
+              text: 'Eources délectricité'
             }
           }
         }
@@ -651,13 +650,13 @@ const ViewReport = ({ id }) => {
     if (energyConsumptionChartRef.current && activeTab === "scope2") {
       // Create energy consumption types data combining cooling and heating types
       const energyTypes = [
-        ...coolingTypes.map(type => ({ ...type, category: 'Cooling' })),
-        ...heatingTypes.map(type => ({ ...type, category: 'Heating' }))
+        ...coolingTypes.map(type => ({ ...type, category: 'Refroidissement' })),
+        ...heatingTypes.map(type => ({ ...type, category: 'Chauffage' }))
       ];
       
       // Create a stacked bar chart for energy consumption by type
       const datasets = [];
-      const categoryColors = { 'Cooling': '#4299e1', 'Heating': '#ae3ec9' };
+      const categoryColors = { 'Refroidissement': '#4299e1', 'Chauffage': '#ae3ec9' };
       
       // Get unique types and categories
       const uniqueTypes = [...new Set(energyTypes.map(item => item.type))];
@@ -701,7 +700,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Energy Consumption by Type'
+              text: 'Consommation dénergie par type'
             }
           }
         }
@@ -713,7 +712,7 @@ const ViewReport = ({ id }) => {
       newCharts.scope3Breakdown = new Chart(scope3BreakdownChartRef.current, {
         type: 'polarArea',
         data: {
-          labels: ['Business Travel', 'Transportation', 'Waste Management', 'Capital Goods'],
+          labels: ['Voyages daffaires', 'Transport', 'Gestion des déchets', 'Biens déquipement'],
           datasets: [{
             data: [
               scope3Details.businessTravelEmissions,
@@ -731,7 +730,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Scope 3 Emissions Breakdown'
+              text: 'Répartition des émissions de Scope 3'
             }
           }
         }
@@ -762,7 +761,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Emissions by Transport Mode'
+              text: 'Émissions par mode de transport'
             }
           }
         }
@@ -792,7 +791,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Waste Emissions by Type'
+              text: 'Émissions de déchets par type'
             }
           }
         }
@@ -820,7 +819,7 @@ const ViewReport = ({ id }) => {
         data: {
           labels: purposeData.map(d => d.purpose),
           datasets: [{
-            label: 'Emissions (tCO₂e)',
+            label: 'Émissions (tCO₂)',
             data: purposeData.map(d => d.emissions),
             backgroundColor: '#4299e1',
             borderWidth: 1
@@ -832,7 +831,7 @@ const ViewReport = ({ id }) => {
             ...chartOptions.plugins,
             title: {
               display: true,
-              text: 'Business Travel Emissions by Purpose'
+              text: 'Émissions liées aux voyages daffaires par objectif'
             }
           }
         }
@@ -854,7 +853,7 @@ const ViewReport = ({ id }) => {
         <div className="card">
           <div className="card-body text-center py-4">
             <div className="spinner-border text-primary" role="status"></div>
-            <p className="mt-3">Loading report data...</p>
+            <p className="mt-3">Chargement des données du rapport...</p>
           </div>
         </div>
       </div>
@@ -873,7 +872,7 @@ const ViewReport = ({ id }) => {
               className="btn btn-primary mt-3"
               onClick={() => router.push("/Dashboard/User/reports")}
             >
-              <ArrowLeft size={16} className="me-2" /> Back to Reports
+              <ArrowLeft size={16} className="me-2" /> Retour aux rapports
             </button>
           </div>
         </div>
@@ -889,7 +888,7 @@ const ViewReport = ({ id }) => {
       {/* Report Header */}
       <div className="card mb-3">
         <div className="card-header">
-          <div className="d-flex align-items-center justify-content-between">
+          <div className="d-flex align-items-center justify-content-between w-full">
             <div className="d-flex align-items-center">
               <button
                 className="btn btn-icon"
@@ -906,9 +905,6 @@ const ViewReport = ({ id }) => {
               <button className="btn btn-outline-primary btn-icon">
                 <Download size={18} />
               </button>
-              <button className="btn btn-primary">
-                <Share2 size={18} className="me-2" /> Share
-              </button>
             </div>
           </div>
         </div>
@@ -921,7 +917,7 @@ const ViewReport = ({ id }) => {
               <div className="d-flex mb-2">
                 <div className="me-4 d-flex align-items-center">
                   <Calendar size={18} className="me-2 text-primary" />
-                  <span>Year: {report.Year}</span>
+                  <span>Année: {report.Year}</span>
                 </div>
                 <div className="me-4 d-flex align-items-center">
                   <FileText size={18} className="me-2 text-primary" />
@@ -929,7 +925,7 @@ const ViewReport = ({ id }) => {
                 </div>
                 <div className="d-flex align-items-center">
                   <BarChart size={18} className="me-2 text-primary" />
-                  <span>Charts: {report.includeCharts === "yes" ? "Included" : "Not Included"}</span>
+                  <span>graphique: {report.includeCharts === "yes" ? "Included" : "Not Included"}</span>
                 </div>
               </div>
               <div className="mt-3">
@@ -951,10 +947,10 @@ const ViewReport = ({ id }) => {
                     </div>
                     <div className="col">
                       <div className="font-weight-medium">
-                        Total Emissions
+                      Émissions totales
                       </div>
                       <div className="text-secondary">
-                        {formatNumber(emissionTotals.total)} tCO₂e
+                        {formatNumber(emissionTotals.total)} tCO₂
                       </div>
                     </div>
                   </div>
@@ -976,7 +972,7 @@ const ViewReport = ({ id }) => {
                 onClick={(e) => { e.preventDefault(); setActiveTab("overview"); }}
               >
                 <BarChart size={16} className="me-2" />
-                Overview
+                Aperçu
               </a>
             </li>
             {report.detailLevel === "detailed" && report.scope1 && (
@@ -1026,16 +1022,16 @@ const ViewReport = ({ id }) => {
             <div className="col-md-6">
               <div className="card">
                 <div className="card-header">
-                  <h3 className="card-title">Emissions Summary</h3>
+                  <h3 className="card-title">Résumé des émissions</h3>
                 </div>
                 <div className="card-body">
                   <div className="mb-3">
                     <div className="d-flex align-items-center justify-content-between mb-1">
                       <span className="d-flex align-items-center">
                         <span className="badge bg-blue-lt me-2">Scope 1</span>
-                        Direct Emissions
+                        Émissions directes
                       </span>
-                      <strong>{formatNumber(emissionTotals.scope1)} tCO₂e</strong>
+                      <strong>{formatNumber(emissionTotals.scope1)} tCO₂</strong>
                     </div>
                     <div className="progress mb-3">
                       <div 
@@ -1049,9 +1045,9 @@ const ViewReport = ({ id }) => {
                     <div className="d-flex align-items-center justify-content-between mb-1">
                       <span className="d-flex align-items-center">
                         <span className="badge bg-purple-lt me-2">Scope 2</span>
-                        Indirect Emissions
+                          Émissions indirectes
                       </span>
-                      <strong>{formatNumber(emissionTotals.scope2)} tCO₂e</strong>
+                      <strong>{formatNumber(emissionTotals.scope2)} tCO₂</strong>
                     </div>
                     <div className="progress mb-3">
                       <div 
@@ -1065,9 +1061,9 @@ const ViewReport = ({ id }) => {
                     <div className="d-flex align-items-center justify-content-between mb-1">
                       <span className="d-flex align-items-center">
                         <span className="badge bg-green-lt me-2">Scope 3</span>
-                        Value Chain Emissions
+                        Émissions directes
                       </span>
-                      <strong>{formatNumber(emissionTotals.scope3)} tCO₂e</strong>
+                      <strong>{formatNumber(emissionTotals.scope3)} tCO₂</strong>
                     </div>
                     <div className="progress mb-3">
                       <div 
@@ -1079,8 +1075,8 @@ const ViewReport = ({ id }) => {
                   
                   <div className="mt-4">
                     <div className="d-flex align-items-center justify-content-between mb-1">
-                      <span className="font-weight-bold">Total Emissions</span>
-                      <strong>{formatNumber(emissionTotals.total)} tCO₂e</strong>
+                      <span className="font-weight-bold">Émissions totales</span>
+                      <strong>{formatNumber(emissionTotals.total)} tCO₂</strong>
                     </div>
                   </div>
                 </div>
@@ -1090,26 +1086,26 @@ const ViewReport = ({ id }) => {
             <div className="col-md-6">
               <div className="card">
                 <div className="card-header">
-                  <h3 className="card-title">Generated Report Information</h3>
+                  <h3 className="card-title">Informations sur le rapport généré</h3>
                 </div>
                 <div className="card-body">
                   <dl className="row">
-                    <dt className="col-5">Report Name:</dt>
+                    <dt className="col-5">Nom du rapport :</dt>
                     <dd className="col-7">{report.name}</dd>
                     
-                    <dt className="col-5">Description:</dt>
+                    <dt className="col-5">Description :</dt>
                     <dd className="col-7">{report.description}</dd>
                     
-                    <dt className="col-5">Year:</dt>
+                    <dt className="col-5">Année :</dt>
                     <dd className="col-7">{report.Year}</dd>
                     
-                    <dt className="col-5">Report Type:</dt>
+                    <dt className="col-5">Type de rapport :</dt>
                     <dd className="col-7">{report.detailLevel === "detailed" ? "Detailed Report" : "Summary Report"}</dd>
                     
-                    <dt className="col-5">Created On:</dt>
+                    <dt className="col-5">Créé le</dt>
                     <dd className="col-7">{new Date(report.createdAt).toLocaleDateString()}</dd>
                     
-                    <dt className="col-5">Scopes Included:</dt>
+                    <dt className="col-5">Scopes inclus :</dt>
                     <dd className="col-7">
                       {report.scope1 && <span className="badge bg-blue-lt me-1">Scope 1</span>}
                       {report.scope2 && <span className="badge bg-purple-lt me-1">Scope 2</span>}
@@ -1127,7 +1123,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Emissions by Scope</h3>
+                    <h3 className="card-title">Émissions par scope</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1139,7 +1135,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Emissions by Source</h3>
+                    <h3 className="card-title">Émissions par source</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1151,7 +1147,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Emission Intensity by Activity</h3>
+                    <h3 className="card-title">Intensité des émissions par activité</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1163,7 +1159,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Carbon Footprint Comparison</h3>
+                    <h3 className="card-title">Comparaison de l’empreinte carbone</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1175,7 +1171,7 @@ const ViewReport = ({ id }) => {
               <div className="col-12 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Emissions by Category</h3>
+                    <h3 className="card-title">Émissions par catégorie</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1197,7 +1193,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Scope 1 Emissions Breakdown</h3>
+                    <h3 className="card-title">Répartition des émissions Scope 1</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1209,13 +1205,13 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Scope 1 Summary</h3>
+                    <h3 className="card-title">Résumé Scope 1</h3>
                   </div>
                   <div className="card-body">
                     <div className="d-flex align-items-baseline">
                       <div className="h1 mb-0 me-2">{formatNumber(emissionTotals.scope1)}</div>
                       <div className="me-auto">
-                        <span className="text-muted">tCO₂e total direct emissions</span>
+                        <span className="text-muted">Émissions directes totales en tCO₂</span>
                       </div>
                     </div>
                     <div className="d-flex mt-4">
@@ -1230,10 +1226,10 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Fuel Combustion
+                                Combustion de carburant
                                 </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope1Details().fuelEmissions)} tCO₂e
+                                  {formatNumber(getScope1Details().fuelEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1251,10 +1247,10 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Production
+                                Production
                                 </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope1Details().productionEmissions)} tCO₂e
+                                  {formatNumber(getScope1Details().productionEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1268,7 +1264,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Emissions by Fuel Type</h3>
+                    <h3 className="card-title">Émissions par Type de Carburant</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1280,7 +1276,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Fuel Emission Intensity</h3>
+                    <h3 className="card-title">Intensité des Émissions de Carburant</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1299,11 +1295,11 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Flame className="me-2" size={20} />
-                    Fuel Combustion by Type
+                    Combustion de Carburant par Type
                   </h3>
                   <div className="card-actions">
                     <span className="badge bg-blue text-white">
-                      {report.scope1Data?.fuelCombution?.[0]?.totalEmissions?.toLocaleString()} tCO₂e
+                      {report.scope1Data?.fuelCombution?.[0]?.totalEmissions?.toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -1313,11 +1309,11 @@ const ViewReport = ({ id }) => {
                       <table className="table table-vcenter card-table table-striped">
                         <thead>
                           <tr>
-                            <th>Fuel Type</th>
-                            <th>Number of Machines</th>
-                            <th>Total Quantity</th>
-                            <th>CO₂ Emissions (tCO₂e)</th>
-                            <th>Percentage</th>
+                            <th>Type de Carburant</th>
+                            <th>Type de Carburant</th>
+                            <th>Quantité Totale</th>
+                            <th>Émissions CO₂ (tCO₂)</th>
+                            <th>Pourcentage</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1352,14 +1348,14 @@ const ViewReport = ({ id }) => {
                         <tfoot>
                           <tr>
                             <td colSpan="3" className="text-end"><strong>Total Emissions:</strong></td>
-                            <td><strong>{report.scope1Data?.fuelCombution?.[0]?.totalEmissions?.toLocaleString()} tCO₂e</strong></td>
+                            <td><strong>{report.scope1Data?.fuelCombution?.[0]?.totalEmissions?.toLocaleString()} tCO₂</strong></td>
                             <td>100%</td>
                           </tr>
                         </tfoot>
                       </table>
                     </div>
                   ) : (
-                    <div className="alert alert-info">No fuel combustion data available.</div>
+                    <div className="alert alert-info">Aucune donnée sur la combustion de carburant disponible.</div>
                   )}
                 </div>
               </div>
@@ -1372,11 +1368,11 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Factory className="me-2" size={20} />
-                    Production Processes
+                    Processus de Production
                   </h3>
                   <div className="card-actions">
                     <span className="badge bg-blue text-white">
-                      {report.scope1Data?.production?.[0]?.totalEmissions?.toLocaleString()} tCO₂e
+                      {report.scope1Data?.production?.[0]?.totalEmissions?.toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -1385,10 +1381,10 @@ const ViewReport = ({ id }) => {
                     <table className="table table-vcenter card-table table-striped">
                       <thead>
                         <tr>
-                          <th>Product Name</th>
-                          <th>Production Line</th>
-                          <th>Quantity</th>
-                          <th>CO₂ Emissions (tCO₂e)</th>
+                          <th>Nom du Produit</th>
+                          <th>Ligne de Production</th>
+                          <th>Quantité</th>
+                          <th>Émissions CO₂ (tCO₂)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1407,8 +1403,8 @@ const ViewReport = ({ id }) => {
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td colSpan="3" className="text-end"><strong>Total Emissions:</strong></td>
-                          <td><strong>{report.scope1Data?.production?.[0]?.totalEmissions?.toLocaleString()} tCO₂e</strong></td>
+                          <td colSpan="3" className="text-end"><strong>Émissions Totales:</strong></td>
+                          <td><strong>{report.scope1Data?.production?.[0]?.totalEmissions?.toLocaleString()} tCO₂</strong></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -1428,7 +1424,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Scope 2 Emissions Breakdown</h3>
+                    <h3 className="card-title">Répartition des émissions du Scope 2</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1440,13 +1436,13 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Scope 2 Summary</h3>
+                    <h3 className="card-title">Résumé du Scope 2</h3>
                   </div>
                   <div className="card-body">
                     <div className="d-flex align-items-baseline">
                       <div className="h1 mb-0 me-2">{formatNumber(emissionTotals.scope2)}</div>
                       <div className="me-auto">
-                        <span className="text-muted">tCO₂e total indirect emissions</span>
+                        <span className="text-muted">Émissions indirectes totales en tCO₂ </span>
                       </div>
                     </div>
                     <div className="d-flex mt-4 flex-wrap">
@@ -1461,10 +1457,10 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Cooling
+                                Refroidissement
                                 </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope2Details().coolingEmissions)} tCO₂e
+                                  {formatNumber(getScope2Details().coolingEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1482,10 +1478,10 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Heating
+                                Chauffage
                                 </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope2Details().heatingEmissions)} tCO₂e
+                                  {formatNumber(getScope2Details().heatingEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1503,10 +1499,10 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Electricity
+                                Électricité
                                 </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope2Details().energyConsumptionEmissions)} tCO₂e
+                                  {formatNumber(getScope2Details().energyConsumptionEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1520,7 +1516,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Electricity Sources</h3>
+                    <h3 className="card-title">Sources d'Électricité</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1532,7 +1528,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Energy Consumption by Type</h3>
+                    <h3 className="card-title">Consommation d'Énergie par Type</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1551,13 +1547,13 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Snowflake className="me-2" size={20} />
-                    Cooling Systems by Type
+                    Systèmes de Refroidissement par Type
                   </h3>
                   <div className="card-actions">
                     <span className="badge bg-purple text-white">
                       {Array.isArray(report.scope2Data?.cooling)
                         ? report.scope2Data?.cooling?.[0]?.totalEmissions?.toLocaleString()
-                        : report.scope2Data?.cooling?.totalEmissions?.toLocaleString()} tCO₂e
+                        : report.scope2Data?.cooling?.totalEmissions?.toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -1567,11 +1563,11 @@ const ViewReport = ({ id }) => {
                       <table className="table table-vcenter card-table table-striped">
                         <thead>
                           <tr>
-                            <th>Cooling Type</th>
-                            <th>Number of Systems</th>
-                            <th>Total Energy (kWh)</th>
-                            <th>CO₂ Emissions (tCO₂e)</th>
-                            <th>Percentage</th>
+                            <th>Type de Refroidissement</th>
+                            <th>Nombre de Systèmes</th>
+                            <th>Énergie Totale (kWh)</th>
+                            <th>Émissions de CO₂ (tCO₂)</th>
+                            <th>Pourcentage</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1609,12 +1605,12 @@ const ViewReport = ({ id }) => {
                         </tbody>
                         <tfoot>
                           <tr>
-                            <td colSpan="3" className="text-end"><strong>Total Emissions:</strong></td>
+                            <td colSpan="3" className="text-end"><strong>Émissions Totales:</strong></td>
                             <td>
                               <strong>
                                 {Array.isArray(report.scope2Data?.cooling)
                                   ? report.scope2Data?.cooling?.[0]?.totalEmissions?.toLocaleString()
-                                  : report.scope2Data?.cooling?.totalEmissions?.toLocaleString()} tCO₂e
+                                  : report.scope2Data?.cooling?.totalEmissions?.toLocaleString()} tCO₂
                               </strong>
                             </td>
                             <td>100%</td>
@@ -1623,7 +1619,7 @@ const ViewReport = ({ id }) => {
                       </table>
                     </div>
                   ) : (
-                    <div className="alert alert-info">No cooling system data available.</div>
+                    <div className="alert alert-info">Aucune donnée sur les systèmes de refroidissement disponible. </div>
                   )}
                 </div>
               </div>
@@ -1637,13 +1633,13 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Flame className="me-2" size={20} />
-                    Heating Systems by Type
+                    Systèmes de Chauffage par Type
                   </h3>
                   <div className="card-actions">
                     <span className="badge bg-purple text-white">
                       {Array.isArray(report.scope2Data?.heating)
                         ? report.scope2Data?.heating?.[0]?.totalEmissions?.toLocaleString()
-                        : report.scope2Data?.heating?.totalEmissions?.toLocaleString()} tCO₂e
+                        : report.scope2Data?.heating?.totalEmissions?.toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -1653,11 +1649,11 @@ const ViewReport = ({ id }) => {
                       <table className="table table-vcenter card-table table-striped">
                         <thead>
                           <tr>
-                            <th>Heating Type</th>
-                            <th>Number of Systems</th>
-                            <th>Total Energy (kWh)</th>
-                            <th>CO₂ Emissions (tCO₂e)</th>
-                            <th>Percentage</th>
+                            <th>Type de Chauffage</th>
+                            <th>Nombre de Systèmes</th>
+                            <th>Énergie Totale  (kWh)</th>
+                            <th>Émissions de CO₂ (tCO₂)</th>
+                            <th>Pourcentage</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1695,12 +1691,12 @@ const ViewReport = ({ id }) => {
                         </tbody>
                         <tfoot>
                           <tr>
-                            <td colSpan="3" className="text-end"><strong>Total Emissions:</strong></td>
+                            <td colSpan="3" className="text-end"><strong>Émissions Totales:</strong></td>
                             <td>
                               <strong>
                                 {Array.isArray(report.scope2Data?.heating)
                                   ? report.scope2Data?.heating?.[0]?.totalEmissions?.toLocaleString()
-                                  : report.scope2Data?.heating?.totalEmissions?.toLocaleString()} tCO₂e
+                                  : report.scope2Data?.heating?.totalEmissions?.toLocaleString()} tCO₂
                               </strong>
                             </td>
                             <td>100%</td>
@@ -1709,7 +1705,7 @@ const ViewReport = ({ id }) => {
                       </table>
                     </div>
                   ) : (
-                    <div className="alert alert-info">No heating system data available.</div>
+                    <div className="alert alert-info">Aucune donnée sur les systèmes de chauffage disponible.</div>
                   )}
                 </div>
               </div>
@@ -1722,13 +1718,13 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <BatteryCharging className="me-2" size={20} />
-                    Energy Consumption
+                    Consommation d'Énergie
                   </h3>
                   <div className="card-actions">
                     <span className="badge bg-purple text-white">
                       {Array.isArray(report.scope2Data?.energyConsumption)
                         ? report.scope2Data?.energyConsumption?.[0]?.emissions?.toLocaleString()
-                        : report.scope2Data?.energyConsumption?.emissions?.toLocaleString()} tCO₂e
+                        : report.scope2Data?.energyConsumption?.emissions?.toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -1736,26 +1732,26 @@ const ViewReport = ({ id }) => {
                   <div className="row align-items-center">
                     <div className="col-md-6">
                       <dl className="row">
-                        <dt className="col-5">Country:</dt>
+                        <dt className="col-5">Pays :</dt>
                         <dd className="col-7">
                           {Array.isArray(report.scope2Data?.energyConsumption)
                             ? report.scope2Data?.energyConsumption?.[0]?.country
                             : report.scope2Data?.energyConsumption?.country}
                         </dd>
                         
-                        <dt className="col-5">Yearly Consumption:</dt>
+                        <dt className="col-5">Consommation Annuelle :</dt>
                         <dd className="col-7">
                           {Array.isArray(report.scope2Data?.energyConsumption)
                             ? report.scope2Data?.energyConsumption?.[0]?.yearlyConsumption?.toLocaleString()
                             : report.scope2Data?.energyConsumption?.yearlyConsumption?.toLocaleString()} kWh
                         </dd>
                         
-                        <dt className="col-5">Total Emissions:</dt>
+                        <dt className="col-5">Émissions Totales :</dt>
                         <dd className="col-7">
                           <strong>
                             {Array.isArray(report.scope2Data?.energyConsumption)
                               ? report.scope2Data?.energyConsumption?.[0]?.emissions?.toLocaleString()
-                              : report.scope2Data?.energyConsumption?.emissions?.toLocaleString()} tCO₂e
+                              : report.scope2Data?.energyConsumption?.emissions?.toLocaleString()} tCO₂
                           </strong>
                         </dd>
                       </dl>
@@ -1772,8 +1768,7 @@ const ViewReport = ({ id }) => {
                             </svg>
                           </div>
                           <div>
-                            Electricity consumption emissions are calculated based on country-specific emission factors that reflect the grid's energy mix.
-                          </div>
+                          Les émissions liées à la consommation d'électricité sont calculées en fonction des facteurs d'émission spécifiques au pays.            </div>
                         </div>
                       </div>
                     </div>
@@ -1793,7 +1788,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Scope 3 Emissions Breakdown</h3>
+                    <h3 className="card-title">Répartition des émissions du Scope 3</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1805,13 +1800,13 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Scope 3 Summary</h3>
+                    <h3 className="card-title">Résumé du Scope 3</h3>
                   </div>
                   <div className="card-body">
                     <div className="d-flex align-items-baseline">
                       <div className="h1 mb-0 me-2">{formatNumber(emissionTotals.scope3)}</div>
                       <div className="me-auto">
-                        <span className="text-muted">tCO₂e total value chain emissions</span>
+                        <span className="text-muted">Émissions totales de la chaîne de valeur en tCO₂</span>
                       </div>
                     </div>
                     <div className="d-flex mt-4 flex-wrap">
@@ -1826,10 +1821,9 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Business Travel
-                                </div>
+                                Déplacements professionnels                                </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope3Details().businessTravelEmissions)} tCO₂e
+                                  {formatNumber(getScope3Details().businessTravelEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1847,10 +1841,10 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Transportation
+                                Transport
                                 </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope3Details().transportEmissions)} tCO₂e
+                                  {formatNumber(getScope3Details().transportEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1868,10 +1862,10 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Waste
+                                Déchets
                                 </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope3Details().wasteEmissions)} tCO₂e
+                                  {formatNumber(getScope3Details().wasteEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1889,10 +1883,9 @@ const ViewReport = ({ id }) => {
                               </div>
                               <div className="col">
                                 <div className="font-weight-medium">
-                                  Capital Goods
-                                </div>
+                                Biens d’équipement                                </div>
                                 <div className="text-muted">
-                                  {formatNumber(getScope3Details().capitalGoodEmissions)} tCO₂e
+                                  {formatNumber(getScope3Details().capitalGoodEmissions)} tCO₂
                                 </div>
                               </div>
                             </div>
@@ -1906,7 +1899,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Transport Emissions by Mode</h3>
+                    <h3 className="card-title">Émissions de déchets par type</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1918,7 +1911,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-6 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Waste Emissions by Type</h3>
+                    <h3 className="card-title">Émissions de déchets par type</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1930,7 +1923,7 @@ const ViewReport = ({ id }) => {
               <div className="col-md-12 mt-3">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Business Travel Emissions by Purpose</h3>
+                    <h3 className="card-title">Émissions de déplacements professionnels par objectif</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
@@ -1949,11 +1942,10 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Briefcase className="me-2" size={20} />
-                    Business Travel
-                  </h3>
+                    Déplacements professionnels                  </h3>
                   <div className="card-actions">
                     <span className="badge bg-green text-white">
-                      {parseFloat(report.scope3Data?.businessTravelEmissions || 0).toLocaleString()} tCO₂e
+                      {parseFloat(report.scope3Data?.businessTravelEmissions || 0).toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -1962,11 +1954,11 @@ const ViewReport = ({ id }) => {
                     <table className="table table-vcenter card-table table-striped">
                       <thead>
                         <tr>
-                          <th>Purpose</th>
+                          <th>But</th>
                           <th>Mode</th>
                           <th>Type</th>
                           <th>Distance (km)</th>
-                          <th>CO₂ Emissions (tCO₂e)</th>
+                          <th>Émissions de CO₂  (tCO₂)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1986,8 +1978,8 @@ const ViewReport = ({ id }) => {
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td colSpan="4" className="text-end"><strong>Total Emissions:</strong></td>
-                          <td><strong>{parseFloat(report.scope3Data?.businessTravelEmissions || 0).toLocaleString()} tCO₂e</strong></td>
+                          <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
+                          <td><strong>{parseFloat(report.scope3Data?.businessTravelEmissions || 0).toLocaleString()} tCO₂</strong></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -2002,11 +1994,10 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Truck className="me-2" size={20} />
-                    Transportation & Distribution
-                  </h3>
+                    Transport & Distribution                  </h3>
                   <div className="card-actions">
                     <span className="badge bg-green text-white">
-                      {parseFloat(report.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂e
+                      {parseFloat(report.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -2015,11 +2006,11 @@ const ViewReport = ({ id }) => {
                     <table className="table table-vcenter card-table table-striped">
                       <thead>
                         <tr>
-                          <th>Purpose</th>
+                          <th>but</th>
                           <th>Mode</th>
                           <th>Weight (kg)</th>
                           <th>Distance (km)</th>
-                          <th>CO₂ Emissions (tCO₂e)</th>
+                          <th>Émissions de CO₂ (tCO₂)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2039,8 +2030,8 @@ const ViewReport = ({ id }) => {
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td colSpan="4" className="text-end"><strong>Total Emissions:</strong></td>
-                          <td><strong>{parseFloat(report.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂e</strong></td>
+                          <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
+                          <td><strong>{parseFloat(report.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂</strong></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -2055,11 +2046,10 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Trash className="me-2" size={20} />
-                    Waste Management
-                  </h3>
+                    Gestion des déchets                  </h3>
                   <div className="card-actions">
                     <span className="badge bg-green text-white">
-                      {parseFloat(report.scope3Data?.dechetEmissions || 0).toLocaleString()} tCO₂e
+                      {parseFloat(report.scope3Data?.dechetEmissions || 0).toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -2068,11 +2058,11 @@ const ViewReport = ({ id }) => {
                     <table className="table table-vcenter card-table table-striped">
                       <thead>
                         <tr>
-                          <th>Name</th>
+                          <th>Nom</th>
                           <th>Type</th>
-                          <th>Method</th>
-                          <th>Weight (kg)</th>
-                          <th>CO₂ Emissions (tCO₂e)</th>
+                          <th>Méthode</th>
+                          <th>Poids (kg)</th>
+                          <th>Émissions de CO₂ (tCO₂)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2092,8 +2082,8 @@ const ViewReport = ({ id }) => {
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td colSpan="4" className="text-end"><strong>Total Emissions:</strong></td>
-                          <td><strong>{parseFloat(report.scope3Data?.dechetEmissions || 0).toLocaleString()} tCO₂e</strong></td>
+                          <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
+                          <td><strong>{parseFloat(report.scope3Data?.dechetEmissions || 0).toLocaleString()} tCO₂</strong></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -2108,11 +2098,11 @@ const ViewReport = ({ id }) => {
                 <div className="card-header">
                   <h3 className="card-title">
                     <Building className="me-2" size={20} />
-                    Capital Goods
-                  </h3>
+                    Biens d'équipement
+                    </h3>
                   <div className="card-actions">
                     <span className="badge bg-green text-white">
-                      {parseFloat(report.scope3Data?.capitalGoodEmissions || 0).toLocaleString()} tCO₂e
+                      {parseFloat(report.scope3Data?.capitalGoodEmissions || 0).toLocaleString()} tCO₂
                     </span>
                   </div>
                 </div>
@@ -2121,11 +2111,11 @@ const ViewReport = ({ id }) => {
                     <table className="table table-vcenter card-table table-striped">
                       <thead>
                         <tr>
-                          <th>Name</th>
-                          <th>Category</th>
-                          <th>Cost ($)</th>
-                          <th>Lifetime (years)</th>
-                          <th>CO₂ Emissions (tCO₂e)</th>
+                          <th>Nom</th>
+                          <th>Catégorie</th>
+                          <th>Coût ($)</th>
+                          <th>Durée de vie (années)</th>
+                          <th>Émissions de CO₂  (tCO₂)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2145,8 +2135,8 @@ const ViewReport = ({ id }) => {
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td colSpan="4" className="text-end"><strong>Total Emissions:</strong></td>
-                          <td><strong>{parseFloat(report.scope3Data?.capitalGoodEmissions || 0).toLocaleString()} tCO₂e</strong></td>
+                          <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
+                          <td><strong>{parseFloat(report.scope3Data?.capitalGoodEmissions || 0).toLocaleString()} tCO₂</strong></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -2163,10 +2153,10 @@ const ViewReport = ({ id }) => {
         <div className="card-footer text-muted">
           <div className="row">
             <div className="col-md-6">
-              Report generated on: {new Date(report.createdAt).toLocaleString()}
+            Rapport généré le : {new Date(report.createdAt).toLocaleString()}
             </div>
             <div className="col-md-6 text-end">
-              <small>Carbon footprint measurement & reporting system</small>
+              <small>Système de mesure et de rapport d'empreinte carbone</small>
             </div>
           </div>
         </div>
