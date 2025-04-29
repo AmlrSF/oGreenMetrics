@@ -383,10 +383,6 @@ const GoalsPage = () => {
       
       const allScopesAchieved = isScope1Achieved && isScope2Achieved && isScope3Achieved;
       
-      // Only consider this a newly achieved goal if:
-      // 1. It's now achieved
-      // 2. It was previously not marked as achieved
-      // 3. We haven't already sent a notification for it
       if (allScopesAchieved && goal.status !== "achieved") {
         achievedGoals.push({
           ...goal,

@@ -109,7 +109,7 @@ const Navbar = ({ user, isAdmin }) => {
                 <img
                   src={user?.photo_de_profil}
                   alt={`${user?.prenom} ${user?.nom}`}
-                  className="rounded-circle w-[25px] h-[25px]"
+                  className="rounded-circle"
                 />
               ) : (
                 <span style={{ color: "#8ebe21" }}>{getInitials(user?.prenom, user?.nom)}</span>

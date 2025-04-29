@@ -244,40 +244,7 @@ const ViewReport = ({ id }) => {
       maximumFractionDigits: 2,
     });
   };
-
-  if (loading) {
-    return (
-      <div className="container-xl py-4">
-        <div className="card">
-          <div className="card-body text-center py-4">
-            <div className="spinner-border text-primary" role="status"></div>
-            <p className="mt-3">Chargement des données du rapport...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !memoizedReport) {
-    return (
-      <div className="container-xl py-4">
-        <div className="card">
-          <div className="card-body text-center py-4">
-            <div className="alert alert-danger mb-0">
-              {error || "Report not found"}
-            </div>
-            <button
-              className="btn btn-primary mt-3"
-              onClick={() => router.push("/Dashboard/User/reports")}
-            >
-              <ArrowLeft size={16} className="me-2" /> Retour aux rapports
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+ 
   const emissionTotals = calculateTotalEmissions();
 
   return (

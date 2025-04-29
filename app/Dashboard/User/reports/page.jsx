@@ -356,7 +356,7 @@ const Reporting = () => {
       border-b  justify-content-center align-items-start"
       >
         <div>
-          <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
+          <h3 className="fs-3 fw-bold" style={{ color: "#263589" }}>
             Reporting
           </h3>
           <div className="card-subtitle">
@@ -493,13 +493,13 @@ const Reporting = () => {
                           <td>
                             <div className="d-flex align-items-center">
                               <span
-                                className="badge mx-auto flex justify-center
+                                className="badge mx-auto flex justify-content-center
                             items-center
                              bg-pink-lt"
                               >
                                 <div
                                   className="flex items-center
-                               w-full justify-center"
+                               w-100 justify-content-center"
                                 >
                                   <BarChart2 size={14} className="me-1" />
                                   {data.includeRecomondations ? "Yes" : "No"}

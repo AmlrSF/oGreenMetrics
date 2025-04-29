@@ -8,10 +8,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   const [sortDate, setSortDate] = useState("newest");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  //console.log(data);
-  
+  const itemsPerPage = 3;
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -100,10 +97,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
             <div className="flex items-center gap-2">
               {categories.length > 0 && (
                 <select
-                  className="form-select "
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  style={{ width: "150px" }}
+                  className="form-select " value={selectedCategory}  onChange={(e) => setSelectedCategory(e.target.value)} style={{ width: "150px" }}
                 >
                   <option value="all">All Types</option>
                   {categories.map((cat) => (
@@ -115,10 +109,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               )}
 
               <select
-                className="form-select "
-                value={sortDate}
-                style={{ width: "150px" }}
-                onChange={(e) => setSortDate(e.target.value)}
+                className="form-select " value={sortDate} style={{ width: "150px" }} onChange={(e) => setSortDate(e.target.value)}
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -169,11 +160,6 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                             : header.toLowerCase()  
                         ];
                         
-                       
-                        
-                        
-                        
-
                       if (header.toLowerCase() === "createdat" && cellValue) {
                         cellValue = formatDate(cellValue);
                       }
@@ -230,16 +216,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="icon"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M15 6l-6 6l6 6" />
@@ -270,15 +247,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="icon"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M9 6l6 6l-6 6" />

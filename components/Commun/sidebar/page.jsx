@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { userMenuItems, menuItems, websiteMenuItems  } from "@/lib/Data";
-//here is three data
 
 const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
