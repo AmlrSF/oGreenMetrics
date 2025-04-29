@@ -145,21 +145,21 @@ const OTPVerificationPage = () => {
   }
 
   return (
-    <div className="page page-center bg-light">
+    <div className="min-vh-100 d-flex justify-content-center align-items-center bg-light position-relative">
       {/* Alerts container */}
       <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
         {alerts.map((alert) => (
           <div 
             key={alert.id} 
-            className={`alert alert-${alert.type} alert-dismissible`}
+            className={`alert alert-${alert.type} alert-dismissible fade show`}
             role="alert"
           >
             {alert.type === 'success' ? 
-              <IconCheck className="alert-icon" /> : 
-              <IconAlertCircle className="alert-icon" />
+              <IconCheck className="me-2" /> : 
+              <IconAlertCircle className="me-2" />
             }
             <div>{alert.message}</div>
-            <a className="btn-close" onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}></a>
+            <button type="button" className="btn-close" onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}></button>
           </div>
         ))}
       </div>
@@ -198,8 +198,8 @@ const OTPVerificationPage = () => {
             </div>
 
             <div className="row align-items-center g-4">
-              <div className="col-md-6 text-md-start text-center">
-                <h2 className="h3 mb-2">Verification</h2>
+              <div className="col-md-6 text-center text-md-start">
+                <h2 className="fs-3 mb-2">Verification</h2>
                 <p className="text-muted mb-4">
                   Veuillez vérifier le code de vérification dans votre boîte de
                   réception <span className="text-decoration-underline fw-semibold">{email}</span>
@@ -229,9 +229,8 @@ const OTPVerificationPage = () => {
                     <button
                       onClick={handleResend}
                       disabled={!canResend}
-                      className={`btn btn-link p-0 text-primary ${
-                        !canResend && "opacity-50 disabled"
-                      }`}
+                      className="btn btn-link p-0 text-decoration-none"
+                      style={{ color: canResend ? "var(--bs-primary)" : "", opacity: canResend ? "1" : "0.5" }}
                     >
                       Resend code
                     </button>

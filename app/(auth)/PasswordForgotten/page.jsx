@@ -62,21 +62,21 @@ const Page = () => {
   };
 
   return (
-    <div className="page page-center bg-body-tertiary">
+    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-body-tertiary position-relative">
       {/* Alerts container */}
       <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
         {alerts.map((alert) => (
           <div 
             key={alert.id} 
-            className={`alert alert-${alert.type} alert-dismissible`}
+            className={`alert alert-${alert.type} alert-dismissible fade show`}
             role="alert"
           >
             {alert.type === 'success' ? 
-              <IconCheck className="alert-icon" /> : 
-              <IconAlertCircle className="alert-icon" />
+              <IconCheck className="me-2" /> : 
+              <IconAlertCircle className="me-2" />
             }
             <div>{alert.message}</div>
-            <a className="btn-close" onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}></a>
+            <button type="button" className="btn-close" onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}></button>
           </div>
         ))}
       </div>
@@ -102,7 +102,7 @@ const Page = () => {
       </div>
 
       <div className="container py-4">
-        <div className="card shadow ">
+        <div className="card shadow">
           <div className="card-body p-4">
             <div className="row g-4">
               <div className="col-md-6">
@@ -117,7 +117,7 @@ const Page = () => {
                 </div>
 
                 <div className="mb-4">
-                  <h1 className="h3 mb-1">Password forgotten 👋</h1>
+                  <h1 className="fs-3 mb-1">Password forgotten 👋</h1>
                   <p className="text-muted small">
                     Entrez votre e-mail pour le processus de vérification, nous vous enverrons un code à 4 chiffres à votre e-mail.
                   </p>
@@ -159,7 +159,7 @@ const Page = () => {
 
                   <p className="text-muted small text-center mt-3">
                     Vous n&apos;avez pas de compte ?{" "}
-                    <a href="/register" className="text-primary">
+                    <a href="/register" className="text-primary text-decoration-none">
                       Inscrivez-vous maintenant
                     </a>
                   </p>
@@ -168,7 +168,7 @@ const Page = () => {
 
               <div className="col-md-6 d-none d-md-block">
                 <div className="d-flex h-100 align-items-center justify-content-center">
-                  <div className="w-100 ml-40">
+                  <div className="w-100">
                     <img
                       src="/Auth illustrations/Forgot password.png"
                       alt="Login illustration"
