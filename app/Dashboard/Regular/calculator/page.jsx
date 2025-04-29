@@ -12,6 +12,8 @@ import {
   Check,
   Coffee,
   BatteryCharging,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 function WebsiteCalculator() {
@@ -23,6 +25,19 @@ function WebsiteCalculator() {
   const [user, setUser] = useState(null);
   const [showSave, setShowSave] = useState(true);
   const [visits, setVisits] = useState(10000);
+  const [counter, setCounter] = useState(1);
+
+  const increment = () => {
+    if (counter < 10000) {
+      setCounter(counter * 10);
+    }
+  };
+
+  const decrement = () => {
+    if (counter > 1) {
+      setCounter(counter / 10);
+    }
+  };
 
   useEffect(() => {
     let interval;
@@ -114,8 +129,15 @@ function WebsiteCalculator() {
 
   // Helper function for CO2 formatting
   const formatCO2 = (grams) => {
-    if (grams < 1) return `${(grams * 1000).toFixed(2)} mg`;
-    return `${grams.toFixed(2)} g`;
+    if (grams >= 1000000) {
+      return `${(grams / 1000000).toFixed(2)} tonnes`;
+    } else if (grams >= 1000) {
+      return `${(grams / 1000).toFixed(2)} kg`;
+    } else if (grams < 1) {
+      return `${(grams * 1000).toFixed(2)} mg`;
+    } else {
+      return `${grams.toFixed(2)} g`;
+    }
   };
 
   return (
@@ -285,33 +307,64 @@ function WebsiteCalculator() {
                 >
                   <div className="card shadow" style={{ borderRadius: 20 }}>
                     <div className="card-body p-4">
-                      <div className="d-flex align-items-center mb-2">
-                        <Globe className="icon me-2 text-blue" size={30} />
+                      <div className="d-flex align-items-center mb-4">
+                        <Globe className="icon me-2 text-primary" size={30} />
                         <span
-                          className="fw-bold fs-4"
+                          className="fw-bold fs-4 px-3 py-1"
                           style={{
-                            background: "#00e5ff22",
+                            background: "rgba(0,229,255,0.13)",
                             borderRadius: 8,
-                            padding: "0.2em 0.5em",
                           }}
                         >
-                          {formatCO2(result?.statistics?.co2?.grid?.grams || 0)}
+                          {formatCO2(result?.statistics?.co2?.grid?.grams )}
                         </span>
                         <span className="ms-2 fs-5">
                           of CO₂ is produced every time someone visits this web
                           page.
                         </span>
                       </div>
-                      <div className="text-muted ms-5">
-                        <small>
-                          <a
-                            href="https://www.websitecarbon.com/how-does-it-work/"
-                            target="_blank"
-                            className="text-blue"
+
+                      <div className="bg-light rounded p-4">
+                        <div className="d-flex align-items-center justify-content-center gap-4 mb-4">
+                          <button
+                            onClick={decrement}
+                            className="btn btn-primary rounded-circle fw-bold"
+                            style={{ width: 48, height: 48 }}
+                            disabled={counter === 1}
                           >
-                            How do we calculate it?
-                          </a>
-                        </small>
+                            <Minus height={40} width={40} />
+                          </button>
+
+                          <div
+                            className="bg-white px-4 py-2 rounded shadow-sm text-center"
+                            style={{ minWidth: 150 }}
+                          >
+                            <div className="text-muted small mb-1">
+                              Number of Users
+                            </div>
+                            <div className="fs-3 fw-bold text-primary">
+                              {counter}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={increment}
+                            className="btn btn-primary text-xl rounded-circle fw-bold"
+                            style={{ width: 48, height: 48 }}
+                            disabled={counter === 10000}
+                          >
+                            <Plus height={40} width={40} />
+                          </button>
+                        </div>
+
+                        <div className="bg-light-lt rounded p-4 text-center">
+                          <div className="text-muted mb-2">
+                            Total CO₂ Emissions
+                          </div>
+                          <div className="fs-2 fw-bold text-primary">
+                            {formatCO2(counter * result?.statistics?.co2?.grid?.grams )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -326,7 +379,7 @@ function WebsiteCalculator() {
                 >
                   <div className="card shadow" style={{ borderRadius: 20 }}>
                     <div className="card-body p-4">
-                      <div className="d-flex align-items-center mb-2">
+                      <div className="d-flex align-items-center ">
                         <BatteryCharging
                           className="icon me-2 text-green"
                           size={30}
@@ -338,35 +391,13 @@ function WebsiteCalculator() {
                           </span>
                         </span>
                       </div>
-                      <div className="text-muted ms-5">
-                        <small>
-                          <a
-                            href="https://www.websitecarbon.com/how-does-it-work/"
-                            target="_blank"
-                            className="text-green"
-                          >
-                            How do we calculate it?
-                          </a>
-                        </small>
-                      </div>
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Approximation disclaimer */}
-                <div className="text-center my-3">
-                  <span className="text-white-70">
-                    <small>
-                      This result is an <strong>approximation</strong>.<br />
-                      Your usage can vary based on website code, user device,
-                      and potential improvements. See .
-                    </small>
-                  </span>
-                </div>
-
                 {showSave && (
                   <button
-                    className="btn btn-success btn-lg mt-4 float-end"
+                    className="btn btn-success  mt-4 float-end"
                     onClick={SaveSiteDetails}
                     disabled={saving}
                   >
