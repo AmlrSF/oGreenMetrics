@@ -58,7 +58,7 @@ const Calculator = () => {
 
   return (
     <>
-      <section style={{ background: "#8ebe21" }} className="py-4">
+      <section style={{ background: "#8ebe21" }} className="py-4 calculator">
         <div className="container">
           <div className="text-center">
             <h2 className="display-5 text-white fw-bold mb-1">

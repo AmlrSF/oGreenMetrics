@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Trash2, Plus } from "lucide-react";
 
 const Page = () => {
   const [roles, setRoles] = useState([]);
@@ -10,6 +9,8 @@ const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAccess, setUserAccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [newRole, setNewRole] = useState({
     name: "",
     description: "",
@@ -17,6 +18,8 @@ const Page = () => {
     roleManagement: "00",
     companyManagement: "00",
   });
+
+  const [deletingIds, setDeletingIds] = useState(new Set());
 
   const itemsPerPage = 10;
   const totalPages = Math.ceil(roles?.length / itemsPerPage);
@@ -85,6 +88,9 @@ const Page = () => {
 
   const handleAddRole = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     setLoading(true);
     try {
       console.log(newRole);
@@ -110,10 +116,15 @@ const Page = () => {
       console.error(error);
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const deleterole = async (role) => {
+    if (deletingIds.has(role._id)) return;
+
+    setDeletingIds((prev) => new Set([...prev, role._id]));
+
     try {
       const response = await fetch(`http://localhost:4000/roles/${role._id}`, {
         method: "DELETE",
@@ -126,17 +137,26 @@ const Page = () => {
       fetchRoles();
     } catch (error) {
       console.error("❌ Error deleting role:", error);
+    } finally {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(role._id);
+        return newSet;
+      });
     }
   };
 
   return (
     <div className="container-xl h-full">
-      <div className="py-10 mb-5 border-b flex justify-between items-center">
-        <div className="flex flex-col justify-start">
-          <h3 className="text-[30px] font-bold text-[#263589]">
+      <div className="py-4 mb-5 d-flex d-flex justify-content-between align-items-start border-bottom">
+        <div className="d-flex flex-column justify-content-start">
+          <h3
+            className="fw-bold mb-1"
+            style={{ fontSize: "30px", color: "#263589" }}
+          >
             Administration des rôles
           </h3>
-          <div className="text-gray-600">
+          <div className="text-muted">
             Gérez les rôles des utilisateurs efficacement.
           </div>
         </div>
@@ -149,7 +169,23 @@ const Page = () => {
             onClick={() => setIsModalOpen(true)}
             style={{ backgroundColor: "#8EBE21" }}
           >
-            <Plus size={18} className="mr-2" /> Add Role
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-plus"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>{" "}
+            Add Role
           </button>
         )}
       </div>
@@ -271,8 +307,35 @@ const Page = () => {
                           <button
                             className="btn btn-ghost-danger btn-icon"
                             onClick={() => deleterole(role)}
+                            disabled={deletingIds.has(role._id)}
                           >
-                            <Trash2 size={18} />
+                            {deletingIds.has(role._id) ? (
+                              <span className="spinner-border spinner-border-sm" />
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                              >
+                                <path
+                                  stroke="none"
+                                  d="M0 0h24v24H0z"
+                                  fill="none"
+                                />
+                                <path d="M4 7l16 0" />
+                                <path d="M10 11l0 6" />
+                                <path d="M14 11l0 6" />
+                                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                              </svg>
+                            )}
                           </button>
                         </td>
                       )}
@@ -379,7 +442,7 @@ const Page = () => {
               <form onSubmit={handleAddRole}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Nom du rôle</label>
+                    <label className="form-label">Nom du rôle <span className="text-red fs-2">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -393,7 +456,7 @@ const Page = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Description</label>
+                    <label className="form-label">Description<span className="text-red fs-2">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -407,7 +470,7 @@ const Page = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Permissions</label>
+                    <label className="form-label">Permissions<span className="text-red fs-2">*</span></label>
                     <div className="border p-3 rounded">
                       {/* Gestion des utilisateurs */}
                       <div className="mb-2">
@@ -517,6 +580,7 @@ const Page = () => {
                     type="submit"
                     className="btn text-white"
                     style={{ backgroundColor: "#263589" }}
+                    disabled={isSubmitting}
                   >
                     {loading ? "Création en cours..." : "Créer le rôle"}
                   </button>

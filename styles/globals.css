@@ -1,6 +1,6 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 :root {
   --background: #ffffff;
@@ -21,6 +21,10 @@ body {
 
 .primary-clr-bg {
   background-color: var(--primary-clr);
+}
+
+.bg-prime{
+  background: #8ebe21;
 }
 
 a:hover {
@@ -79,4 +83,23 @@ a:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 10px;
+}
+
+.calculator{
+  margin-top: -5px;
+}
+
+.h-50{
+  min-height: 40vh;
+}
+
+.contact{
+  margin-bottom: -55px;
+  z-index: 1000000;
+}
+
+
+
+.ctct{
+  height: 550px;
 }

@@ -6,12 +6,12 @@ const About = () => {
     <section className="container min-h-screen my-5 py-5">
       <h2 className="text-center text-4xl font-bold mb-10">À propos de nous</h2>
       
-      <div className="row align-items-start mb-5">
+      <div className="row align-items-center justify-content-between ">
         <div className="col-lg-5">
           <Image 
             src="/factory.png" 
             alt="Durabilité" 
-            width={400} 
+            width={300} 
             height={300} 
             className="img-fluid rounded-4 shadow"
           />

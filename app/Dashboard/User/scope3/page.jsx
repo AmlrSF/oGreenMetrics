@@ -20,6 +20,10 @@ const Scope3 = () => {
     "deplacement-employes": [],
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingIds, setDeletingIds] = useState(new Set());
+
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -88,10 +92,10 @@ const Scope3 = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
+    setIsSubmitting(true);
     const newFormData = { ...formData, company_id: Company?._id, scopeType };
-
-    console.log(newFormData);
 
     try {
       const method = isEditing ? "PUT" : "POST";
@@ -107,33 +111,40 @@ const Scope3 = () => {
         body: JSON.stringify(newFormData),
       });
 
-      console.log(newFormData);
-
       const responseData = await response.json();
-
-      console.log(responseData);
-
-      fetchData();
+      await fetchData();
       toggleModal(false);
       setIsEditing(false);
       setEditingId(null);
       setFormData({});
     } catch (error) {
       console.error("Error adding/updating data:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
+    if (deletingIds.has(id)) return;
+    
+    setDeletingIds(prev => new Set([...prev, id]));
+    
     try {
       const response = await fetch(`http://localhost:4000/${activeTab}/${id}`, {
         method: "DELETE",
       });
 
       const responseData = await response.json();
-
-      console.log(responseData);
-      fetchData();
-    } catch (error) {}
+      await fetchData();
+    } catch (error) {
+      console.error("Error deleting:", error);
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   };
 
   const handleUpdate = async (id) => {
@@ -213,7 +224,7 @@ const Scope3 = () => {
 
       return (
         <div className="mb-3" key={index}>
-          <label className="form-label">{field?.label}</label>
+          <label className="form-label">{field?.label}{field?.required ? <span className="fs-2 text-danger">*</span> : "" }</label>
           {field.type === "select" ? (
             <select
               className="form-select"
@@ -304,6 +315,8 @@ const Scope3 = () => {
             onDelete={handleDelete}
             onUpdate={handleUpdate}
             onAdd={() => toggleModal(true)}
+            deletingIds={deletingIds}
+            
           />
         </div>
       </div>
@@ -320,6 +333,7 @@ const Scope3 = () => {
                   type="button"
                   className="btn-close"
                   onClick={() => toggleModal(false)}
+                  
                 ></button>
               </div>
               <form onSubmit={handleSubmit}>
@@ -329,11 +343,23 @@ const Scope3 = () => {
                     type="button"
                     className="btn btn-link link-secondary"
                     onClick={() => toggleModal(false)}
+                    disabled={isSubmitting}
                   >
                     Annuler
                   </button>
-                  <button type="submit" className="btn btn-primary ms-auto">
-                    {isEditing ? "Mettre à jour" : "Ajouter"}
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary ms-auto"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <span>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        {isEditing ? "Mise à jour..." : "Ajout..."}
+                      </span>
+                    ) : (
+                      isEditing ? "Mettre à jour" : "Ajouter"
+                    )}
                   </button>
                 </div>
               </form>

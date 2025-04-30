@@ -320,8 +320,10 @@ const CompanyDash = () => {
 
   if (loading || !processedEmissions) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="spinner-border text-primary" role="status" style={{ width: '2rem', height: '2rem' }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
       </div>
     );
   }

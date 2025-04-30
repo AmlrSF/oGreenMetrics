@@ -1,14 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  UserCheck,
-  UserX,
-  Trash2,
-  AlertTriangle,
-} from "lucide-react";
 
 import { formatDate, getInitials } from "@/lib/Utils";
 
@@ -26,6 +18,7 @@ const Page = () => {
   const [RoleFilter, setRoleFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("latest");
   const itemsPerPage = 5;
+  const [deletingIds, setDeletingIds] = useState(new Set());
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   useEffect(() => {
@@ -94,6 +87,10 @@ const Page = () => {
   };
 
   const handleDeleteUser = async () => {
+    if (deletingIds.has(selectedUser._id)) return;
+
+    setDeletingIds((prev) => new Set([...prev, selectedUser._id]));
+
     try {
       const response = await fetch(
         `http://localhost:4000/users/${selectedUser._id}`,
@@ -106,6 +103,12 @@ const Page = () => {
       fetchUsers();
     } catch (error) {
       setError("Failed to delete user");
+    } finally {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedUser._id);
+        return newSet;
+      });
     }
   };
 
@@ -150,10 +153,18 @@ const Page = () => {
             <div className="modal-content">
               <div className="modal-body">
                 <div className="text-center py-4">
-                  <AlertTriangle
-                    size={48}
-                    className="text-yellow-500 mb-2 mx-auto"
-                  />
+               
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="icon icon-tabler text-warn mb-2 icons-tabler-filled icon-tabler-alert-hexagon"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M10.425 1.414a3.33 3.33 0 0 1 3.026 -.097l.19 .097l6.775 3.995l.096 .063l.092 .077l.107 .075a3.224 3.224 0 0 1 1.266 2.188l.018 .202l.005 .204v7.284c0 1.106 -.57 2.129 -1.454 2.693l-.17 .1l-6.803 4.302c-.918 .504 -2.019 .535 -3.004 .068l-.196 -.1l-6.695 -4.237a3.225 3.225 0 0 1 -1.671 -2.619l-.007 -.207v-7.285c0 -1.106 .57 -2.128 1.476 -2.705l6.95 -4.098zm1.585 13.586l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-.01 -8a1 1 0 0 0 -.993 .883l-.007 .117v4l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-4l-.007 -.117a1 1 0 0 0 -.993 -.883z" />
+                  </svg>
                   <h3>Êtes-vous sûr ?</h3>
                   <div className="text-muted">
                     {modalType === "approve"
@@ -194,6 +205,7 @@ const Page = () => {
                             ? handleApproveUser
                             : handleDeleteUser
                         }
+                        disabled={deletingIds.has(selectedUser._id)}
                       >
                         {modalType === "approve"
                           ? selectedUser.isVerified
@@ -215,14 +227,18 @@ const Page = () => {
         </div>
       )}
 
-      <div className="py-10  mb-5 d-flex leading-[0.1] border-b flex-column justify-content-center align-items-start">
-        <h3 className=" text-[30px] font-bold" style={{ color: "#263589" }}>
+      <div className="py-4 mb-5 d-flex flex-column justify-content-center align-items-start border-bottom">
+        <h3
+          className="mb-1 fw-bold"
+          style={{ fontSize: "30px", color: "#263589" }}
+        >
           Administration des utilisateurs
         </h3>
         <div className="card-subtitle">
           Gérez les utilisateurs, les rôles et les permissions efficacement.
         </div>
       </div>
+
       <div className="card pt-5">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
@@ -260,7 +276,6 @@ const Page = () => {
               </div>
               entrées
             </div>
-            
           </div>
         </div>
 
@@ -312,7 +327,7 @@ const Page = () => {
                               >
                                 {user.photo_de_profil ? (
                                   <img
-                                  className="w-full h-full rounded-sm object-fit-cover"
+                                    className="w-full h-full rounded-sm object-fit-cover"
                                     src={user.photo_de_profil}
                                     alt={`${user.prenom} ${user.nom}`}
                                   />
@@ -361,16 +376,82 @@ const Page = () => {
                                   } btn-icon`}
                                 >
                                   {user.isVerified ? (
-                                    <UserX size={18} />
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="icon icon-tabler icons-tabler-outline icon-tabler-user-x"
+                                    >
+                                      <path
+                                        stroke="none"
+                                        d="M0 0h24v24H0z"
+                                        fill="none"
+                                      />
+                                      <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                      <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" />
+                                      <path d="M22 22l-5 -5" />
+                                      <path d="M17 22l5 -5" />
+                                    </svg>
                                   ) : (
-                                    <UserCheck size={18} />
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="icon icon-tabler icons-tabler-outline icon-tabler-user-check"
+                                    >
+                                      <path
+                                        stroke="none"
+                                        d="M0 0h24v24H0z"
+                                        fill="none"
+                                      />
+                                      <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                      <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+                                      <path d="M15 19l2 2l4 -4" />
+                                    </svg>
                                   )}
                                 </button>
                                 <button
                                   onClick={() => openModal("delete", user)}
                                   className="btn btn-ghost-danger btn-icon"
+                                  
                                 >
-                                  <Trash2 size={18} />
+                                  
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="24"
+                                      height="24"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                                    >
+                                      <path
+                                        stroke="none"
+                                        d="M0 0h24v24H0z"
+                                        fill="none"
+                                      />
+                                      <path d="M4 7l16 0" />
+                                      <path d="M10 11l0 6" />
+                                      <path d="M14 11l0 6" />
+                                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                    </svg>
+                                  
                                 </button>
                               </div>
                             </td>
@@ -390,7 +471,8 @@ const Page = () => {
 
             <div className="card-footer d-flex align-items-center">
               <p className="m-0 text-secondary">
-              Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span> à{" "}
+                Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span>{" "}
+                à{" "}
                 <span>
                   {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
                 </span>{" "}

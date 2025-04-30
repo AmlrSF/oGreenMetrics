@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, ShieldX, Trash2, AlertTriangle, Eye } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
 
@@ -17,6 +16,8 @@ const Page = () => {
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCompany, setselectedCompany] = useState(null);
+  const [deletingIds, setDeletingIds] = useState(new Set());
+  
   const router = useRouter();
 
   useEffect(() => {
@@ -79,6 +80,10 @@ const Page = () => {
   };
 
   const handleDeleteCompany = async () => {
+    if (deletingIds.has(selectedCompany._id)) return;
+
+    setDeletingIds((prev) => new Set([...prev, selectedCompany._id]));
+
     try {
       const response = await fetch(
         `http://localhost:4000/deletecompany/${selectedCompany._id}`,
@@ -91,6 +96,12 @@ const Page = () => {
       fetchCompanies();
     } catch (error) {
       setError("Failed to update company status");
+    }finally {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedCompany._id);
+        return newSet;
+      });
     }
   };
 
@@ -126,10 +137,17 @@ const Page = () => {
             <div className="modal-content">
               <div className="modal-body">
                 <div className="text-center py-4">
-                  <AlertTriangle
-                    size={48}
-                    className="text-yellow-500 mb-2 mx-auto"
-                  />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="icon icon-tabler text-warn mb-2 icons-tabler-filled icon-tabler-alert-hexagon"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M10.425 1.414a3.33 3.33 0 0 1 3.026 -.097l.19 .097l6.775 3.995l.096 .063l.092 .077l.107 .075a3.224 3.224 0 0 1 1.266 2.188l.018 .202l.005 .204v7.284c0 1.106 -.57 2.129 -1.454 2.693l-.17 .1l-6.803 4.302c-.918 .504 -2.019 .535 -3.004 .068l-.196 -.1l-6.695 -4.237a3.225 3.225 0 0 1 -1.671 -2.619l-.007 -.207v-7.285c0 -1.106 .57 -2.128 1.476 -2.705l6.95 -4.098zm1.585 13.586l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-.01 -8a1 1 0 0 0 -.993 .883l-.007 .117v4l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-4l-.007 -.117a1 1 0 0 0 -.993 -.883z" />
+                  </svg>
                   <h3>Êtes-vous sûr ?</h3>
                   <div className="text-muted">
                     Voulez-vous supprimer cette entreprise ?
@@ -154,6 +172,7 @@ const Page = () => {
                       <button
                         className="btn w-100 btn-danger"
                         onClick={() => handleDeleteCompany(selectedCompany)}
+                        disabled={deletingIds.has(selectedCompany._id)}
                       >
                         Supprimer
                       </button>
@@ -170,8 +189,11 @@ const Page = () => {
           ></div>
         </div>
       )}
-      <div className="py-10 mb-5 d-flex leading-[0.1] border-b flex-column justify-content-center align-items-start">
-        <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
+      <div className="py-4 mb-5 d-flex flex-column justify-content-center align-items-start border-bottom">
+        <h3
+          className="mb-1 fw-bold"
+          style={{ fontSize: "30px", color: "#263589" }}
+        >
           Administration des entreprises
         </h3>
         <div className="card-subtitle">
@@ -283,13 +305,54 @@ const Page = () => {
                                   }
                                   className="btn btn-ghost-blue btn-icon"
                                 >
-                                  <Eye size={18} />
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="icon icon-tabler icons-tabler-outline icon-tabler-eye"
+                                  >
+                                    <path
+                                      stroke="none"
+                                      d="M0 0h24v24H0z"
+                                      fill="none"
+                                    />
+                                    <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                                    <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+                                  </svg>
                                 </button>
                                 <button
                                   onClick={() => openModal(company)}
                                   className="btn btn-ghost-danger btn-icon"
                                 >
-                                  <Trash2 size={18} />
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                                  >
+                                    <path
+                                      stroke="none"
+                                      d="M0 0h24v24H0z"
+                                      fill="none"
+                                    />
+                                    <path d="M4 7l16 0" />
+                                    <path d="M10 11l0 6" />
+                                    <path d="M14 11l0 6" />
+                                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                  </svg>
                                 </button>
                               </div>
                             </td>
