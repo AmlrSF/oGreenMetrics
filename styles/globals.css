@@ -1,6 +1,5 @@
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "@tabler/core/dist/css/tabler.min.css";
 
 :root {
   --background: #ffffff;
