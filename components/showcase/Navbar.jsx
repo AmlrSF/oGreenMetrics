@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, User2, X } from "lucide-react";
+import { IconMenu2, IconUser, IconX } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
@@ -67,8 +67,8 @@ const Navbar = () => {
 
           <div className="d-flex align-items-center gap-3">
             <div className="d-none d-md-flex align-items-center justify-content-center gap-2">
-              <User2 width={35} height={35} />
-              <div className="d-flex flex-column align-items-start">
+            <IconUser width={35} height={35} />
+            <div className="d-flex flex-column align-items-start">
                 <p className="m-0 small fw-medium">Bonjour</p>
                 <p className="m-0 small">Contactez-vous</p>
               </div>
@@ -87,11 +87,12 @@ const Navbar = () => {
             className="d-md-none position-relative z-index-5 btn btn-link p-2"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? (
-              <X className="icon text-white" />
-            ) : (
-              <Menu className="icon text-muted" />
-            )}
+           {isOpen ? (
+  <IconX className="icon text-white" size={24} />
+) : (
+  <IconMenu2 className="icon text-muted" size={24} />
+)}
+
           </button>
         </div>
       </nav>

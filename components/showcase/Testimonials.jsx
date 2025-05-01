@@ -1,5 +1,9 @@
 import React from "react";
-import { Star, StarHalf } from 'lucide-react';
+import {
+  IconStarFilled,
+  IconStarHalfFilled,
+  IconStar
+} from "@tabler/icons-react";
 
 const Testimonials = () => {
   const testimonials = [
@@ -31,36 +35,33 @@ const Testimonials = () => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
 
-    // Add full stars
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Star
+        <IconStarFilled
           key={`star-${i}`}
-          className="icon icon-filled text-yellow"
-          style={{ width: '1rem', height: '1rem' }}
+          className="text-yellow"
+          size={16}
         />
       );
     }
 
-    // Add half star if needed
     if (hasHalfStar) {
       stars.push(
-        <StarHalf
+        <IconStarHalfFilled
           key="half-star"
-          className="icon icon-filled text-yellow"
-          style={{ width: '1rem', height: '1rem' }}
+          className="text-yellow"
+          size={16}
         />
       );
     }
 
-    // Add remaining empty stars
     const remainingStars = 5 - Math.ceil(rating);
     for (let i = 0; i < remainingStars; i++) {
       stars.push(
-        <Star
+        <IconStar
           key={`empty-star-${i}`}
-          className="icon text-yellow"
-          style={{ width: '1rem', height: '1rem' }}
+          className="text-yellow"
+          size={16}
         />
       );
     }
@@ -70,7 +71,7 @@ const Testimonials = () => {
 
   return (
     <section className="py-4 mb-6"
-     style={{ backgroundColor: '#8ebe21', minHeight: '30vh' }}>
+      style={{ backgroundColor: '#8ebe21', minHeight: '30vh' }}>
       <div className="container">
         <h2 className="text-center text-4xl font-bold text-white mb-4">
           Témoignages

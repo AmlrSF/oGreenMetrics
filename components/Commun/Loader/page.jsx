@@ -1,9 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { IconLoader } from "@tabler/icons-react";  
 
-
-const Loader = () => {
+const LoaderPage = () => {
   return (
     <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-white">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="position-relative">
@@ -14,7 +13,7 @@ const Loader = () => {
           }}
           className="w-100 h-100 d-flex align-items-center justify-content-center"
         >
-          <Loader2 className="text-success" size={80} />
+          <IconLoader className="text-success" size={80} />  
         </motion.div>
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -39,4 +38,4 @@ const Loader = () => {
   );
 };
 
-export default Loader;
+export default LoaderPage;

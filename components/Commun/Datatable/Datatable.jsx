@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
-import { Trash2, Edit2, Search } from "lucide-react";
+import {
+  IconTrash,
+  IconEdit,
+  IconSearch,
+  IconChevronLeft,
+  IconChevronRight,
+} from "@tabler/icons-react";
 
 const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   const [filteredData, setFilteredData] = useState(data);
@@ -54,9 +60,9 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
           ? "mode"
           : tab?.id === "businessTravel"
           ? "mode"
-            : tab?.id === "biens-services"
+          : tab?.id === "biens-services"
           ? "type"
-            : tab?.id === "employesTransport"
+          : tab?.id === "employesTransport"
           ? "mode"
           : null;
 
@@ -78,12 +84,11 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   return (
     <div className="card">
       <div className="card-header">
-        <div className="d-flex flex-col sm:flex-row justify-content-between 
-          w-full align-items-start sm:align-items-center gap-3">
+        <div className="d-flex flex-col sm:flex-row justify-content-between w-full align-items-start sm:align-items-center gap-3">
           <div className="d-flex flex-col gap-2">
-            <div className="input-icon " style={{ width: "350px" }}>
+            <div className="input-icon" style={{ width: "350px" }}>
               <span className="input-icon-addon">
-                <Search size={16} />
+                <IconSearch size={16} />
               </span>
               <input
                 type="text"
@@ -97,7 +102,10 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
             <div className="flex items-center gap-2">
               {categories.length > 0 && (
                 <select
-                  className="form-select " value={selectedCategory}  onChange={(e) => setSelectedCategory(e.target.value)} style={{ width: "150px" }}
+                  className="form-select"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  style={{ width: "150px" }}
                 >
                   <option value="all">All Types</option>
                   {categories.map((cat) => (
@@ -109,7 +117,10 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               )}
 
               <select
-                className="form-select " value={sortDate} style={{ width: "150px" }} onChange={(e) => setSortDate(e.target.value)}
+                className="form-select"
+                value={sortDate}
+                style={{ width: "150px" }}
+                onChange={(e) => setSortDate(e.target.value)}
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -134,19 +145,13 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
           <tbody>
             {filteredData?.length === 0 ? (
               <tr>
-                <td
-                  colSpan={headers?.length}
-                  className="text-center text-muted"
-                >
+                <td colSpan={headers?.length} className="text-center text-muted">
                   No data available
                 </td>
               </tr>
             ) : (
               filteredData
-                ?.slice(
-                  (currentPage - 1) * itemsPerPage,
-                  currentPage * itemsPerPage
-                )
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                 .map((row, rowIndex) => (
                   <tr key={rowIndex}>
                     {headers?.slice(0, -1).map((header, colIndex) => {
@@ -154,12 +159,15 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                         row[
                           header.toLowerCase() === "createdat"
                             ? "createdAt"
-                            : header === "sousType" ? header 
-                            : header === "Nombre d'employés"? "nombreEmployes" 
-                            : header === "Bus" ? "nomBus" 
-                            : header.toLowerCase()  
+                            : header === "sousType"
+                            ? header
+                            : header === "Nombre d'employés"
+                            ? "nombreEmployes"
+                            : header === "Bus"
+                            ? "nomBus"
+                            : header.toLowerCase()
                         ];
-                        
+
                       if (header.toLowerCase() === "createdat" && cellValue) {
                         cellValue = formatDate(cellValue);
                       }
@@ -184,13 +192,13 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                           className="btn btn-ghost-danger btn-icon"
                           onClick={() => onDelete(row._id)}
                         >
-                          <Trash2 size={18} />
+                          <IconTrash size={18} />
                         </button>
                         <button
                           className="btn btn-ghost-success btn-icon"
                           onClick={() => onUpdate(row._id)}
                         >
-                          <Edit2 size={18} />
+                          <IconEdit size={18} />
                         </button>
                       </div>
                     </td>
@@ -204,10 +212,8 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
       <div className="card-footer d-flex align-items-center">
         <p className="m-0 text-secondary">
           Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-          <span>
-            {Math.min(currentPage * itemsPerPage, filteredData.length)}
-          </span>{" "}
-          of <span>{filteredData.length}</span> entries
+          <span>{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of{" "}
+          <span>{filteredData.length}</span> entries
         </p>
         <ul className="pagination m-0 ms-auto">
           <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
@@ -215,12 +221,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               className="page-link"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M15 6l-6 6l6 6" />
-              </svg>
+              <IconChevronLeft size={20} />
             </button>
           </li>
           <li className="page-item active">
@@ -234,24 +235,14 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               {currentPage}
             </span>
           </li>
-          <li
-            className={`page-item ${
-              currentPage === totalPages ? "disabled" : ""
-            }`}
-          >
+          <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
             <button
               className="page-link"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M9 6l6 6l-6 6" />
-              </svg>
+              <IconChevronRight size={20} />
             </button>
           </li>
         </ul>

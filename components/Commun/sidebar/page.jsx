@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  LogOut,
-  Menu,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-} from "lucide-react";
+  IconLogout,
+  IconMenu2,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronDown,
+} from "@tabler/icons-react";
 import { useRouter, usePathname } from "next/navigation";
 import { userMenuItems, menuItems, websiteMenuItems  } from "@/lib/Data";
 
@@ -18,56 +18,47 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
   const pathname = usePathname();
   const [items, setItems] = useState([]);
 
-  
   const colors = {
-    primary: "#ffffff", 
-    white: "#000", 
+    primary: "#ffffff",
+    white: "#000",
     lightAccent: "#5a7814",
     green: "#8ebe21",
-    darkAccent: "#f0ffe0", 
+    darkAccent: "#f0ffe0",
     textDark: "#2c3e0e",
-    borderColor: "rgba(255, 255, 255, 0.15)", 
+    borderColor: "rgba(255, 255, 255, 0.15)",
   };
-  
-
-
 
   useEffect(() => {
     if (user?.role === "Admin") {
-      
       setItems(
         menuItems.filter(
           (item) => item.label !== "Profile" && item.label !== "Settings"
         )
       );
-    } 
-    else if (user?.AdminRoles) {
+    } else if (user?.AdminRoles) {
       const filteredMenuItems = adminMenuItems.filter((item) => {
         if (!item?.service) return true;
         return user.AdminRoles[item?.service] !== "00";
       });
-      
+
       setItems(
         filteredMenuItems.filter(
           (item) => item.label !== "Profile" && item.label !== "Settings"
         )
       );
-    } 
-    else if (user?.role === "entreprise") {
+    } else if (user?.role === "entreprise") {
       setItems(
         userMenuItems.filter(
           (item) => item.label !== "Profile" && item.label !== "Settings"
         )
       );
-    } 
-    else if (user?.role === "régulier") {
+    } else if (user?.role === "régulier") {
       setItems(
         websiteMenuItems.filter(
           (item) => item.label !== "Profile" && item.label !== "Settings"
         )
       );
-    } 
-    else {
+    } else {
       setItems([]);
     }
   }, [user?.role, user?.AdminRoles]);
@@ -81,9 +72,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
     setOpenDropdown(openDropdown === label ? null : label);
   };
 
-  const isLinkActive = (href) => {
-    return pathname === href;
-  };
+  const isLinkActive = (href) => pathname === href;
 
   const isDropdownActive = (item) => {
     if (!item.children) return false;
@@ -110,8 +99,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
   return (
     <aside className="sidebar">
       <div
-        className="position-fixed top-0 start-0 bottom-0 
-        overflow-y-auto shadow-lg"
+        className="position-fixed top-0 start-0 bottom-0 overflow-y-auto shadow-lg"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -121,11 +109,10 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
           left: 0,
           height: "100vh",
           backgroundColor: colors.primary,
-         
         }}
       >
         <div
-          className="d-flex align-items-center p-3 "
+          className="d-flex align-items-center p-3"
           style={{
             justifyContent: isCollapsed ? "center" : "space-between",
             backgroundColor: colors.primary,
@@ -135,10 +122,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
           {!isCollapsed && (
             <div className="d-flex align-items-start">
               <span className="fs-2 font-bold text-primary">Green</span>{" "}
-              <span
-                className="fs-2 font-medium"
-                style={{ color: colors.green }}
-              >
+              <span className="fs-2 font-medium" style={{ color: colors.green }}>
                 Metrics
               </span>
             </div>
@@ -154,9 +138,9 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? (
-              <ChevronRight size={20} />
+              <IconChevronRight size={20} />
             ) : (
-              <ChevronLeft size={20} />
+              <IconChevronLeft size={20} />
             )}
           </button>
         </div>
@@ -169,14 +153,11 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                   <>
                     <button
                       onClick={() => toggleDropdown(item.label)}
-                      className={`nav-link 
-                        p-2 rounded text-decoration-none w-full ${
-                          isCollapsed
-                            ? "items-center justify-center"
-                            : "items-center"
-                        } `}
-                      style={{            
-                        color:"#fff",
+                      className={`nav-link p-2 rounded text-decoration-none w-full ${
+                        isCollapsed ? "items-center justify-center" : "items-center"
+                      }`}
+                      style={{
+                        color: "#fff",
                         textAlign: "left",
                         fontWeight:
                           openDropdown === item.label || isDropdownActive(item)
@@ -186,30 +167,36 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                     >
                       <div
                         style={{ gap: isCollapsed ? "0px" : "10px" }}
-                        className="d-flex align-items-center "
+                        className="d-flex align-items-center"
                       >
                         <item.icon
                           size={22}
-                          
                           style={{
-                            color: isLinkActive(item.href) ? colors.primary : colors.white,
-                          
+                            color: isLinkActive(item.href)
+                              ? colors.primary
+                              : colors.white,
                           }}
                         />
-
                         {!isCollapsed && (
-                          <span className="text-sm font-medium" 
-                          style={{color: isLinkActive(item.href) ? colors.primary : colors.white}}>
+                          <span
+                            className="text-sm font-medium"
+                            style={{
+                              color: isLinkActive(item.href)
+                                ? colors.primary
+                                : colors.white,
+                            }}
+                          >
                             {item.label}
                           </span>
                         )}
-
                       </div>
                       {!isCollapsed && (
-                        <ChevronDown
+                        <IconChevronDown
                           className="ms-auto"
                           style={{
-                            color: isLinkActive(item.href) ? colors.primary : colors.white,
+                            color: isLinkActive(item.href)
+                              ? colors.primary
+                              : colors.white,
                             opacity:
                               openDropdown === item.label ||
                               isDropdownActive(item)
@@ -225,62 +212,96 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                       )}
                     </button>
                     <div
-                      className={`flex flex-col  items-center justify-center ${
+                      className={`flex flex-col items-center justify-center ${
                         openDropdown === item.label ? "d-block" : "d-none"
                       }`}
                       style={{
                         transition: "height 0.3s ease",
-                        marginLeft: !isCollapsed && openDropdown === item.label ? "12px" : "",
+                        marginLeft:
+                          !isCollapsed && openDropdown === item.label
+                            ? "12px"
+                            : "",
                       }}
                     >
                       {item.children.map((child) => (
                         <Link
                           key={child.label}
                           href={child.href}
-                          className={`
-                          flex items-center rounded p-2 my-1 transition-all duration-200
-                          ${isCollapsed ? "justify-center" : "gap-2"}
-                        `}
+                          className={`flex items-center rounded p-2 my-1 transition-all duration-200 ${
+                            isCollapsed ? "justify-center" : "gap-2"
+                          }`}
                           style={{
                             backgroundColor: isLinkActive(child.href)
-                            ? "rgba(142, 190, 33, 1)"
-                            : "transparent",
-                            color: isLinkActive(child.href) ? colors.primary : colors.white,
+                              ? "rgba(142, 190, 33, 1)"
+                              : "transparent",
+                            color: isLinkActive(child.href)
+                              ? colors.primary
+                              : colors.white,
                             opacity: isLinkActive(child.href) ? 1 : 0.85,
                             fontWeight: isLinkActive(child.href) ? 500 : 400,
                           }}
                         >
-                          <child.icon size={18} style={{color: isLinkActive(child.href) ? colors.primary : colors.white}}/>
-                          {!isCollapsed && <span className="font-normal" style={{color: isLinkActive(child.href) ? colors.primary : colors.white}}>{child.label}</span>}
-                          
+                          <child.icon
+                            size={18}
+                            style={{
+                              color: isLinkActive(child.href)
+                                ? colors.primary
+                                : colors.white,
+                            }}
+                          />
+                          {!isCollapsed && (
+                            <span
+                              className="font-normal"
+                              style={{
+                                color: isLinkActive(child.href)
+                                  ? colors.primary
+                                  : colors.white,
+                              }}
+                            >
+                              {child.label}
+                            </span>
+                          )}
                         </Link>
                       ))}
                     </div>
-                  
                   </>
                 ) : (
                   <Link
                     href={item.href}
-                    className={`nav-link 
-                      p-2 rounded text-decoration-none ${
-                        isCollapsed
-                          ? "items-center justify-center"
-                          : "items-center"
-                      } `}
+                    className={`nav-link p-2 rounded text-decoration-none ${
+                      isCollapsed ? "items-center justify-center" : "items-center"
+                    }`}
                     style={{
                       backgroundColor: isLinkActive(item.href)
-                      ? "rgba(142, 190, 33, 1)"
-                      : "transparent",
-                      color: isLinkActive(item.href) ? colors.primary : colors.white,
+                        ? "rgba(142, 190, 33, 1)"
+                        : "transparent",
+                      color: isLinkActive(item.href)
+                        ? colors.primary
+                        : colors.white,
                       opacity: isLinkActive(item.href) ? 1 : 0.85,
                       fontWeight: isLinkActive(item.href) ? 600 : 400,
-
                       gap: isCollapsed ? "0px" : "10px",
                     }}
                   >
-                    <item.icon size={22} className="" style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}} />
+                    <item.icon
+                      size={22}
+                      style={{
+                        color: isLinkActive(item.href)
+                          ? colors.primary
+                          : colors.white,
+                      }}
+                    />
                     {!isCollapsed && (
-                      <span className="text-sm font-medium" style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}}>{item.label}</span>
+                      <span
+                        className="text-sm font-medium"
+                        style={{
+                          color: isLinkActive(item.href)
+                            ? colors.primary
+                            : colors.white,
+                        }}
+                      >
+                        {item.label}
+                      </span>
                     )}
                   </Link>
                 )}
@@ -295,34 +316,49 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
         >
           <ul className="nav flex-column gap-2 mb-3">
             {["Profile", "Settings"].map((label) => {
-              const item = (user?.role == "Admin" ? menuItems : user?.role == "entreprise" ? userMenuItems : websiteMenuItems).find(
-                (i) => i.label === label
-              );
+              const item = (user?.role === "Admin"
+                ? menuItems
+                : user?.role === "entreprise"
+                ? userMenuItems
+                : websiteMenuItems
+              ).find((i) => i.label === label);
               return (
                 item && (
                   <li key={item.label} className="nav-item">
                     <Link
                       href={item.href}
-                      className={`nav-link 
-                       p-2 rounded text-decoration-none ${
-                         isCollapsed
-                           ? "items-center justify-center"
-                           : "items-center"
-                       } `}
+                      className={`nav-link p-2 rounded text-decoration-none ${
+                        isCollapsed ? "items-center justify-center" : "items-center"
+                      }`}
                       style={{
                         backgroundColor: isLinkActive(item.href)
                           ? "rgba(142, 190, 33, 1)"
-                            : "transparent",
-                        color: isLinkActive(item.href) ? colors.primary : colors.white,
+                          : "transparent",
+                        color: isLinkActive(item.href)
+                          ? colors.primary
+                          : colors.white,
                         opacity: isLinkActive(item.href) ? 1 : 0.85,
                         fontWeight: isLinkActive(item.href) ? 600 : 400,
-
                         gap: isCollapsed ? "0px" : "10px",
                       }}
                     >
-                      <item.icon size={22} style={{color : isLinkActive(item.href) ? colors.primary : colors.white,}} />
+                      <item.icon
+                        size={22}
+                        style={{
+                          color: isLinkActive(item.href)
+                            ? colors.primary
+                            : colors.white,
+                        }}
+                      />
                       {!isCollapsed && (
-                        <span style={{color : isLinkActive(item.href) ? colors.primary : colors.white,}}  className="text-sm font-medium" >
+                        <span
+                          className="text-sm font-medium"
+                          style={{
+                            color: isLinkActive(item.href)
+                              ? colors.primary
+                              : colors.white,
+                          }}
+                        >
                           {item.label}
                         </span>
                       )}
@@ -335,8 +371,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
 
           <button
             onClick={logout}
-            className="btn d-flex align-items-center 
-            justify-content-center gap-2 w-100"
+            className="btn d-flex align-items-center justify-content-center gap-2 w-100"
             style={{
               backgroundColor: colors.green,
               color: colors.primary,
@@ -345,9 +380,8 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
               borderRadius: "6px",
               fontWeight: 500,
             }}
-            
           >
-            <LogOut size={20} />
+            <IconLogout size={20} />
             {!isCollapsed && (
               <span className="text-sm font-medium">Logout</span>
             )}

@@ -1,18 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { IconBellUp } from "@tabler/icons-react"; 
 import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
- 
+
 const Navbar = ({ user, isAdmin }) => {
-  const router = useRouter(); 
-  
- 
+  const router = useRouter();
+
   const handleNavigation = () => {
     router.push(`/Dashboard/${isAdmin ? "Admin" : "User"}/profile`);
   };
- 
 
   return (
     <nav className="navbar py-2 navbar-expand-lg" style={{ backgroundColor: "#8ebe21" }}>
@@ -23,22 +21,20 @@ const Navbar = ({ user, isAdmin }) => {
             <button
               className="btn position-relative"
               style={{ border: "none", background: "none" }}
-             >
-              <Bell size={20} className="text-white" />
-             
+            >
+              <IconBellUp size={20} className="text-white" />
             </button>
 
             {/* Notification dropdown */}
-               <div
-                className="position-absolute end-0 mt-2 shadow-lg rounded-3 bg-white"
-                style={{ width: "320px", zIndex: 1000, maxHeight: "400px", overflowY: "auto" }}
-              >
-               
-                <div>
-                  
-                </div>
+            <div
+              className="position-absolute end-0 mt-2 shadow-lg rounded-3 bg-white"
+              style={{ width: "320px", zIndex: 1000, maxHeight: "400px", overflowY: "auto" }}
+            >
+              <div>
+                {/* Notifications will go here */}
               </div>
-           </div>
+            </div>
+          </div>
 
           {/* Profile */}
           <div

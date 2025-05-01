@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 
 const Scope2 = () => {
   const [activeTab, setActiveTab] = useState("electricity");
@@ -611,7 +611,7 @@ const Scope2 = () => {
             className="btn btn-primary"
             onClick={() => toggleModal(true)}
           >
-            <Plus className="mr-2" size={16} /> Ajouter
+            <IconPlus className="mr-2" size={16} /> Ajouter
           </button>
         </div>
       </div>

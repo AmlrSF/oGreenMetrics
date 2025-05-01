@@ -3,21 +3,21 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
-  BarChart,
-  FileText,
-  Calendar,
-  Building,
-  ArrowLeft,
-  Download,
-  Printer,
-  Flame,
-  Truck,
-  Briefcase,
-  Trash,
-  Factory,
-  BatteryCharging,
-  Snowflake,
-} from "lucide-react";
+  IconChartBar,
+  IconFileText,
+  IconCalendar,
+  IconBuilding,
+  IconArrowLeft,
+  IconDownload,
+  IconPrinter,
+  IconFlame,
+  IconTruck,
+  IconBriefcase,
+  IconTrash,
+  IconFactory,
+  IconBatteryCharging,
+  IconSnowflake,
+} from "@tabler/icons-react";
 import ReportCharts from "./ReportCharts";
 
 const ViewReport = ({ id }) => {
@@ -286,16 +286,16 @@ const ViewReport = ({ id }) => {
                 className="btn btn-icon"
                 onClick={() => router.push("/Dashboard/User/reports")}
               >
-                <ArrowLeft />
+                <IconArrowLeft />
               </button>
               <h2 className="ms-3 mb-0">{memoizedReport.name || "Environmental Impact Report"}</h2>
             </div>
             <div className="btn-list">
               <button className="btn btn-outline-primary btn-icon" onClick={() => window.print()}>
-                <Printer size={18} />
+                <IconPrinter size={18} />
               </button>
               <button className="btn btn-outline-primary btn-icon">
-                <Download size={18} />
+                <IconDownload size={18} />
               </button>
             </div>
           </div>
@@ -308,15 +308,15 @@ const ViewReport = ({ id }) => {
               </p>
               <div className="d-flex mb-2">
                 <div className="me-4 d-flex align-items-center">
-                  <Calendar size={18} className="me-2 text-primary" />
+                  <IconCalendar size={18} className="me-2 text-primary" />
                   <span>Année: {memoizedReport.Year}</span>
                 </div>
                 <div className="me-4 d-flex align-items-center">
-                  <FileText size={18} className="me-2 text-primary" />
+                  <IconFileText size={18} className="me-2 text-primary" />
                   <span>Type: {memoizedReport.detailLevel === "detailed" ? "Detailed Report" : "Summary Report"}</span>
                 </div>
                 <div className="d-flex align-items-center">
-                  <BarChart size={18} className="me-2 text-primary" />
+                  <IconChartBar size={18} className="me-2 text-primary" />
                   <span>Graphique: {memoizedReport.includeCharts === "yes" ? "Included" : "Not Included"}</span>
                 </div>
               </div>
@@ -359,7 +359,7 @@ const ViewReport = ({ id }) => {
                 role="tab"
                 aria-selected={activeTab === "overview"}
               >
-                <BarChart size={16} className="me-2" />
+                <IconBarChart size={16} className="me-2" />
                 Aperçu
               </button>
             </li>
@@ -371,7 +371,7 @@ const ViewReport = ({ id }) => {
                   role="tab"
                   aria-selected={activeTab === "scope1"}
                 >
-                  <Flame size={16} className="me-2" />
+                  <IconFlame size={16} className="me-2" />
                   Scope 1
                 </button>
               </li>
@@ -384,7 +384,7 @@ const ViewReport = ({ id }) => {
                   role="tab"
                   aria-selected={activeTab === "scope2"}
                 >
-                  <BatteryCharging size={16} className="me-2" />
+                  <IconBatteryCharging size={16} className="me-2" />
                   Scope 2
                 </button>
               </li>
@@ -397,7 +397,7 @@ const ViewReport = ({ id }) => {
                   role="tab"
                   aria-selected={activeTab === "scope3"}
                 >
-                  <Truck size={16} className="me-2" />
+                  <IconTruck size={16} className="me-2" />
                   Scope 3
                 </button>
               </li>
@@ -536,7 +536,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Flame className="me-2" size={20} />
+                    <IconFlame className="me-2" size={20} />
                     Combustion de Carburant par Type
                   </h3>
                   <div className="card-actions">
@@ -605,7 +605,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Factory className="me-2" size={20} />
+                    <IconFactory className="me-2" size={20} />
                     Processus de Production
                   </h3>
                   <div className="card-actions">
@@ -679,7 +679,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Snowflake className="me-2" size={20} />
+                    <IconSnowflake className="me-2" size={20} />
                     Systèmes de Refroidissement par Type
                   </h3>
                   <div className="card-actions">
@@ -760,7 +760,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Flame className="me-2" size={20} />
+                    <IconFlame className="me-2" size={20} />
                     Systèmes de Chauffage par Type
                   </h3>
                   <div className="card-actions">
@@ -841,7 +841,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <BatteryCharging className="me-2" size={20} />
+                    <IconBatteryCharging className="me-2" size={20} />
                     Consommation d'Énergie
                   </h3>
                   <div className="card-actions">
@@ -935,7 +935,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Briefcase className="me-2" size={20} />
+                    <IconBriefcase className="me-2" size={20} />
                     Déplacements professionnels
                   </h3>
                   <div className="card-actions">
@@ -1047,7 +1047,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Trash className="me-2" size={20} />
+                    <IconTrash className="me-2" size={20} />
                     Gestion des déchets
                   </h3>
                   <div className="card-actions">
@@ -1107,7 +1107,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Building className="me-2" size={20} />
+                    <IconBuilding className="me-2" size={20} />
                     Biens d'équipement
                   </h3>
                   <div className="card-actions">

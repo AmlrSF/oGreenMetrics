@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Search, Globe } from "lucide-react";
+import {
+  IconSearch,
+  IconCopy,
+  IconWorld,
+} from "@tabler/icons-react"; 
 
 const Calculator = () => {
   const [url, setUrl] = useState("");
@@ -87,7 +91,7 @@ const Calculator = () => {
                     {loading ? (
                       <span className="spinner-border spinner-border-sm me-2"></span>
                     ) : (
-                      <Search className="icon me-2" />
+                      <IconSearch className="icon me-2" />
                     )}
                     Calculate
                   </button>
@@ -166,11 +170,8 @@ const Calculator = () => {
                               <div className="mb-1 text-left text-white">
                                 This is cleaner than{" "}
                                 <span className="badge bg-cyan-lt text-cyan me-1">
-                                  {((result?.cleanerThan || 0) * 100).toFixed(
-                                    0
-                                  )}
-                                  %
-                                </span>
+                                  {((result?.cleanerThan || 0) * 100).toFixed(0)}%
+                                </span>{" "}
                                 of all web pages globally.
                               </div>
                               <div className="d-flex align-items-center gap-2">
@@ -194,13 +195,10 @@ const Calculator = () => {
                                     }}
                                   ></div>
                                 </div>
-                                <span className="text-white fw-semibold">
-                                  F
-                                </span>
+                                <span className="text-white fw-semibold">F</span>
                               </div>
-                            
+
                               <p className="text-left">
-                                {" "}
                                 Please{" "}
                                 <a href="/login" className="fw-bold text-black">
                                   log in

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Building2, FileText, Users, TrendingUp } from "lucide-react";
+import { IconBuildingSkyscraper, IconFileText, IconUsers, IconTrendingUp,
+} from "@tabler/icons-react";
 
 const CompanyDash = () => {
   const [companyCount, setCompanyCount] = useState(0);
@@ -20,9 +21,11 @@ const CompanyDash = () => {
       .get("http://localhost:4000/users")
       .then((response) => {
         const users = response.data;
-        const admins = users.filter((item) => item?.AdminRoles || item?.role=="Admin" ).length;
+        const admins = users.filter(
+          (item) => item?.AdminRoles || item?.role === "Admin"
+        ).length;
         const nonAdmins = users.filter(
-          (item) => item?.roles !== "Admin" 
+          (item) => item?.roles !== "Admin"
         ).length;
 
         setAdminCount(admins);
@@ -38,35 +41,34 @@ const CompanyDash = () => {
 
   const stats = [
     {
-      title: "Entreprises", // Companies
+      title: "Entreprises",
       value: companyCount,
-      icon: Building2,
+      icon: IconBuildingSkyscraper,
       trend: "+12%",
       color: "primary",
     },
     {
-      title: "Rapports", // Reports
+      title: "Rapports",
       value: reportCount,
-      icon: FileText,
+      icon: IconFileText,
       trend: "+8%",
       color: "purple",
     },
     {
-      title: "Utilisateurs", // Users
+      title: "Utilisateurs",
       value: userCount,
-      icon: Users,
+      icon: IconUsers,
       trend: "+15%",
       color: "green",
     },
     {
-      title: "Admins", // Admins
+      title: "Admins",
       value: adminCount,
-      icon: TrendingUp,
+      icon: IconTrendingUp,
       trend: "+5%",
       color: "orange",
     },
   ];
-  
 
   return (
     <div className="page-body">
@@ -95,7 +97,7 @@ const CompanyDash = () => {
                       <div
                         className={`text-${stat.color} d-flex align-items-center`}
                       >
-                        <TrendingUp size={16} className="me-1" />
+                        <IconTrendingUp size={16} className="me-1" />
                         {stat.trend}
                       </div>
                     </div>
@@ -136,4 +138,4 @@ const CompanyDash = () => {
   );
 };
 
-export default CompanyDash;
+export default CompanyDash 
