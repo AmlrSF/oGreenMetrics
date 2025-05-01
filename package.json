@@ -11,7 +11,7 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@tabler/core": "^1.0.0",
-    "@tabler/icons-react": "^3.30.0",
+    "@tabler/icons-react": "^3.31.0",
     "axios": "^1.8.1",
     "bootstrap": "^5.3.5",
     "chart.js": "^4.4.8",

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Plus, Search } from "lucide-react";
+import { IconPlus, IconSearch } from "@tabler/icons-react";
 
 const Scope1 = () => {
   const [activeTab, setActiveTab] = useState("Combustion de carburant");
@@ -493,7 +493,7 @@ const Scope1 = () => {
                 )}
                 <div className="input-group" style={{ width: "250px" }}>
                   <span className="input-group-text">
-                    <Search size={16} />
+                    <IconSearch size={16} />
                   </span>
                   <input
                     type="text"
@@ -509,7 +509,7 @@ const Scope1 = () => {
                 className="btn btn-primary"
                 onClick={() => toggleModal(true, "add")}
               >
-                <Plus className="mr-2" size={16} />
+                <IconPlus className="mr-2" size={16} />
                 Ajouter
               </button>
             </div>

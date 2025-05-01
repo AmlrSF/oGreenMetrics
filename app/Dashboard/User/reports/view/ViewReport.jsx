@@ -2,7 +2,22 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { BarChart, FileText, Calendar, Building, ArrowLeft, Download, Printer, Flame, Truck, Briefcase, Trash, Factory, BatteryCharging, Snowflake,} from "lucide-react";
+import {
+  BarChart,
+  FileText,
+  Calendar,
+  Building,
+  ArrowLeft,
+  Download,
+  Printer,
+  Flame,
+  Truck,
+  Briefcase,
+  Trash,
+  Factory,
+  BatteryCharging,
+  Snowflake,
+} from "lucide-react";
 import ReportCharts from "./ReportCharts";
 
 const ViewReport = ({ id }) => {
@@ -14,13 +29,23 @@ const ViewReport = ({ id }) => {
 
   useEffect(() => {
     const fetchReportData = async () => {
+      if (!id || typeof id !== "string") {
+        setError("Invalid report ID");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:4000/report/${id}`);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const response = await fetch(`${API_URL}/report/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch report");
         }
         const data = await response.json();
+        if (!data?.data) {
+          throw new Error("No report data found");
+        }
         setReport(data.data);
       } catch (err) {
         setError(err.message);
@@ -29,15 +54,15 @@ const ViewReport = ({ id }) => {
       }
     };
 
-    if (id) {
-      fetchReportData();
-    }
+    console.log("Fetching report with ID:", id); // Debug log
+    fetchReportData();
   }, [id]);
 
-  // Memoize report to prevent unnecessary re-renders
+  // Memoize report
   const memoizedReport = useMemo(() => report, [report]);
 
-  const calculateTotalEmissions = () => {
+  // Calculate emissions (memoized to prevent recalculation)
+  const calculateTotalEmissions = useMemo(() => {
     if (!memoizedReport) return { scope1: 0, scope2: 0, scope3: 0, total: 0 };
 
     let scope1Total = 0;
@@ -46,10 +71,10 @@ const ViewReport = ({ id }) => {
 
     // Scope 1
     if (memoizedReport.scope1Data) {
-      if (memoizedReport.scope1Data.fuelCombution && memoizedReport.scope1Data.fuelCombution.length > 0) {
+      if (memoizedReport.scope1Data.fuelCombution?.length > 0) {
         scope1Total += memoizedReport.scope1Data.fuelCombution[0].totalEmissions || 0;
       }
-      if (memoizedReport.scope1Data.production && memoizedReport.scope1Data.production.length > 0) {
+      if (memoizedReport.scope1Data.production?.length > 0) {
         scope1Total += memoizedReport.scope1Data.production[0].totalEmissions || 0;
       }
     }
@@ -60,10 +85,10 @@ const ViewReport = ({ id }) => {
         if (memoizedReport.scope2Data.cooling.length > 0) {
           scope2Total += memoizedReport.scope2Data.cooling[0].totalEmissions || 0;
         }
-        if (memoizedReport.scope2Data.heating.length > 0) {
+        if (memoizedReport.scope2Data.heating?.length > 0) {
           scope2Total += memoizedReport.scope2Data.heating[0].totalEmissions || 0;
         }
-        if (memoizedReport.scope2Data.energyConsumption.length > 0) {
+        if (memoizedReport.scope2Data.energyConsumption?.length > 0) {
           scope2Total += memoizedReport.scope2Data.energyConsumption[0].emissions || 0;
         }
       } else {
@@ -87,7 +112,7 @@ const ViewReport = ({ id }) => {
       scope3: scope3Total,
       total: scope1Total + scope2Total + scope3Total,
     };
-  };
+  }, [memoizedReport]);
 
   const getScope1Details = () => {
     if (!memoizedReport || !memoizedReport.scope1Data) return { fuelEmissions: 0, productionEmissions: 0 };
@@ -119,11 +144,11 @@ const ViewReport = ({ id }) => {
   };
 
   const getScope3Details = () => {
-    if (!memoizedReport || !memoizedReport.scope3Data) return { 
-      businessTravelEmissions: 0, 
-      transportEmissions: 0, 
-      wasteEmissions: 0, 
-      capitalGoodEmissions: 0 
+    if (!memoizedReport || !memoizedReport.scope3Data) return {
+      businessTravelEmissions: 0,
+      transportEmissions: 0,
+      wasteEmissions: 0,
+      capitalGoodEmissions: 0,
     };
 
     const businessTravelEmissions = parseFloat(memoizedReport.scope3Data.businessTravelEmissions || 0);
@@ -131,16 +156,16 @@ const ViewReport = ({ id }) => {
     const wasteEmissions = parseFloat(memoizedReport.scope3Data.dechetEmissions || 0);
     const capitalGoodEmissions = parseFloat(memoizedReport.scope3Data.capitalGoodEmissions || 0);
 
-    return { 
-      businessTravelEmissions, 
-      transportEmissions, 
-      wasteEmissions, 
-      capitalGoodEmissions 
+    return {
+      businessTravelEmissions,
+      transportEmissions,
+      wasteEmissions,
+      capitalGoodEmissions,
     };
   };
 
   const getFuelTypes = () => {
-    if (!memoizedReport || !memoizedReport.scope1Data || !memoizedReport.scope1Data.fuelCombution || !memoizedReport.scope1Data.fuelCombution[0]?.machines) {
+    if (!memoizedReport || !memoizedReport.scope1Data?.fuelCombution?.[0]?.machines) {
       return [];
     }
 
@@ -149,11 +174,7 @@ const ViewReport = ({ id }) => {
 
     machines.forEach(machine => {
       const fuelType = machine.typeDeCarburant;
-      if (fuelTypesMap.has(fuelType)) {
-        fuelTypesMap.set(fuelType, fuelTypesMap.get(fuelType) + machine.co2Emission);
-      } else {
-        fuelTypesMap.set(fuelType, machine.co2Emission);
-      }
+      fuelTypesMap.set(fuelType, (fuelTypesMap.get(fuelType) || 0) + machine.co2Emission);
     });
 
     return Array.from(fuelTypesMap).map(([type, emissions]) => ({ type, emissions }));
@@ -162,8 +183,8 @@ const ViewReport = ({ id }) => {
   const getCoolingTypes = () => {
     if (!memoizedReport || !memoizedReport.scope2Data?.cooling) return [];
 
-    const coolers = Array.isArray(memoizedReport.scope2Data.cooling) 
-      ? memoizedReport.scope2Data.cooling[0]?.coolers 
+    const coolers = Array.isArray(memoizedReport.scope2Data.cooling)
+      ? memoizedReport.scope2Data.cooling[0]?.coolers
       : memoizedReport.scope2Data.cooling.coolers;
 
     if (!coolers) return [];
@@ -172,11 +193,7 @@ const ViewReport = ({ id }) => {
 
     coolers.forEach(cooler => {
       const type = cooler.type;
-      if (coolingTypesMap.has(type)) {
-        coolingTypesMap.set(type, coolingTypesMap.get(type) + cooler.emissions);
-      } else {
-        coolingTypesMap.set(type, cooler.emissions);
-      }
+      coolingTypesMap.set(type, (coolingTypesMap.get(type) || 0) + cooler.emissions);
     });
 
     return Array.from(coolingTypesMap).map(([type, emissions]) => ({ type, emissions }));
@@ -185,8 +202,8 @@ const ViewReport = ({ id }) => {
   const getHeatingTypes = () => {
     if (!memoizedReport || !memoizedReport.scope2Data?.heating) return [];
 
-    const heaters = Array.isArray(memoizedReport.scope2Data.heating) 
-      ? memoizedReport.scope2Data.heating[0]?.heaters 
+    const heaters = Array.isArray(memoizedReport.scope2Data.heating)
+      ? memoizedReport.scope2Data.heating[0]?.heaters
       : memoizedReport.scope2Data.heating.heaters;
 
     if (!heaters) return [];
@@ -195,11 +212,7 @@ const ViewReport = ({ id }) => {
 
     heaters.forEach(heater => {
       const type = heater.type;
-      if (heatingTypesMap.has(type)) {
-        heatingTypesMap.set(type, heatingTypesMap.get(type) + heater.emissions);
-      } else {
-        heatingTypesMap.set(type, heater.emissions);
-      }
+      heatingTypesMap.set(type, (heatingTypesMap.get(type) || 0) + heater.emissions);
     });
 
     return Array.from(heatingTypesMap).map(([type, emissions]) => ({ type, emissions }));
@@ -212,11 +225,7 @@ const ViewReport = ({ id }) => {
 
     memoizedReport.scope3Data.transport.forEach(item => {
       const mode = item.mode;
-      if (transportModes.has(mode)) {
-        transportModes.set(mode, transportModes.get(mode) + parseFloat(item.emissions));
-      } else {
-        transportModes.set(mode, parseFloat(item.emissions));
-      }
+      transportModes.set(mode, (transportModes.get(mode) || 0) + parseFloat(item.emissions));
     });
 
     return Array.from(transportModes).map(([mode, emissions]) => ({ mode, emissions }));
@@ -229,23 +238,42 @@ const ViewReport = ({ id }) => {
 
     memoizedReport.scope3Data.dechet.forEach(item => {
       const type = item.type;
-      if (wasteTypes.has(type)) {
-        wasteTypes.set(type, wasteTypes.get(type) + parseFloat(item.emissions));
-      } else {
-        wasteTypes.set(type, parseFloat(item.emissions));
-      }
+      wasteTypes.set(type, (wasteTypes.get(type) || 0) + parseFloat(item.emissions));
     });
 
     return Array.from(wasteTypes).map(([type, emissions]) => ({ type, emissions }));
   };
 
   const formatNumber = (num) => {
-    return Number(num).toLocaleString("en-US", {
-      maximumFractionDigits: 2,
-    });
+    return Number(num).toLocaleString("en-US", { maximumFractionDigits: 2 });
   };
- 
-  const emissionTotals = calculateTotalEmissions();
+
+  // Conditional rendering for loading, error, and no data states
+  if (loading) {
+    return (
+      <div className="container-xl py-4">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container-xl py-4">
+        <div className="alert alert-danger">{error}</div>
+      </div>
+    );
+  }
+
+  if (!memoizedReport) {
+    return (
+      <div className="container-xl py-4">
+        <div className="alert alert-info">No report data available</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-xl py-4">
@@ -263,7 +291,7 @@ const ViewReport = ({ id }) => {
               <h2 className="ms-3 mb-0">{memoizedReport.name || "Environmental Impact Report"}</h2>
             </div>
             <div className="btn-list">
-              <button className="btn btn-outline-primary btn-icon">
+              <button className="btn btn-outline-primary btn-icon" onClick={() => window.print()}>
                 <Printer size={18} />
               </button>
               <button className="btn btn-outline-primary btn-icon">
@@ -310,7 +338,7 @@ const ViewReport = ({ id }) => {
                     </div>
                     <div className="col">
                       <div className="font-weight-medium">Émissions totales</div>
-                      <div className="text-secondary">{formatNumber(emissionTotals.total)} tCO₂</div>
+                      <div className="text-secondary">{formatNumber(calculateTotalEmissions.total)} tCO₂</div>
                     </div>
                   </div>
                 </div>
@@ -323,63 +351,55 @@ const ViewReport = ({ id }) => {
       {/* Tabs Navigation */}
       <div className="card mb-3">
         <div className="card-body">
-          <ul className="nav nav-tabs nav-fill" data-bs-toggle="tabs">
+          <ul className="nav nav-tabs nav-fill" role="tablist">
             <li className="nav-item">
-              <a
-                href="#"
+              <button
                 className={`nav-link ${activeTab === "overview" ? "active" : ""}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveTab("overview");
-                }}
+                onClick={() => setActiveTab("overview")}
+                role="tab"
+                aria-selected={activeTab === "overview"}
               >
                 <BarChart size={16} className="me-2" />
                 Aperçu
-              </a>
+              </button>
             </li>
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope1 && (
               <li className="nav-item">
-                <a
-                  href="#"
+                <button
                   className={`nav-link ${activeTab === "scope1" ? "active" : ""}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("scope1");
-                  }}
+                  onClick={() => setActiveTab("scope1")}
+                  role="tab"
+                  aria-selected={activeTab === "scope1"}
                 >
                   <Flame size={16} className="me-2" />
                   Scope 1
-                </a>
+                </button>
               </li>
             )}
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope2 && (
               <li className="nav-item">
-                <a
-                  href="#"
+                <button
                   className={`nav-link ${activeTab === "scope2" ? "active" : ""}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("scope2");
-                  }}
+                  onClick={() => setActiveTab("scope2")}
+                  role="tab"
+                  aria-selected={activeTab === "scope2"}
                 >
                   <BatteryCharging size={16} className="me-2" />
                   Scope 2
-                </a>
+                </button>
               </li>
             )}
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope3 && (
               <li className="nav-item">
-                <a
-                  href="#"
+                <button
                   className={`nav-link ${activeTab === "scope3" ? "active" : ""}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("scope3");
-                  }}
+                  onClick={() => setActiveTab("scope3")}
+                  role="tab"
+                  aria-selected={activeTab === "scope3"}
                 >
                   <Truck size={16} className="me-2" />
                   Scope 3
-                </a>
+                </button>
               </li>
             )}
           </ul>
@@ -402,12 +422,12 @@ const ViewReport = ({ id }) => {
                         <span className="badge bg-blue-lt me-2">Scope 1</span>
                         Émissions directes
                       </span>
-                      <strong>{formatNumber(emissionTotals.scope1)} tCO₂</strong>
+                      <strong>{formatNumber(calculateTotalEmissions.scope1)} tCO₂</strong>
                     </div>
                     <div className="progress mb-3">
                       <div
                         className="progress-bar bg-blue"
-                        style={{ width: `${emissionTotals.total ? (emissionTotals.scope1 / emissionTotals.total) * 100 : 0}%` }}
+                        style={{ width: `${calculateTotalEmissions.total ? (calculateTotalEmissions.scope1 / calculateTotalEmissions.total) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
@@ -417,12 +437,12 @@ const ViewReport = ({ id }) => {
                         <span className="badge bg-purple-lt me-2">Scope 2</span>
                         Émissions indirectes
                       </span>
-                      <strong>{formatNumber(emissionTotals.scope2)} tCO₂</strong>
+                      <strong>{formatNumber(calculateTotalEmissions.scope2)} tCO₂</strong>
                     </div>
                     <div className="progress mb-3">
                       <div
                         className="progress-bar bg-purple"
-                        style={{ width: `${emissionTotals.total ? (emissionTotals.scope2 / emissionTotals.total) * 100 : 0}%` }}
+                        style={{ width: `${calculateTotalEmissions.total ? (calculateTotalEmissions.scope2 / calculateTotalEmissions.total) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
@@ -432,19 +452,19 @@ const ViewReport = ({ id }) => {
                         <span className="badge bg-green-lt me-2">Scope 3</span>
                         Émissions indirectes
                       </span>
-                      <strong>{formatNumber(emissionTotals.scope3)} tCO₂</strong>
+                      <strong>{formatNumber(calculateTotalEmissions.scope3)} tCO₂</strong>
                     </div>
                     <div className="progress mb-3">
                       <div
                         className="progress-bar bg-green"
-                        style={{ width: `${emissionTotals.total ? (emissionTotals.scope3 / emissionTotals.total) * 100 : 0}%` }}
+                        style={{ width: `${calculateTotalEmissions.total ? (calculateTotalEmissions.scope3 / calculateTotalEmissions.total) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
                   <div className="mt-4">
                     <div className="d-flex align-items-center justify-content-between mb-1">
                       <span className="font-weight-bold">Émissions totales</span>
-                      <strong>{formatNumber(emissionTotals.total)} tCO₂</strong>
+                      <strong>{formatNumber(calculateTotalEmissions.total)} tCO₂</strong>
                     </div>
                   </div>
                 </div>
@@ -617,7 +637,11 @@ const ViewReport = ({ id }) => {
                               <strong>{product.co2Emission.toLocaleString()}</strong>
                             </td>
                           </tr>
-                        ))}
+                        )) || (
+                          <tr>
+                            <td colSpan="4" className="text-center">Aucune donnée disponible</td>
+                          </tr>
+                        )}
                       </tbody>
                       <tfoot>
                         <tr>
@@ -945,7 +969,11 @@ const ViewReport = ({ id }) => {
                               <strong>{parseFloat(travel.emissions).toLocaleString()}</strong>
                             </td>
                           </tr>
-                        ))}
+                        )) || (
+                          <tr>
+                            <td colSpan="5" className="text-center">Aucune donnée disponible</td>
+                          </tr>
+                        )}
                       </tbody>
                       <tfoot>
                         <tr>
@@ -997,7 +1025,11 @@ const ViewReport = ({ id }) => {
                               <strong>{parseFloat(transport.emissions).toLocaleString()}</strong>
                             </td>
                           </tr>
-                        ))}
+                        )) || (
+                          <tr>
+                            <td colSpan="5" className="text-center">Aucune donnée disponible</td>
+                          </tr>
+                        )}
                       </tbody>
                       <tfoot>
                         <tr>
@@ -1050,7 +1082,11 @@ const ViewReport = ({ id }) => {
                                 <strong>{parseFloat(waste.emissions).toLocaleString()}</strong>
                               </td>
                             </tr>
-                          ))}
+                          )) || (
+                            <tr>
+                              <td colSpan="5" className="text-center">Aucune donnée disponible</td>
+                            </tr>
+                          )}
                         </tbody>
                         <tfoot>
                           <tr>
