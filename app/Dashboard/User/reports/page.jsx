@@ -3,7 +3,13 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
 import {
-  Calendar, BarChart2, UserX, UserCheck, Trash2, FileTextIcon,  Eye,
+  Calendar,
+  BarChart2,
+  UserX,
+  UserCheck,
+  Trash2,
+  FileTextIcon,
+  Eye,
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
@@ -180,61 +186,118 @@ const Reporting = () => {
   return (
     <div className="container-xl h-full">
       {modalOpen && (
-        <div className="modal modal-blur fade show d-block">
+        <div className="modal modal-blur    fade show d-block" 
+
+        style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        tabIndex="-1"
+        role="dialog"
+
+        >
           <div
             style={{ zIndex: 1050 }}
             className="modal-dialog modal-lg modal-dialog-centered"
           >
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Generate New Report</h5>
+                <h5 className="modal-title">Générer un nouveau rapport</h5>
                 <button
-                  type="button"   className="btn-close" onClick={() => setModalOpen(false)}
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setModalOpen(false)}
                 ></button>
               </div>
 
               <div className="modal-body">
-                <div className="s">
-                  <label className="form-label">Report Name</label>
+                <div className="mb-2">
+                  <label className="form-label">Nom du rapport</label>
                   <input
-                    type="text" name="name" className="form-control" value={formData.name} onChange={handleInputChange}
+                    type="text"
+                    name="name"
+                    className="form-control"
+                    value={formData.name}
+                    onChange={handleInputChange}
                   />
                 </div>
 
-                <div className="s">
+                <div className="mb-2">
                   <label className="form-label">Description</label>
                   <textarea
-                    name="description" className="form-control" rows="3" value={formData.description} onChange={handleInputChange}
+                    name="description"
+                    className="form-control"
+                    rows="3"
+                    value={formData.description}
+                    onChange={handleInputChange}
                   />
                 </div>
-
-                <div className="s">
-                  <label className="form-label">Scope Selection</label>
-                  <div className="form-selectgroup">
-                    <label className="form-selectgroup-item">
-                      <input
-                        type="checkbox" name="scope1" className="form-selectgroup-input" checked={formData.scope1} onChange={handleInputChange}
-                      />
-                      <span className="form-selectgroup-label">Scope 1</span>
-                    </label>
-                    <label className="form-selectgroup-item">
-                      <input
-                        type="checkbox" name="scope2" className="form-selectgroup-input" checked={formData.scope2} onChange={handleInputChange}
-                      />
-                      <span className="form-selectgroup-label">Scope 2</span>
-                    </label>
-                    <label className="form-selectgroup-item">
-                      <input
-                        type="checkbox" name="scope3" className="form-selectgroup-input" checked={formData.scope3} onChange={handleInputChange}
-                      />
-                      <span className="form-selectgroup-label">Scope 3</span>
-                    </label>
-                  </div>
+                <div className="">
+              <label className="form-label"> Sélection de la Scope</label>
+              <div className="form-selectgroup-boxes row">
+                <div className="col-md-4">
+                  <label className="form-selectgroup-item">
+                    <input
+                      type="checkbox"
+                      name="scope1"
+                      className="form-selectgroup-input"
+                      checked={formData.scope1}
+                      onChange={handleInputChange}
+                    />
+                    <span className="form-selectgroup-label d-flex align-items-center p-2s">
+                      <span className="me-3">
+                        <span className="form-selectgroup-check"></span>
+                      </span>
+                      <span className="form-selectgroup-label-content">
+                        <span className="form-selectgroup-title strong mb-1">Scope 1</span>
+                        <span className="d-block text-secondary">Émissions directes </span>
+                      </span>
+                    </span>
+                  </label>
                 </div>
+                <div className="col-md-4">
+                  <label className="form-selectgroup-item">
+                    <input
+                      type="checkbox"
+                      name="scope2"
+                      className="form-selectgroup-input"
+                      checked={formData.scope2}
+                      onChange={handleInputChange}
+                    />
+                    <span className="form-selectgroup-label d-flex align-items-center p-2s">
+                      <span className="me-3">
+                        <span className="form-selectgroup-check"></span>
+                      </span>
+                      <span className="form-selectgroup-label-content">
+                        <span className="form-selectgroup-title strong mb-1">Scope 2</span>
+                        <span className="d-block text-secondary">Émissions indirectes </span>
+                      </span>
+                    </span>
+                  </label>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-selectgroup-item">
+                    <input
+                      type="checkbox"
+                      name="scope3"
+                      className="form-selectgroup-input"
+                      checked={formData.scope3}
+                      onChange={handleInputChange}
+                    />
+                    <span className="form-selectgroup-label d-flex align-items-center p-2s">
+                      <span className="me-3">
+                        <span className="form-selectgroup-check"></span>
+                      </span>
+                      <span className="form-selectgroup-label-content">
+                        <span className="form-selectgroup-title strong mb-1">Scope 3</span>
+                        <span className="d-block text-secondary">Toutes les autres  </span>
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
 
                 <div className="row s">
                   <div className="col-6">
-                    <label className="form-label">Select Year</label>
+                    <label className="form-label">Sélectionner l'année</label>
                     <select
                       name="Year"
                       className="form-control"
@@ -251,25 +314,35 @@ const Reporting = () => {
                   </div>
                 </div>
 
-                <div className="s">
-                  <label className="form-label">Include Charts</label>
+                <div className="mb-2">
+                  <label className="form-label">Inclure des Charts graphiques </label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
                       <input
-                        type="radio" name="includeCharts" value="yes" className="form-selectgroup-input" checked={formData.includeCharts === "yes"} onChange={handleInputChange}
+                        type="radio"
+                        name="includeCharts"
+                        value="yes"
+                        className="form-selectgroup-input"
+                        checked={formData.includeCharts === "yes"}
+                        onChange={handleInputChange}
                       />
-                      <span className="form-selectgroup-label">Yes</span>
+                      <span className="form-selectgroup-label">Oui</span>
                     </label>
                     <label className="form-selectgroup-item">
                       <input
-                        type="radio" name="includeCharts" value="no" className="form-selectgroup-input" checked={formData.includeCharts === "no"} onChange={handleInputChange}
+                        type="radio"
+                        name="includeCharts"
+                        value="no"
+                        className="form-selectgroup-input"
+                        checked={formData.includeCharts === "no"}
+                        onChange={handleInputChange}
                       />
-                      <span className="form-selectgroup-label">No</span>
+                      <span className="form-selectgroup-label">Non</span>
                     </label>
                   </div>
                 </div>
-                <div className="s">
-                  <label className="form-label">Include Recomendation</label>
+                <div className="mb-2">
+                  <label className="form-label">Inclure des recommandations</label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
                       <input
@@ -280,7 +353,7 @@ const Reporting = () => {
                         checked={formData.includeRecomondations === "yes"}
                         onChange={handleInputChange}
                       />
-                      <span className="form-selectgroup-label">Yes</span>
+                      <span className="form-selectgroup-label">Oui</span>
                     </label>
                     <label className="form-selectgroup-item">
                       <input
@@ -288,7 +361,7 @@ const Reporting = () => {
                         name="includeRecomondations"
                         value="no"
                         className="form-selectgroup-input"
-                        checked={formData.includeRecomondations === "no"}
+                        checked={formData.includeRecomondations === "No"}
                         onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">No</span>
@@ -296,8 +369,8 @@ const Reporting = () => {
                   </div>
                 </div>
 
-                <div className="s">
-                  <label className="form-label">Detail Level</label>
+                <div className="mb-2">
+                  <label className="form-label">Niveau de détail</label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
                       <input
@@ -308,7 +381,7 @@ const Reporting = () => {
                         checked={formData.detailLevel === "summary"}
                         onChange={handleInputChange}
                       />
-                      <span className="form-selectgroup-label">Summary</span>
+                      <span className="form-selectgroup-label">Résumé</span>
                     </label>
                     <label className="form-selectgroup-item">
                       <input
@@ -319,7 +392,7 @@ const Reporting = () => {
                         checked={formData.detailLevel === "detailed"}
                         onChange={handleInputChange}
                       />
-                      <span className="form-selectgroup-label">Detailed</span>
+                      <span className="form-selectgroup-label">Détaillé</span>
                     </label>
                   </div>
                 </div>
@@ -331,21 +404,21 @@ const Reporting = () => {
                   className="btn btn-link link-secondary"
                   onClick={() => setModalOpen(false)}
                 >
-                  Cancel
+                   Annuler
                 </button>
                 <button
                   type="button"
                   className="btn btn-primary ms-auto"
                   onClick={handleSubmit}
                 >
-                  Generate Report
+                   Générer le rapport
                 </button>
               </div>
             </div>
           </div>
           <div
             style={{ zIndex: 1040 }}
-            className="modal-backdrop fade show"
+            className="modal-backdrop  fade "
             onClick={() => setModalOpen(false)}
           ></div>
         </div>
@@ -355,12 +428,13 @@ const Reporting = () => {
         className="py-2 mb-4 d-flex 
       border-b  justify-content-center align-items-start"
       >
-        <div>
+        <div> 
           <h3 className="fs-3 fw-bold" style={{ color: "#263589" }}>
             Reporting
+ 
           </h3>
           <div className="card-subtitle">
-            Generate and manage your environmental impact reports
+          Générez et gérez vos rapports d'impact environnemental
           </div>
         </div>
         <button
@@ -368,7 +442,7 @@ const Reporting = () => {
           className="btn btn-primary ms-auto"
           onClick={() => setModalOpen(true)}
         >
-          Generate Report
+          Générer un nouveau rapport
         </button>
       </div>
 
@@ -376,14 +450,14 @@ const Reporting = () => {
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary d-flex align-items-center">
-              Show
+            Afficher
               <div className="mx-2 d-flex gap-2">
                 <select
                   className="form-select form-select-sm"
                   value={scopeFilter}
                   onChange={(e) => setScopeFilter(e.target.value)}
                 >
-                  <option value="all">All Scopes</option>
+                  <option value="all">Tous les scopes</option>
                   <option value="scope1">Scope 1</option>
                   <option value="scope2">Scope 2</option>
                   <option value="scope3">Scope 3</option>
@@ -394,8 +468,8 @@ const Reporting = () => {
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
                 >
-                  <option value="latest">Newest</option>
-                  <option value="oldest">Oldest</option>
+                  <option value="latest">Les plus récents</option>
+                  <option value="oldest">Les plus anciens</option>
                 </select>
               </div>
             </div>
@@ -421,14 +495,14 @@ const Reporting = () => {
               <table className="table table-vcenter card-table">
                 <thead>
                   <tr className="text-center">
-                    <th>Report Name</th>
+                    <th>Nom du rapport</th>
                     <th>Description</th>
-                    <th>Period</th>
+                    <th>Période</th>
                     <th>Scopes</th>
-                    <th>Charts</th>
-                    <th>Recomondations</th>
-                    <th>Detail Level</th>
-                   
+                    <th>Graphiques</th>
+                    <th>Recommandations</th>
+                    <th>Niveau de détail</th>
+
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -512,10 +586,9 @@ const Reporting = () => {
                               {data.detailLevel}
                             </span>
                           </td>
-                      
+
                           <td>
                             <div className="btn-list flex-nowrap">
-
                               <button
                                 onClick={() => deleteReport(data?._id)}
                                 className="btn btn-ghost-danger btn-icon"
@@ -539,7 +612,7 @@ const Reporting = () => {
                   ) : (
                     <tr>
                       <td colSpan="8" className="text-center text-muted">
-                        No reports available.
+                      Aucun rapport disponible.
                       </td>
                     </tr>
                   )}
@@ -549,14 +622,14 @@ const Reporting = () => {
 
             <div className="card-footer d-flex align-items-center">
               <p className="m-0 text-secondary">
-                Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+                Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span> à{" "}
                 <span>
                   {Math.min(
                     currentPage * itemsPerPage,
                     filteredReports?.length
                   )}
                 </span>{" "}
-                of <span>{filteredReports?.length}</span> entries
+                sur <span>{filteredReports?.length}</span> entrées
               </p>
               <ul className="pagination m-0 ms-auto">
                 <li
@@ -569,7 +642,16 @@ const Reporting = () => {
                     }
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="icon"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M15 6l-6 6l6 6" />
@@ -580,7 +662,8 @@ const Reporting = () => {
                   <span
                     className="page-link"
                     style={{
-                      backgroundColor: "#263589",  borderColor: "#263589",
+                      backgroundColor: "#263589",
+                      borderColor: "#263589",
                     }}
                   >
                     {currentPage}
@@ -598,7 +681,16 @@ const Reporting = () => {
                     }
                   >
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"   className="icon"    width="24"   height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="icon"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M9 6l6 6l-6 6" />

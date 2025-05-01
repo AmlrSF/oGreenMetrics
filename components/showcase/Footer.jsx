@@ -5,37 +5,35 @@ import { Facebook, Twitter, Linkedin, Instagram, MapPin, Phone, Mail } from 'luc
 
 const Footer = () => {
   return (
-    <footer className="relative   bg-gray-900 z-[-10] pt-[250px]">
+    <footer className="footer z-10 footer-transparent position-relative ">
       <div 
-        className="absolute inset-0"
+        className="position-absolute start-0 end-0 top-0 bottom-0"
         style={{
           backgroundImage: "url('/footer.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-
         }}
       />
-      {/* Black overlay with 0.3 opacity */}
-      <div className="absolute inset-0 bg-black opacity-70" />
+      <div className="position-absolute start-0 end-0 top-0 bottom-0 
+      bg-dark opacity-70" />
       
-      <div className="relative  min-h-[25vh] container mx-auto px-4">
-        <div className="footer-section container-card-3 items-center ">
+      <div className="container position-relative ftr">
+        <div className="row g-4">
           {/* Company Info */}
-          <div>
-            <Link href="/" className="inline-block mb-4">
+          <div className="col-12 col-md-4">
+            <Link href="/" className="d-inline-block mb-3">
               <Image 
                 src="/Group.png" 
                 alt="Green Metric" 
                 width={150} 
                 height={40}
-               
               />
             </Link>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-white small mb-3">
               Plateforme de mesure de l'empreinte carbone pour les entreprises
             </p>
-            <div className="flex space-x-4">
+            <div className="d-flex gap-3">
               <SocialIcon Icon={Facebook} />
               <SocialIcon Icon={Twitter} />
               <SocialIcon Icon={Linkedin} />
@@ -44,9 +42,9 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className='min-w-[200px]'>
-            <h5 className="text-white uppercase text-sm font-medium mb-1">Accueil</h5>
-            <ul className="pl-4 ">
+          <div className="col-12 col-md-4">
+            <h5 className="text-white text-uppercase fw-medium mb-2">Accueil</h5>
+            <ul className="list-unstyled ps-0">
               <FooterLink href="/" text="Accueil" />
               <FooterLink href="/services" text="Services" />
               <FooterLink href="/about" text="À propos de nous" />
@@ -55,9 +53,9 @@ const Footer = () => {
           </div>
 
           {/* Contact */}
-          <div className='min-w-[200px]'>
-            <h5 className="text-white uppercase text-sm font-medium mb-1">Nous contacter</h5>
-            <div className="pl-4 ">
+          <div className="col-12 col-md-4">
+            <h5 className="text-white text-uppercase fw-medium mb-2">Nous contacter</h5>
+            <div className="ps-0">
               <ContactInfo Icon={MapPin} text="123 rue de la Terre, 75000 Paris" />
               <ContactInfo Icon={Phone} text="+33 1 23 45 67 89" />
               <ContactInfo Icon={Mail} text="contact@greenmetric.com" />
@@ -65,11 +63,11 @@ const Footer = () => {
           </div>
         </div>
 
-        <hr className="border-black my-0 " />
+        <hr className="border-dark my-4" />
 
         {/* Bottom Bar */}
-        <div className="flex items-center justify-center py-2">
-          <p className="text-gray-400 text-sm mb-0">
+        <div className="text-center py-3">
+          <p className="text-white small mb-0">
             © GreenMetric 2025. Tous droits réservés.
           </p>
         </div>
@@ -80,22 +78,22 @@ const Footer = () => {
 
 // Helper Components
 const SocialIcon = ({ Icon }) => (
-  <Link href="#" className="text-white hover:text-gray-300 transition-colors">
+  <Link href="#" className="text-white text-decoration-none hover-opacity-75">
     <Icon size={20} />
   </Link>
 );
 
 const FooterLink = ({ href, text }) => (
-  <li>
-    <Link href={href} className="text-gray-400 text-sm hover:text-white transition-colors">
+  <li className="mb-2">
+    <Link href={href} className="text-white text-decoration-none hover-text-white">
       {text}
     </Link>
   </li>
 );
 
 const ContactInfo = ({ Icon, text }) => (
-  <p className="text-gray-400 text-sm mb-0 flex items-center">
-    <Icon size={16} className="mr-2" />
+  <p className="text-white small mb-2 d-flex align-items-center">
+    <Icon size={16} className="me-2" />
     {text}
   </p>
 );

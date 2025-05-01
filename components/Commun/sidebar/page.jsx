@@ -125,7 +125,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
         }}
       >
         <div
-          className="d-flex align-items-center p-[0.8rem] "
+          className="d-flex align-items-center p-3 "
           style={{
             justifyContent: isCollapsed ? "center" : "space-between",
             backgroundColor: colors.primary,
@@ -134,9 +134,9 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
         >
           {!isCollapsed && (
             <div className="d-flex align-items-start">
-              <span className="text-xl font-bold text-primary">Green</span>{" "}
+              <span className="fs-2 font-bold text-primary">Green</span>{" "}
               <span
-                className="text-xl font-medium"
+                className="fs-2 font-medium"
                 style={{ color: colors.green }}
               >
                 Metrics

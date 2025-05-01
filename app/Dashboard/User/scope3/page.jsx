@@ -20,6 +20,10 @@ const Scope3 = () => {
     "deplacement-employes": [],
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingIds, setDeletingIds] = useState(new Set());
+
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -48,11 +52,10 @@ const Scope3 = () => {
             }
           );
           const data = await response.json();
-    
+
           if (response.ok) {
             setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
           }
-
         } else {
           console.log("User not found");
         }
@@ -89,11 +92,10 @@ const Scope3 = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
+    setIsSubmitting(true);
     const newFormData = { ...formData, company_id: Company?._id, scopeType };
-
-    console.log(newFormData);
-    
 
     try {
       const method = isEditing ? "PUT" : "POST";
@@ -109,33 +111,40 @@ const Scope3 = () => {
         body: JSON.stringify(newFormData),
       });
 
-      console.log(newFormData);
-
       const responseData = await response.json();
-
-      console.log(responseData);
-
-      fetchData();
+      await fetchData();
       toggleModal(false);
       setIsEditing(false);
       setEditingId(null);
       setFormData({});
     } catch (error) {
       console.error("Error adding/updating data:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
+    if (deletingIds.has(id)) return;
+    
+    setDeletingIds(prev => new Set([...prev, id]));
+    
     try {
       const response = await fetch(`http://localhost:4000/${activeTab}/${id}`, {
         method: "DELETE",
       });
 
       const responseData = await response.json();
-
-      console.log(responseData);
-      fetchData();
-    } catch (error) {}
+      await fetchData();
+    } catch (error) {
+      console.error("Error deleting:", error);
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   };
 
   const handleUpdate = async (id) => {
@@ -180,8 +189,10 @@ const Scope3 = () => {
     return currentTab?.fields.map((field, index) => {
       // Cas spécial pour le type de transport avec options dynamiques
       if (
-        (field.name === "type" || field.name === "sousType" )&&
-        (activeTab === "transport" || activeTab === "businessTravel" || activeTab==="biens-services") &&
+        (field.name === "type" || field.name === "sousType") &&
+        (activeTab === "transport" ||
+          activeTab === "businessTravel" ||
+          activeTab === "biens-services") &&
         field.dynamicOptions
       ) {
         const transportMode = formData.mode || formData.type;
@@ -213,7 +224,7 @@ const Scope3 = () => {
 
       return (
         <div className="mb-3" key={index}>
-          <label className="form-label">{field?.label}</label>
+          <label className="form-label">{field?.label}{field?.required ? <span className="fs-2 text-danger">*</span> : "" }</label>
           {field.type === "select" ? (
             <select
               className="form-select"
@@ -263,11 +274,10 @@ const Scope3 = () => {
       border-b  justify-content-start align-items-center"
       >
         <div>
-          <h3 className="text-[30px] font-bold" 
-          style={{ color: "#263589" }}>
+          <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
             Scope 3
           </h3>
-          <p >
+          <p>
             <strong className="text-primary">Émissions indirectes</strong>{" "}
             issues des activités de la chaîne de valeur de l’organisation,
             telles que l’achat de biens, les déplacements professionnels,
@@ -297,6 +307,7 @@ const Scope3 = () => {
 
         <div className="card-body">
           <DataTable
+            dataHeader={tabs[activeTab]?.dataHeader}
             headers={tabs[activeTab]?.headers}
             data={tableData[activeTab] || []}
             activeTab={activeTab}
@@ -304,6 +315,8 @@ const Scope3 = () => {
             onDelete={handleDelete}
             onUpdate={handleUpdate}
             onAdd={() => toggleModal(true)}
+            deletingIds={deletingIds}
+            
           />
         </div>
       </div>
@@ -320,6 +333,7 @@ const Scope3 = () => {
                   type="button"
                   className="btn-close"
                   onClick={() => toggleModal(false)}
+                  
                 ></button>
               </div>
               <form onSubmit={handleSubmit}>
@@ -329,11 +343,23 @@ const Scope3 = () => {
                     type="button"
                     className="btn btn-link link-secondary"
                     onClick={() => toggleModal(false)}
+                    disabled={isSubmitting}
                   >
                     Annuler
                   </button>
-                  <button type="submit" className="btn btn-primary ms-auto">
-                    {isEditing ? "Mettre à jour" : "Ajouter"}
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary ms-auto"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <span>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        {isEditing ? "Mise à jour..." : "Ajout..."}
+                      </span>
+                    ) : (
+                      isEditing ? "Mettre à jour" : "Ajouter"
+                    )}
                   </button>
                 </div>
               </form>

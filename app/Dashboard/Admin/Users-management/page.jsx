@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  UserCheck,
-  UserX,
-  Trash2,
-  X,
-  Plus,
-} from "lucide-react";
+
 import { formatDate, getInitials } from "@/lib/Utils";
 
 const Page = () => {
@@ -31,6 +23,12 @@ const Page = () => {
     AdminRoles: "",
     mot_de_passe: "",
   });
+
+  const [deletingIds, setDeletingIds] = useState(new Set());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
@@ -88,6 +86,11 @@ const Page = () => {
   };
 
   const deleteUser = async (userId) => {
+    if (deletingIds.has(userId)) return;
+    
+    setDeletingIds(prev => new Set([...prev, userId]));
+    
+
     try {
       const response = await fetch(`http://localhost:4000/users/${userId}`, {
         method: "DELETE",
@@ -97,6 +100,12 @@ const Page = () => {
       }
     } catch (error) {
       setError("Failed to delete user");
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
     }
   };
 
@@ -146,7 +155,11 @@ const Page = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    console.log(newUser);
+   
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
 
     try {
       const response = await fetch("http://localhost:4000/register", {
@@ -158,7 +171,7 @@ const Page = () => {
       });
 
       const data = await response.json();
-      console.log(data);
+      setError(data?.error);
       if (response.ok) {
         fetchUsers();
         setIsModalOpen(false);
@@ -172,23 +185,28 @@ const Page = () => {
       }
     } catch (error) {
       setError("Failed to create user");
+    }finally {
+      setIsSubmitting(false);
+      setError(null)
     }
+
   };
 
   return (
     <div className="container-xl h-full ">
-      <div className="py-10 mb-5 d-flex justify-content-between border-b align-items-center">
-        <div
-          className=" d-flex leading-[0.1]  flex-column
-         justify-content-center align-items-start"
-        >
-          <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
-            Users Administration
+      <div className="py-4 mb-5 d-flex d-flex justify-content-between align-items-start border-bottom">
+        <div className="d-flex flex-column justify-content-center align-items-start">
+          <h3
+            className="fw-bold mb-1"
+            style={{ fontSize: "30px", color: "#263589" }}
+          >
+            Administration des utilisateurs
           </h3>
           <div className="card-subtitle">
-            Manage roles, and permissions efficiently.
+            Gérez efficacement les rôles et les permissions.
           </div>
         </div>
+
         {userAccess == "10" ? (
           <></>
         ) : (
@@ -197,7 +215,23 @@ const Page = () => {
             onClick={() => setIsModalOpen(true)}
             style={{ backgroundColor: "#8EBE21" }}
           >
-            <Plus size={18} className="mr-2" /> Add User
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-plus"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+            Ajouter un utilisateur
           </button>
         )}
       </div>
@@ -206,23 +240,23 @@ const Page = () => {
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary d-flex align-items-center">
-              Show
+              Afficher
               <div className="mx-2 d-flex gap-2">
                 <select
                   className="form-select form-select-sm"
                   value={currentFilter}
                   onChange={(e) => setCurrentFilter(e.target.value)}
                 >
-                  <option value="all">All Users</option>
-                  <option value="verified">Verified</option>
-                  <option value="unverified">Unverified</option>
+                  <option value="all">Tous les utilisateurs</option>
+                  <option value="verified">Vérifiés</option>
+                  <option value="unverified">Non vérifiés</option>
                 </select>
                 <select
                   className="form-select form-select-sm"
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
                 >
-                  <option value="">All Roles</option>
+                  <option value="">Tous les rôles</option>
                   {roles.map((role) => (
                     <option key={role._id} value={role.name}>
                       {role.name}
@@ -234,11 +268,11 @@ const Page = () => {
                   value={SortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
                 >
-                  <option value="latest">Oldest</option>
-                  <option value="oldest">Newest</option>
+                  <option value="latest">Les plus anciens</option>
+                  <option value="oldest">Les plus récents</option>
                 </select>
               </div>
-              entries
+              entrées
             </div>
           </div>
         </div>
@@ -262,11 +296,11 @@ const Page = () => {
               <table className="table table-vcenter card-table">
                 <thead>
                   <tr>
-                    <th>User</th>
+                    <th>Utilisateur</th>
                     <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Created At</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Créé le</th>
                     {userAccess == "10" ? (
                       <></>
                     ) : (
@@ -332,16 +366,58 @@ const Page = () => {
                                 }
                               >
                                 {user.isVerified ? (
-                                  <UserX size={18} />
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="icon icon-tabler icons-tabler-outline icon-tabler-user-x"
+                                  >
+                                    <path
+                                      stroke="none"
+                                      d="M0 0h24v24H0z"
+                                      fill="none"
+                                    />
+                                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                    <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" />
+                                    <path d="M22 22l-5 -5" />
+                                    <path d="M17 22l5 -5" />
+                                  </svg>
                                 ) : (
-                                  <UserCheck size={18} />
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="icon icon-tabler icons-tabler-outline icon-tabler-user-check"
+                                  >
+                                    <path
+                                      stroke="none"
+                                      d="M0 0h24v24H0z"
+                                      fill="none"
+                                    />
+                                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                    <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+                                    <path d="M15 19l2 2l4 -4" />
+                                  </svg>
                                 )}
                               </button>
                               <button
                                 className="btn btn-ghost-danger btn-icon"
                                 onClick={() => deleteUser(user._id)}
+                                disabled={deletingIds.has(user._id)}
                               >
-                                <Trash2 size={18} />
+                                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
                               </button>
                             </div>
                           </td>
@@ -351,7 +427,7 @@ const Page = () => {
                   ) : (
                     <tr>
                       <td colSpan={6} className="text-center text-secondary">
-                        No users found.
+                        Aucun utilisateur trouvé.
                       </td>
                     </tr>
                   )}
@@ -361,11 +437,12 @@ const Page = () => {
 
             <div className="card-footer d-flex align-items-center">
               <p className="m-0 text-secondary">
-                Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+                Affichage de <span>{(currentPage - 1) * itemsPerPage + 1}</span>{" "}
+                à{" "}
                 <span>
                   {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
                 </span>{" "}
-                of <span>{filteredUsers.length}</span> entries
+                sur <span>{filteredUsers.length}</span> entrées
               </p>
               <ul className="pagination m-0 ms-auto">
                 <li
@@ -377,7 +454,7 @@ const Page = () => {
                       setCurrentPage((prev) => Math.max(prev - 1, 1))
                     }
                   >
-                    <ChevronLeft className="icon" />
+                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
                   </button>
                 </li>
                 <li className="page-item active">
@@ -402,7 +479,7 @@ const Page = () => {
                       setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                     }
                   >
-                    <ChevronRight className="icon" />
+                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
                   </button>
                 </li>
               </ul>
@@ -419,7 +496,7 @@ const Page = () => {
           >
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Add New User</h5>
+                <h5 className="modal-title">Ajouter un nouvel utilisateur</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -429,24 +506,25 @@ const Page = () => {
               <form onSubmit={handleAddUser}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Email</label>
+                    <label className="form-label">Email<span className="text-red fs-2">*</span></label>
                     <input
                       type="email"
                       className="form-control"
-                      placeholder="Email address"
+                      placeholder="Adresse e-mail"
                       value={newUser.email}
                       onChange={(e) =>
                         setNewUser({ ...newUser, email: e.target.value })
                       }
                       required
                     />
+                    <span className="text-danger">{error}</span>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">First Name</label>
+                    <label className="form-label">Prénom<span className="text-red fs-2">*</span></label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="First name"
+                      placeholder="Prénom"
                       value={newUser.prenom}
                       onChange={(e) =>
                         setNewUser({ ...newUser, prenom: e.target.value })
@@ -455,11 +533,11 @@ const Page = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Last Name</label>
+                    <label className="form-label">Nom<span className="text-red fs-2">*</span></label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Last name"
+                      placeholder="Nom"
                       value={newUser.nom}
                       onChange={(e) =>
                         setNewUser({ ...newUser, nom: e.target.value })
@@ -468,7 +546,7 @@ const Page = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Role</label>
+                    <label className="form-label">Rôle<span className="text-red fs-2">*</span></label>
                     <select
                       className="form-select"
                       value={newUser.role}
@@ -476,7 +554,7 @@ const Page = () => {
                         setNewUser({ ...newUser, AdminRoles: e.target.value })
                       }
                     >
-                      <option value="">Select a role</option>
+                      <option value="">Sélectionner un rôle</option>
                       {roles.map((role) => (
                         <option key={role._id} value={role._id}>
                           {role.name}
@@ -485,11 +563,11 @@ const Page = () => {
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Password</label>
+                    <label className="form-label">Mot de passe<span className="text-red fs-2">*</span></label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="mod de passe"
+                      placeholder="Mot de passe"
                       value={newUser.mot_de_passe}
                       onChange={(e) =>
                         setNewUser({ ...newUser, mot_de_passe: e.target.value })
@@ -501,10 +579,10 @@ const Page = () => {
                 <div className="modal-footer">
                   <button
                     type="button"
-                    className="btn   btn-outline"
+                    className="btn btn-outline"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    Cancel
+                    Annuler
                   </button>
                   <a
                     type="button"
@@ -512,14 +590,15 @@ const Page = () => {
                     style={{ backgroundColor: "#8EBE21" }}
                     href="/Dashboard/Admin/Roles-management"
                   >
-                    Create Role
+                    Créer un rôle
                   </a>
                   <button
                     type="submit"
                     className="btn text-white"
                     style={{ backgroundColor: "#263589" }}
+                    disabled={isSubmitting}
                   >
-                    Create user
+                    Créer un utilisateur
                   </button>
                 </div>
               </form>

@@ -225,9 +225,6 @@ const processEmissionsData = (data, days = 7) => {
 };
 
 const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
-
- 
-
   return (
     <div className="card">
       <div className="card-body">
@@ -293,7 +290,7 @@ const CompanyDash = () => {
       });
       const data = await response.json();
       console.log(data);
-      
+
       setEmissionData(data?.data);
     } catch (error) {
       console.error("Failed to fetch reports:", error);
@@ -323,8 +320,10 @@ const CompanyDash = () => {
 
   if (loading || !processedEmissions) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="spinner-border text-primary" role="status" style={{ width: '2rem', height: '2rem' }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
       </div>
     );
   }
@@ -436,37 +435,15 @@ const CompanyDash = () => {
   return (
     <div className="container-xl">
       <div className="page-header d-print-none mb-2">
-        <div className=" g-2 sm:flex flex-col sm:flex-row gap-10 
-         align-items-center justify-content-between ">
-          <div className="col sm:mb-0 mb-2">
-            <h2 className="page-title ">
-              <BarChart3 className=" sm:block  hidden text-center sm:text-left icon me-2" />
+        <div className="row align-items-center g-2">
+          <div className="col-sm mb-sm-0 mb-2 d-flex align-items-center justify-content-between">
+            <h2 className="page-title mb-0 d-flex align-items-center">
+              <BarChart3 className="d-none d-sm-block me-2" />
               Tableau de bord des émissions
             </h2>
-            <div className="text-muted mt-1">
-              Surveillez l'empreinte carbone de votre entreprise
-            </div>
           </div>
-
-          <div className="col-auto ms-auto">
-            <div className="card">
-              <div className="card-body p-3 d-flex align-items-center">
-                <div className="avatar bg-primary me-3">
-                  <Activity className="icon text-white" />
-                </div>
-                <div>
-                  <div className="text-muted mb-1">Émissions Totales</div>
-                  <div className="h3 mb-0">
-                    {Number(
-                      processedEmissions.scope1.total +
-                        processedEmissions.scope2.total +
-                        processedEmissions.scope3.total
-                    ).toFixed(2)}{" "}
-                    tCO₂e
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="col-sm-auto text-muted mt-1">
+            Surveillez l'empreinte carbone de votre entreprise
           </div>
         </div>
       </div>
