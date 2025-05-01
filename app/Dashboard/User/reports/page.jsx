@@ -8,7 +8,7 @@ import {
   IconTrash,
   IconFileText,
   IconEye,
-} from "lucide-react";
+} from "@tabler/icons-react";
 
 import { useRouter } from "next/navigation";
 

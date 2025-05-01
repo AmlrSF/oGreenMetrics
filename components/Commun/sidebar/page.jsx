@@ -212,50 +212,42 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                       )}
                     </button>
                     <div
-                      className={`flex flex-col items-center justify-center ${
+                      className={`flex flex-col ${
                         openDropdown === item.label ? "d-block" : "d-none"
-                      }`}
+                      }`} // Removed items-center justify-center to avoid centering conflicts
                       style={{
                         transition: "height 0.3s ease",
-                        marginLeft:
-                          !isCollapsed && openDropdown === item.label
-                            ? "12px"
-                            : "",
+                        marginLeft: !isCollapsed && openDropdown === item.label ? "12px" : "",
                       }}
                     >
                       {item.children.map((child) => (
                         <Link
                           key={child.label}
                           href={child.href}
-                          className={`flex items-center rounded p-2 my-1 transition-all duration-200 ${
-                            isCollapsed ? "justify-center" : "gap-2"
-                          }`}
+                          className={`d-flex rounded p-2 my-1 transition-all duration-200 ${
+                            isCollapsed ? "justify-center" : "align-items-center gap-2"
+                          }`}  
                           style={{
                             backgroundColor: isLinkActive(child.href)
                               ? "rgba(142, 190, 33, 1)"
                               : "transparent",
-                            color: isLinkActive(child.href)
-                              ? colors.primary
-                              : colors.white,
+                            color: isLinkActive(child.href) ? colors.primary : colors.white,
                             opacity: isLinkActive(child.href) ? 1 : 0.85,
                             fontWeight: isLinkActive(child.href) ? 500 : 400,
+                            width: "100%", 
                           }}
                         >
                           <child.icon
                             size={18}
                             style={{
-                              color: isLinkActive(child.href)
-                                ? colors.primary
-                                : colors.white,
+                              color: isLinkActive(child.href) ? colors.primary : colors.white,
                             }}
                           />
                           {!isCollapsed && (
                             <span
                               className="font-normal"
                               style={{
-                                color: isLinkActive(child.href)
-                                  ? colors.primary
-                                  : colors.white,
+                                color: isLinkActive(child.href) ? colors.primary : colors.white,
                               }}
                             >
                               {child.label}
