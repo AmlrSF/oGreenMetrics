@@ -226,7 +226,7 @@ const Page = () => {
                 </div>
               </div>
 
-              <div className="col-12 col-md-6 text-center mt-4 mt-md-0">
+              <div className="col-12 col-md-6 text-center  d-none d-md-block mt-4 mt-md-0">
                 <Image
                   src="/Auth illustrations/Login illustration.png"
                   width={500}

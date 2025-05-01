@@ -5,7 +5,7 @@ import Link from "next/link";
 const Hero = () => {
   return (
     <section className="relative">
-      <div className="container min-h-[90vh] 
+      <div className="container h-100 hero min-h-[90vh] 
       d-flex align-items-center ">
       <div className="d-flex align-items-center 
       justify-content-center ">

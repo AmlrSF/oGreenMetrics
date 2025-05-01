@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 
 
 const Loader = () => {
@@ -14,7 +14,7 @@ const Loader = () => {
           }}
           className="w-100 h-100 d-flex align-items-center justify-content-center"
         >
-          <Loader2 className="text-success" size={80} />
+          <IconLoader2 className="text-success" size={80} />
         </motion.div>
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}

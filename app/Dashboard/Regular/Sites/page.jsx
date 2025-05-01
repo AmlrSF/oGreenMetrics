@@ -98,8 +98,8 @@ const SitesPage = () => {
 
   return (
     <div className="container-xl">
-      <div className="flex items-center border-b  mb-5 justify-content-between">
-        <div className="py-10  d-flex 
+      <div className="d-flex  align-items-center py-2 mb-4 justify-content-between">
+        <div className="  d-flex 
          flex-column justify-content-center align-items-start">
           <h3
             className="text-2xl mb-0 font-bold "
@@ -215,13 +215,13 @@ const SitesPage = () => {
                             onClick={() => router.push(`/Dashboard/Regular/Sites/${site._id}`)}
                             className="btn btn-ghost-primary btn-icon"
                           >
-                            <Eye size={18} />
+                            <Eye className="text-primary" size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(site._id)}
                             className="btn btn-ghost-danger btn-icon"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 className="text-red" size={18} />
                           </button>
                         </div>
                       </td>
@@ -239,7 +239,7 @@ const SitesPage = () => {
                 </span>{" "}
                 of <span>{filteredSites.length}</span> entries
               </p>
-              <ul className="pagination m-0 ms-auto">
+              <ul className="pagination d-flex gap-3 m-0 ms-auto">
                 <li
                   className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >
@@ -268,11 +268,8 @@ const SitesPage = () => {
                 </li>
                 <li className="page-item active">
                   <span
-                    className="page-link"
-                    style={{
-                      backgroundColor: "#263589",
-                      borderColor: "#263589",
-                    }}
+                    className="page-link bg-primary"
+                
                   >
                     {currentPage}
                   </span>

@@ -1,6 +1,9 @@
 import React from "react";
-import { Star, StarHalf } from 'lucide-react';
-
+import {
+  IconStarFilled,
+  IconStarHalfFilled,
+  IconStar,
+} from '@tabler/icons-react';
 const Testimonials = () => {
   const testimonials = [
     {
@@ -34,21 +37,21 @@ const Testimonials = () => {
     // Add full stars
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Star
+        <IconStarFilled
           key={`star-${i}`}
-          className="icon icon-filled text-yellow"
-          style={{ width: '1rem', height: '1rem' }}
+          className="text-yellow-400"
+          size={16}
         />
       );
     }
 
-    // Add half star if needed
+    // Add half star
     if (hasHalfStar) {
       stars.push(
-        <StarHalf
+        <IconStarHalfFilled
           key="half-star"
-          className="icon icon-filled text-yellow"
-          style={{ width: '1rem', height: '1rem' }}
+          className="text-yellow-400"
+          size={16}
         />
       );
     }
@@ -57,17 +60,16 @@ const Testimonials = () => {
     const remainingStars = 5 - Math.ceil(rating);
     for (let i = 0; i < remainingStars; i++) {
       stars.push(
-        <Star
+        <IconStar
           key={`empty-star-${i}`}
-          className="icon text-yellow"
-          style={{ width: '1rem', height: '1rem' }}
+          className="text-yellow-400"
+          size={16}
         />
       );
     }
 
     return stars;
   };
-
   return (
     <section className="py-4 mb-6"
      style={{ backgroundColor: '#8ebe21', minHeight: '30vh' }}>

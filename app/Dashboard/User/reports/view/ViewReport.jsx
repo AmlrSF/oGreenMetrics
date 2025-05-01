@@ -884,12 +884,136 @@ const ViewReport = ({ id }) => {
   const emissionTotals = calculateTotalEmissions();
   const fuelTypes = getFuelTypes();
 
+
+  const handleDownloadPDF = () => {
+    const content = document.querySelector('.report-body-view-details');
+    
+    if (content) {
+      // Create a new window with proper styling
+      const printWindow = window.open('', '_blank');
+      
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Emissions Report</title>
+              <style>
+                @page {
+                  size: A4;
+                  margin: 20mm;
+                }
+                
+                body {
+                  font-family: Arial, sans-serif;
+                  line-height: 1.6;
+                  color: #333;
+                  margin: 0;
+                  padding: 20px;
+                }
+                
+                .report-header {
+                  margin-bottom: 30px;
+                }
+                
+                .report-title {
+                  font-size: 24px;
+                  color: #2563eb;
+                  margin-bottom: 10px;
+                }
+                
+                .report-meta {
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 20px;
+                }
+                
+                .scope-tags {
+                  margin: 10px 0;
+                }
+                
+                .scope-tag {
+                  display: inline-block;
+                  padding: 4px 12px;
+                  border-radius: 15px;
+                  margin-right: 8px;
+                  font-size: 14px;
+                }
+                
+                .scope-1 { background: #dbeafe; color: #1e40af; }
+                .scope-2 { background: #fae8ff; color: #86198f; }
+                .scope-3 { background: #dcfce7; color: #166534; }
+                
+                .emissions-summary {
+                  background: #f8fafc;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 30px;
+                }
+                
+                .chart-container {
+                  background: white;
+                  border-radius: 8px;
+                  padding: 20px;
+                  margin-bottom: 30px;
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+                
+                .chart-title {
+                  font-size: 18px;
+                  margin-bottom: 15px;
+                  color: #1e293b;
+                }
+                
+                /* Preserve chart colors and styling */
+                .recharts-wrapper {
+                  margin: 0 auto;
+                }
+                
+                @media print {
+                  body {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                  }
+                  
+                  .chart-container {
+                    break-inside: avoid;
+                  }
+                }
+              </style>
+
+            </head>
+            <body>
+              ${content.innerHTML}
+              <script>
+                window.onload = () => {
+                  // Wait for charts to render
+                  setTimeout(() => {
+                    window.print();
+                    window.onafterprint = () => window.close();
+                  }, 1000);
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        
+        printWindow.document.close();
+      }
+    }
+  };
+
+  const handleprint = async() =>{
+    window.print();
+  }
+
   return (
-    <div className="container-xl py-4">
+    <div className="container-xl report-body-view-details  py-4">
       {/* Report Header */}
       <div className="card mb-3">
         <div className="card-header">
-          <div className="d-flex align-items-center justify-content-between">
+          <div className="d-flex align-items-center w-100
+           justify-content-between">
             <div className="d-flex align-items-center">
               <button
                 className="btn btn-icon"
@@ -900,10 +1024,10 @@ const ViewReport = ({ id }) => {
               <h2 className="ms-3 mb-0">{report.name || "Environmental Impact Report"}</h2>
             </div>
             <div className="btn-list">
-              <button className="btn btn-outline-primary btn-icon">
+              <button onClick={handleprint}  className="btn btn-outline-primary btn-icon">
                 <Printer size={18} />
               </button>
-              <button className="btn btn-outline-primary btn-icon">
+              <button onClick={handleDownloadPDF} className="btn btn-outline-primary btn-icon">
                 <Download size={18} />
               </button>
               <button className="btn btn-primary">
@@ -912,7 +1036,7 @@ const ViewReport = ({ id }) => {
             </div>
           </div>
         </div>
-        <div className="card-body">
+        <div className="card-body report-body-view-details">
           <div className="row">
             <div className="col-lg-8">
               <p className="text-secondary mb-3">

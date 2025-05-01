@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
+import { IconEye, IconTrash } from "@tabler/icons-react";
 
 const Reporting = () => {
   const [reports, setReports] = useState([]);
@@ -426,10 +427,10 @@ const Reporting = () => {
 
       <div
         className="py-2 mb-4 d-flex 
-      border-b  justify-content-center align-items-start"
+      border-b  justify-content-center align-items-center"
       >
         <div>
-          <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
+          <h3 className="fs-1 fw-bold" style={{ color: "#263589" }}>
           Rapports
           </h3>
           <div className="card-subtitle">
@@ -445,7 +446,7 @@ const Reporting = () => {
         </button>
       </div>
 
-      <div className="card pt-5">
+      <div className="card">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary d-flex align-items-center">
@@ -592,7 +593,7 @@ const Reporting = () => {
                                 onClick={() => deleteReport(data?._id)}
                                 className="btn btn-ghost-danger btn-icon"
                               >
-                                <Trash2 size={18} />
+                                <IconTrash className="text-red" size={18} />
                               </button>
                               <button
                                 className="btn btn-ghost-blue btn-icon"
@@ -602,7 +603,7 @@ const Reporting = () => {
                                   )
                                 }
                               >
-                                <Eye size={18} />
+                                <IconEye className="text-primary" size={18} />
                               </button>
                             </div>
                           </td>
@@ -630,7 +631,7 @@ const Reporting = () => {
                 </span>{" "}
                 sur <span>{filteredReports?.length}</span> entrées
               </p>
-              <ul className="pagination m-0 ms-auto">
+              <ul className="pagination m-0 ms-auto d-flex gap-3">
                 <li
                   className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >
@@ -659,11 +660,8 @@ const Reporting = () => {
                 </li>
                 <li className="page-item active">
                   <span
-                    className="page-link"
-                    style={{
-                      backgroundColor: "#263589",
-                      borderColor: "#263589",
-                    }}
+                    className="page-link bg-primary"
+                   
                   >
                     {currentPage}
                   </span>

@@ -435,10 +435,10 @@ const CompanyDash = () => {
   return (
     <div className="container-xl">
       <div className="page-header d-print-none mb-2">
-        <div className="row align-items-center g-2">
-          <div className="col-sm mb-sm-0 mb-2 d-flex align-items-center justify-content-between">
-            <h2 className="page-title mb-0 d-flex align-items-center">
-              <BarChart3 className="d-none d-sm-block me-2" />
+        <div className="row flex-warp  align-items-center g-2">
+          <div className="col-sm  mb-sm-0 mb-2 d-flex align-items-center justify-content-between">
+            <h2 style={{ color: "#263589" }} className="page-title mb-0 fs-3  fw-bold d-flex align-items-center">
+          
               Tableau de bord des émissions
             </h2>
           </div>
@@ -476,13 +476,13 @@ const CompanyDash = () => {
       </div>
 
       <div className="row row-deck row-cards">
-        <div className="col-md-6">
+        <div className="col-md-6 mb-2">
           <div className="card">
             <div className="card-header">
-              <h3 className="flex items-center gap-1">
+              <h5 className="d-flex align-items-center gap-1">
                 <PieChart className="icon me-2" />
                 Répartition des émissions
-              </h3>
+              </h5>
             </div>
             <div className="card-body">
               <div style={{ height: "18rem" }}>
@@ -492,13 +492,13 @@ const CompanyDash = () => {
           </div>
         </div>
 
-        <div className="col-md-6">
+        <div className="col-md-6  mb-2">
           <div className="card">
             <div className="card-header">
-              <h3 className="flex items-center gap-1">
+              <h5 className="d-flex align-items-center gap-1">
                 <TrendingUp className="icon me-2" />
                 Émissions par source
-              </h3>
+              </h5>
             </div>
             <div className="card-body">
               <div style={{ height: "18rem" }}>

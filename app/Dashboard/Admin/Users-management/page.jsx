@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 
 import { formatDate, getInitials } from "@/lib/Utils";
+import { IconTrash, IconUserCheck, IconUserX } from "@tabler/icons-react";
 
 const Page = () => {
   const [users, setUsers] = useState([]);
@@ -194,8 +195,8 @@ const Page = () => {
 
   return (
     <div className="container-xl h-full ">
-      <div className="py-4 mb-5 d-flex d-flex justify-content-between align-items-start border-bottom">
-        <div className="d-flex flex-column justify-content-center align-items-start">
+      <div className="py-4 d-flex d-flex justify-content-between align-items-center ">
+        <div className="d-flex flex-column justify-content-start align-items-start">
           <h3
             className="fw-bold mb-1"
             style={{ fontSize: "30px", color: "#263589" }}
@@ -211,9 +212,9 @@ const Page = () => {
           <></>
         ) : (
           <button
-            className="btn btn-success flex items-center"
+            className="btn  d-flex align-items-center btn-primary"
             onClick={() => setIsModalOpen(true)}
-            style={{ backgroundColor: "#8EBE21" }}
+         
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -236,7 +237,7 @@ const Page = () => {
         )}
       </div>
 
-      <div className="card pt-5">
+      <div className="card pt-">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary d-flex align-items-center">
@@ -365,59 +366,18 @@ const Page = () => {
                                   handleApproveUser(user._id, user.isVerified)
                                 }
                               >
-                                {user.isVerified ? (
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="icon icon-tabler icons-tabler-outline icon-tabler-user-x"
-                                  >
-                                    <path
-                                      stroke="none"
-                                      d="M0 0h24v24H0z"
-                                      fill="none"
-                                    />
-                                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-                                    <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" />
-                                    <path d="M22 22l-5 -5" />
-                                    <path d="M17 22l5 -5" />
-                                  </svg>
-                                ) : (
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="icon icon-tabler icons-tabler-outline icon-tabler-user-check"
-                                  >
-                                    <path
-                                      stroke="none"
-                                      d="M0 0h24v24H0z"
-                                      fill="none"
-                                    />
-                                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-                                    <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
-                                    <path d="M15 19l2 2l4 -4" />
-                                  </svg>
-                                )}
+                                  {user.isVerified ? (
+                                    <IconUserX size={18} className="text-red" />
+                                  ) : (
+                                    <IconUserCheck  className="text-green" size={18}/>
+                                  )}
                               </button>
                               <button
                                 className="btn btn-ghost-danger btn-icon"
                                 onClick={() => deleteUser(user._id)}
                                 disabled={deletingIds.has(user._id)}
                               >
-                                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                                <IconTrash size={18} className="text-red"/>
                               </button>
                             </div>
                           </td>
@@ -444,7 +404,7 @@ const Page = () => {
                 </span>{" "}
                 sur <span>{filteredUsers.length}</span> entrées
               </p>
-              <ul className="pagination m-0 ms-auto">
+              <ul className="pagination  d-flex gap-3  m-0 ms-auto">
                 <li
                   className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >

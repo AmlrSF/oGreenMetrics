@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { IconBell } from "@tabler/icons-react";
+
 import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
 import { useNotifications } from "@/components/Commun/context/NotificationContext";
@@ -37,7 +38,8 @@ const Navbar = ({ user, isAdmin }) => {
               style={{ border: "none", background: "none" }}
               onClick={() => setShowNotifications(!showNotifications)}
             >
-              <Bell size={20} className="text-white" />
+         <IconBell size={20} className="text-white" />
+
               {unreadCount > 0 && (
                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                   {unreadCount > 9 ? "9+" : unreadCount}

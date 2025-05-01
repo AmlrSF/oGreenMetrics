@@ -275,7 +275,7 @@ const OTPVerificationPage = () => {
                 </button>
               </div>
 
-              <div className="col-12 col-md-6 text-center mt-4 mt-md-0">
+              <div className="col-12 col-md-6 d-none d-md-block text-center mt-4 mt-md-0">
                 <div className="text-center">
                   <img
                     src="/Auth illustrations/otp.png"

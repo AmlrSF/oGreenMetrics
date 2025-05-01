@@ -156,7 +156,7 @@ function WebsiteCalculator() {
             }}
           >
             <div className="card-body p-4">
-              <div className="flex align-items-center">
+              <div className="d-flex align-items-center">
                 <div className="col-9">
                   <h2 className="mb-0 fw-bold" style={{ color: "#000" }}>
                     Website Carbon Calculator
@@ -183,7 +183,7 @@ function WebsiteCalculator() {
                     required
                   />
                   <button
-                    className="btn btn-primary border-black border-1 border"
+                    className="btn btn-primary "
                     type="submit"
                     disabled={loading}
                   >

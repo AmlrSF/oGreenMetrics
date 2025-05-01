@@ -1,6 +1,8 @@
 import "../styles/globals.css";
 import '@tabler/core/dist/css/tabler.min.css';
 import "../styles/tabler-overrides.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import { NotificationProvider } from "@/components/Commun/context/NotificationContext";
 export const metadata = {
   title: "OGreenMetrics",

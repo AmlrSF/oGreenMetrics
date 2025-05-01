@@ -195,6 +195,7 @@ const ResetPasswordPage = () => {
                       className={`btn btn-primary w-100 mt-4 ${
                         loading ? "disabled" : ""
                       }`}
+                      disabled={loading}
                     >
                       {loading ? (
                         <>
@@ -213,7 +214,8 @@ const ResetPasswordPage = () => {
                 
               </div>
 
-              <div className="col-12 col-md-6 text-center mt-4 mt-md-0">
+              <div className="col-12
+              d-none d-md-block col-md-6 text-center mt-4 mt-md-0">
                 <div className="d-flex align-items-center justify-content-center h-100">
                   <div style={{ maxWidth: "300px" }}>
                     <img

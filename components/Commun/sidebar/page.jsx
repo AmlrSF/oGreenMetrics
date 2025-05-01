@@ -2,16 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  LogOut,
-  Menu,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-} from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { userMenuItems, menuItems, websiteMenuItems  } from "@/lib/Data";
-//here is three data
+import { IconChevronRight, IconChevronLeft ,IconChevronDown} from "@tabler/icons-react";
+import { IconLogout } from "@tabler/icons-react";
+
+
+
 
 const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -126,7 +123,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
         }}
       >
         <div
-          className="d-flex align-items-center p-3 "
+          className="d-flex align-items-center p-2 mb-5 "
           style={{
             justifyContent: isCollapsed ? "center" : "space-between",
             backgroundColor: colors.primary,
@@ -146,7 +143,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
           )}
           <button
             onClick={toggleCollapse}
-            className="btn p-1 rounded-circle"
+            className="btn p-1  d-flex align-items-center justify-content-center"
             style={{
               cursor: "pointer",
               backgroundColor: colors.green,
@@ -155,9 +152,9 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? (
-              <ChevronRight size={20} />
+              <IconChevronRight size={20} />
             ) : (
-              <ChevronLeft size={20} />
+              <IconChevronLeft size={20} />
             )}
           </button>
         </div>
@@ -170,11 +167,11 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                   <>
                     <button
                       onClick={() => toggleDropdown(item.label)}
-                      className={`nav-link 
+                      className={`nav-link d-flex
                         p-2 rounded text-decoration-none w-full ${
                           isCollapsed
-                            ? "items-center justify-center"
-                            : "items-center"
+                            ? "align-items-center justify-content-center"
+                            : "align-items-center"
                         } `}
                       style={{            
                         color:"#fff",
@@ -207,7 +204,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
 
                       </div>
                       {!isCollapsed && (
-                        <ChevronDown
+                        <IconChevronDown
                           className="ms-auto"
                           style={{
                             color: isLinkActive(item.href) ? colors.primary : colors.white,
@@ -226,7 +223,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                       )}
                     </button>
                     <div
-                      className={`flex flex-col  items-center justify-center ${
+                      className={`d-flex flex-column  align-items-start justify-content-start ${
                         openDropdown === item.label ? "d-block" : "d-none"
                       }`}
                       style={{
@@ -239,8 +236,8 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                           key={child.label}
                           href={child.href}
                           className={`
-                          flex items-center rounded p-2 my-1 transition-all duration-200
-                          ${isCollapsed ? "justify-center" : "gap-2"}
+                          d-flex  align-items-center justify-content-between rounded p-2 my-1 transition-all duration-200
+                          ${isCollapsed ? "justify-content-center" : "gap-2"}
                         `}
                           style={{
                             backgroundColor: isLinkActive(child.href)
@@ -262,11 +259,11 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                 ) : (
                   <Link
                     href={item.href}
-                    className={`nav-link 
+                    className={`nav-link d-flex gap-2
                       p-2 rounded text-decoration-none ${
                         isCollapsed
-                          ? "items-center justify-center"
-                          : "items-center"
+                          ? "align-items-center justify-content-center"
+                          : "align-items-center"
                       } `}
                     style={{
                       backgroundColor: isLinkActive(item.href)
@@ -276,12 +273,15 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                       opacity: isLinkActive(item.href) ? 1 : 0.85,
                       fontWeight: isLinkActive(item.href) ? 600 : 400,
 
-                      gap: isCollapsed ? "0px" : "10px",
+                      gap: isCollapsed ? "0px" : "5px",
                     }}
                   >
-                    <item.icon size={22} className="" style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}} />
+                    <item.icon size={22} className=""
+                     style={{color: isLinkActive(item.href) ? colors.primary : colors.white}} />
+                    
                     {!isCollapsed && (
-                      <span className="text-sm font-medium" style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}}>{item.label}</span>
+                      <span className="fs-6 font-medium"
+                       style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}}>{item.label}</span>
                     )}
                   </Link>
                 )}
@@ -307,7 +307,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                       className={`nav-link 
                        p-2 rounded text-decoration-none ${
                          isCollapsed
-                           ? "items-center justify-center"
+                           ? "items-center justify-content-center"
                            : "items-center"
                        } `}
                       style={{
@@ -348,7 +348,8 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
             }}
             
           >
-            <LogOut size={20} />
+            <IconLogout size={20} />
+
             {!isCollapsed && (
               <span className="text-sm font-medium">Logout</span>
             )}

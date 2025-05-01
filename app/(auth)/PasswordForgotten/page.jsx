@@ -12,6 +12,7 @@ const Page = () => {
   const [alerts, setAlerts] = useState([]);
   const router = useRouter();
 
+
   // Function to show alerts
   const showAlert = (message, type) => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -25,6 +26,7 @@ const Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
 
     if (!email) {
       setErrorMessage("Please enter your email");
@@ -58,6 +60,8 @@ const Page = () => {
       showAlert("An error occurred while sending OTP.", "danger");
     } finally {
       setLoading(false);
+      
+
     }
   };
 
@@ -178,7 +182,8 @@ const Page = () => {
                 </form>
               </div>
 
-              <div className="col-12 col-md-6 text-center mt-4 mt-md-0">
+              <div className="col-12 col-md-6 
+              text-center d-none d-md-block mt-4 mt-md-0">
                 <Image
                   src="/Auth illustrations/Forgot password.png"
                   width={500}

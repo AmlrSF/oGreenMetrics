@@ -1,5 +1,6 @@
 "use client";
 
+import { IconTrash } from "@tabler/icons-react";
 import React, { useState, useEffect } from "react";
 
 const Page = () => {
@@ -148,7 +149,8 @@ const Page = () => {
 
   return (
     <div className="container-xl h-full">
-      <div className="py-4 mb-5 d-flex d-flex justify-content-between align-items-start border-bottom">
+      <div className="py-4  d-flex d-flex justify-content-between
+       align-items-center">
         <div className="d-flex flex-column justify-content-start">
           <h3
             className="fw-bold mb-1"
@@ -165,9 +167,8 @@ const Page = () => {
           <></>
         ) : (
           <button
-            className="btn btn-success flex items-center"
-            onClick={() => setIsModalOpen(true)}
-            style={{ backgroundColor: "#8EBE21" }}
+            className="btn btn-primary"
+
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -189,7 +190,7 @@ const Page = () => {
           </button>
         )}
       </div>
-      <div className="card pt-5">
+      <div className="card ">
         <div className="table-responsive">
           <table className="table table-vcenter card-table">
             <thead>
@@ -211,7 +212,7 @@ const Page = () => {
                     <tr key={role._id || index}>
                       <td>{role.name}</td>
                       <td>{role.description}</td>
-                      <td className="gap-2 flex justify-start items-center">
+                      <td className="gap-2 d-flex justify-content-start align-items-center">
                         <div>
                           {role.userManagement != "00"
                             ? role.userManagement && (
@@ -312,29 +313,9 @@ const Page = () => {
                             {deletingIds.has(role._id) ? (
                               <span className="spinner-border spinner-border-sm" />
                             ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
-                              >
-                                <path
-                                  stroke="none"
-                                  d="M0 0h24v24H0z"
-                                  fill="none"
-                                />
-                                <path d="M4 7l16 0" />
-                                <path d="M10 11l0 6" />
-                                <path d="M14 11l0 6" />
-                                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                              </svg>
+                                       
+                              <IconTrash className="text-red" size={18} />
+                                  
                             )}
                           </button>
                         </td>
@@ -358,7 +339,7 @@ const Page = () => {
             sur <span>{roles.length}</span> entrées
           </p>
 
-          <ul className="pagination m-0 ms-auto">
+          <ul className="pagination d-flex gap-3 m-0 ms-auto">
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
               <button
                 className="page-link"

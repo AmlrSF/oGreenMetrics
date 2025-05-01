@@ -1,7 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Facebook, Twitter, Linkedin, Instagram, MapPin, Phone, Mail } from 'lucide-react';
+import {
+  IconBrandFacebook,
+  IconBrandTwitter,
+  IconBrandLinkedin,
+  IconBrandInstagram,
+  IconMapPin,
+  IconPhone,
+  IconMail,
+} from '@tabler/icons-react';
 
 const Footer = () => {
   return (
@@ -34,10 +42,10 @@ const Footer = () => {
               Plateforme de mesure de l'empreinte carbone pour les entreprises
             </p>
             <div className="d-flex gap-3">
-              <SocialIcon Icon={Facebook} />
-              <SocialIcon Icon={Twitter} />
-              <SocialIcon Icon={Linkedin} />
-              <SocialIcon Icon={Instagram} />
+            <SocialIcon Icon={IconBrandFacebook} />
+<SocialIcon Icon={IconBrandTwitter} />
+<SocialIcon Icon={IconBrandLinkedin} />
+<SocialIcon Icon={IconBrandInstagram} />
             </div>
           </div>
 
@@ -56,9 +64,9 @@ const Footer = () => {
           <div className="col-12 col-md-4">
             <h5 className="text-white text-uppercase fw-medium mb-2">Nous contacter</h5>
             <div className="ps-0">
-              <ContactInfo Icon={MapPin} text="123 rue de la Terre, 75000 Paris" />
-              <ContactInfo Icon={Phone} text="+33 1 23 45 67 89" />
-              <ContactInfo Icon={Mail} text="contact@greenmetric.com" />
+            <ContactInfo Icon={IconMapPin} text="123 rue de la Terre, 75000 Paris" />
+<ContactInfo Icon={IconPhone} text="+33 1 23 45 67 89" />
+<ContactInfo Icon={IconMail} text="contact@greenmetric.com" />
             </div>
           </div>
         </div>
