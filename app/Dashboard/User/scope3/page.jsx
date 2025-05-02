@@ -65,28 +65,33 @@ const Scope3 = () => {
     };
 
     fetchUser();
-    fetchData();
+  
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [activeTab]);
+    if(Company?._id){
+      fetchData();
+    }
+
+  }, [activeTab, Company]);
 
   const fetchData = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:4000/${activeTab}/${Company?._id}`,
-        {
-          method: "GET",
+    if(Company){
+      try {
+        const response = await fetch(
+          `http://localhost:4000/${activeTab}/${Company?._id}`,
+          {
+            method: "GET",
+          }
+        );
+        const data = await response.json();
+  
+        if (response.ok) {
+          setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
         }
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
     }
   };
 
@@ -274,7 +279,7 @@ const Scope3 = () => {
       border-b  justify-content-start align-items-center"
       >
         <div>
-          <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
+          <h3 className="fs-1 fw-bold" style={{ color: "#263589" }}>
             Scope 3
           </h3>
           <p>
@@ -287,13 +292,13 @@ const Scope3 = () => {
       </div>
 
       <div className="card">
-        <div className="card-header">
+        <div className="card-header pt-3">
           <ul className="nav nav-tabs card-header-tabs">
             {Object.values(tabs).map((tab) => (
               <li className="nav-item" key={tab?.id}>
                 <a
                   href={`#${tab?.id}`}
-                  className={`nav-link ${
+                  className={`nav-link text-primary ${
                     activeTab === tab?.id ? "active" : ""
                   }`}
                   onClick={(e) => handleTabClick(tab?.id, e)}

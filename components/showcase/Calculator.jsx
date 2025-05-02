@@ -2,11 +2,13 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
 import {
   IconSearch,
   IconCopy,
   IconWorld,
 } from "@tabler/icons-react"; 
+
 
 const Calculator = () => {
   const [url, setUrl] = useState("");
@@ -91,7 +93,9 @@ const Calculator = () => {
                     {loading ? (
                       <span className="spinner-border spinner-border-sm me-2"></span>
                     ) : (
+
                       <IconSearch className="icon me-2" />
+
                     )}
                     Calculate
                   </button>

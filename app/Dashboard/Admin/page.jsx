@@ -2,7 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { IconBuildingSkyscraper, IconFileText, IconUsers, IconTrendingUp,
+ 
+  IconBuildingSkyscraper,
+  IconFileText,
+  IconUsers,
+  IconTrendingUp, 
 } from "@tabler/icons-react";
 
 const CompanyDash = () => {

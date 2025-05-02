@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { formatDate, getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
+import { IconEye, IconTrash } from "@tabler/icons-react";
 
 const Page = () => {
   const [companies, setCompanies] = useState([]);
@@ -17,7 +18,7 @@ const Page = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCompany, setselectedCompany] = useState(null);
   const [deletingIds, setDeletingIds] = useState(new Set());
-  
+
   const router = useRouter();
 
   useEffect(() => {
@@ -96,7 +97,7 @@ const Page = () => {
       fetchCompanies();
     } catch (error) {
       setError("Failed to update company status");
-    }finally {
+    } finally {
       setDeletingIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(selectedCompany._id);
@@ -137,7 +138,7 @@ const Page = () => {
             <div className="modal-content">
               <div className="modal-body">
                 <div className="text-center py-4">
-                <svg
+                  <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
@@ -189,9 +190,12 @@ const Page = () => {
           ></div>
         </div>
       )}
-      <div className="py-4 mb-5 d-flex flex-column justify-content-center align-items-start border-bottom">
+      <div
+        className="py-4 d-flex flex-column justify-content-center align-items-start 
+     "
+      >
         <h3
-          className="mb-1 fw-bold"
+          className="fs-1 fw-bold"
           style={{ fontSize: "30px", color: "#263589" }}
         >
           Administration des entreprises
@@ -201,7 +205,7 @@ const Page = () => {
         </div>
       </div>
 
-      <div className="card pt-5">
+      <div className="card ">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary">
@@ -249,7 +253,7 @@ const Page = () => {
                     {userAccess == "10" ? (
                       <></>
                     ) : (
-                      <th className="w-1"> Action </th>
+                      <th className=""> Action </th>
                     )}
                   </tr>
                 </thead>
@@ -298,61 +302,20 @@ const Page = () => {
                             <></>
                           ) : (
                             <td>
-                              <div className="btn-list flex-nowrap">
+                              <div className=" d-flex">
                                 <button
                                   onClick={() =>
                                     navigateToCompanyDetails(company._id)
                                   }
                                   className="btn btn-ghost-blue btn-icon"
                                 >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="icon icon-tabler icons-tabler-outline icon-tabler-eye"
-                                  >
-                                    <path
-                                      stroke="none"
-                                      d="M0 0h24v24H0z"
-                                      fill="none"
-                                    />
-                                    <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-                                    <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
-                                  </svg>
+                                  <IconEye size={18} className="text-primary" />
                                 </button>
                                 <button
                                   onClick={() => openModal(company)}
                                   className="btn btn-ghost-danger btn-icon"
                                 >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
-                                  >
-                                    <path
-                                      stroke="none"
-                                      d="M0 0h24v24H0z"
-                                      fill="none"
-                                    />
-                                    <path d="M4 7l16 0" />
-                                    <path d="M10 11l0 6" />
-                                    <path d="M14 11l0 6" />
-                                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                                  </svg>
+                                  <IconTrash className="text-red" size={18} />
                                 </button>
                               </div>
                             </td>
@@ -382,7 +345,7 @@ const Page = () => {
                 </span>{" "}
                 sur <span>{filteredCompanies.length}</span> entrées
               </p>
-              <ul className="pagination m-0 ms-auto">
+              <ul className="pagination d-flex gap-3 m-0 ms-auto">
                 <li
                   className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >
