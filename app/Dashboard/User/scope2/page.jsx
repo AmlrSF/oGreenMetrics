@@ -26,7 +26,7 @@ const Scope2 = () => {
     electricity: {
       id: "electricity",
       label: "Consommation d'électricité",
-      headers: ["Consommation électrique (kWh)", "Action"],
+      headers: ["Consommation électrique (kWh)", "Pays", "Émissions (kgCO2e)", "Action"],
       fields: [
         {
           name: "yearlyConsumption",
@@ -39,39 +39,10 @@ const Scope2 = () => {
           name: "country",
           label: "Pays",
           type: "select",
-          placeholder: "Sélectionner un pays",
+          placeholder: "Pays",
           required: true,
-          options: [
-            "Sweden",
-            "Lithuania",
-            "France",
-            "Austria",
-            "Latvia",
-            "Finland",
-            "Slovakia",
-            "Denmark",
-            "Belgium",
-            "Croatia",
-            "Luxembourg",
-            "Slovenia",
-            "Italy",
-            "Hungary",
-            "Spain",
-            "United Kingdom",
-            "Romania",
-            "Portugal",
-            "Ireland",
-            "Germany",
-            "Bulgaria",
-            "Netherlands",
-            "Czechia",
-            "Greece",
-            "Malta",
-            "Cyprus",
-            "Poland",
-            "Estonia",
-          ].map((country) => ({ value: country, label: country })),
-        },
+          disabled: true,
+        }
       ],
     },
     heating: {
@@ -213,7 +184,7 @@ const Scope2 = () => {
         electricity: electricityRes.data || {
           yearlyConsumption: 0,
           emissions: 0,
-          country: null,
+          country: company.country,
         },
         heating: heatingRes.data || { heaters: [], totalEmissions: 0 },
         cooling: coolingRes.data || { coolers: [], totalEmissions: 0 },
@@ -242,7 +213,12 @@ const Scope2 = () => {
       setEditId(item._id);
       setEditRecordId(recordId);
     } else {
-      setFormData({});
+      // For new electricity record, pre-populate the country
+      if (isOpen && activeTab === "electricity" && company) {
+        setFormData({ country: company.country });
+      } else {
+        setFormData({});
+      }
       setEditId(null);
       setEditRecordId(null);
     }
@@ -270,7 +246,7 @@ const Scope2 = () => {
 
     const currentTabConfig = tabs[activeTab];
     const missingFields = currentTabConfig.fields
-      .filter((field) => field.required && !formData[field.name])
+      .filter((field) => field.required && !formData[field.name] && !field.disabled)
       .map((field) => field.label);
 
     if (missingFields.length > 0) {
@@ -282,10 +258,16 @@ const Scope2 = () => {
     }
 
     try {
-      const requestData = {
+      let requestData = {
         ...formData,
         company_id: company._id,
       };
+      
+      // When in electricity tab, automatically use the company's country
+      if (activeTab === "electricity") {
+        requestData.country = company.country;
+      }
+      
       let endpoint, method;
 
       if (activeTab === "electricity") {
@@ -304,6 +286,7 @@ const Scope2 = () => {
           : "http://localhost:4000/cooling";
         method = isEditMode ? "PUT" : "POST";
       }
+      
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -313,6 +296,7 @@ const Scope2 = () => {
         body: JSON.stringify(requestData),
         credentials: "include",
       });
+      
       const result = await response.json();
 
       if (!response.ok) {
@@ -356,7 +340,7 @@ const Scope2 = () => {
         if (!response.ok) throw new Error("Failed to delete");
         setScope2Data((prev) => ({
           ...prev,
-          electricity: { yearlyConsumption: 0, emissions: 0, country: null },
+          electricity: { yearlyConsumption: 0, emissions: 0, country: company.country },
         }));
       } else if (activeTab === "heating") {
         endpoint = `http://localhost:4000/heating/${recordId}/heater/${itemId}`;
@@ -411,7 +395,10 @@ const Scope2 = () => {
 
     return (
       <div className="table-container p-5">
-          <div className="d-flex justify-content-end mb-5">
+        <div className="d-flex justify-content-between mb-5">
+          <div className="scope-info">
+          
+          </div>
           <button
             type="button"
             className="btn btn-primary"
@@ -420,6 +407,7 @@ const Scope2 = () => {
             <IconPlus className="mr-2" size={16} /> Ajouter
           </button>
         </div>
+        
         <div className="table-responsive">   
           <table className="table table-vcenter card-table">           
             <thead>
@@ -432,7 +420,9 @@ const Scope2 = () => {
             <tbody>
               {activeTab === "electricity" && data.yearlyConsumption > 0 ? (
                 <tr>
-                  <td>{data.yearlyConsumption}</td>
+                  <td>{data.yearlyConsumption.toLocaleString()} kWh</td>
+                  <td>{data.country || company?.country || "N/A"}</td>
+                  <td>{data.emissions.toLocaleString()} kgCO2e</td>
                   <td>
                     <div className="btn-list flex-nowrap">
                       <button
@@ -670,49 +660,75 @@ const Scope2 = () => {
               </ul>
             </nav>
           )}
-      
       </div>
     );
   };
 
   const renderFormFields = () => {
     const currentTab = tabs[activeTab];
-    return currentTab.fields.map((field, index) => (
-      <div className="mb-3" key={index}>
-        <label className="form-label">
-          {field.label}
-          {field.required && <span className="text-danger">*</span>}
-        </label>
-        {field.type === "select" ? (
-          <select
-            className="form-select"
-            name={field.name}
-            onChange={handleInputChange}
-            value={formData[field.name] || ""}
-            required={field.required}
-          >
-            <option value="" disabled>
-              {field.placeholder}
-            </option>
-            {field.options.map((option, idx) => (
-              <option key={idx} value={option.value}>
-                {option.label}
+    return currentTab.fields.map((field, index) => {
+      // Special case for country field in electricity tab
+      if (field.name === "country" && activeTab === "electricity") {
+        return (
+          <div className="mb-3" key={index}>
+            <label className="form-label">
+              {field.label}
+              {field.required && <span className="text-danger">*</span>}
+            </label>
+            <select
+              className="form-select"
+              name={field.name}
+              value={company?.country || ""}
+              disabled={true}
+            >
+              <option value={company?.country || ""}>{company?.country || "Loading..."}</option>
+            </select>
+            <small className="form-text text-muted">
+              Le pays est automatiquement défini selon votre profil de votre entreprise.
+            </small>
+          </div>
+        );
+      }
+      
+      return (
+        <div className="mb-3" key={index}>
+          <label className="form-label">
+            {field.label}
+            {field.required && <span className="text-danger">*</span>}
+          </label>
+          {field.type === "select" ? (
+            <select
+              className="form-select"
+              name={field.name}
+              onChange={handleInputChange}
+              value={formData[field.name] || ""}
+              required={field.required}
+              disabled={field.disabled}
+            >
+              <option value="" disabled>
+                {field.placeholder}
               </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type={field.type}
-            className="form-control"
-            name={field.name}
-            placeholder={field.placeholder}
-            onChange={handleInputChange}
-            value={formData[field.name] || ""}
-            required={field.required}
-          />
-        )}
-      </div>
-    ));
+              {field.options && field.options.map((option, idx) => (
+                <option key={idx} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type={field.type}
+              className="form-control"
+              name={field.name}
+              placeholder={field.placeholder}
+              onChange={handleInputChange}
+              value={formData[field.name] || ""}
+              required={field.required}
+              disabled={field.disabled}
+            />
+          )}
+        </div>
+      );
+    });
   };
 
   const renderModal = () => {
@@ -739,7 +755,28 @@ const Scope2 = () => {
               ></button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="modal-body">{renderFormFields()}</div>
+              <div className="modal-body">
+                {renderFormFields()}
+                {activeTab === "electricity" && company && (
+                  <div className="alert alert-info mt-3">
+                    <div className="d-flex">
+                      <div className="me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
+                          <path d="M12 9h.01"/>
+                          <path d="M11 12h1v4h1"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="mb-1">Information sur le calcul d'émissions</h4>
+                        <div>Pays utilisé pour le calcul: <strong>{company.country}</strong></div>
+                        <div>Facteur d'émission: <strong>{company.countryEmissionFactor} kgCO2e/kWh</strong></div>
+                       </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="modal-footer">
                 <button
                   type="button"
@@ -812,4 +849,4 @@ const Scope2 = () => {
   );
 };
 
-export default Scope2; 
+export default Scope2;
