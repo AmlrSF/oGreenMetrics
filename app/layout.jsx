@@ -1,4 +1,4 @@
-import "../styles/globals.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import '@tabler/core/dist/css/tabler.min.css';
 import "../styles/tabler-overrides.css";
  export const metadata = {

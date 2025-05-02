@@ -137,30 +137,42 @@ const SignupPage = () => {
               <div className="mb-4">
                 <div className="d-flex align-items-center">
                   <div className={`d-flex align-items-center ${currentStep >= 1 ? "text-success" : "text-secondary"}`}>
-                    <div className={`d-flex align-items-center justify-content-center rounded-circle me-2 ${currentStep >= 1 ? "bg-success" : "bg-light border"}`} 
-                      style={{width: "28px", height: "28px"}}>
+                    <div
+                      className={`d-flex align-items-center justify-content-center rounded-circle me-2 ${
+                        currentStep >= 1 ? "stepper-active" : "bg-light border"
+                      }`}
+                      style={{ width: "28px", height: "28px" }}
+                    >
                       <span className={currentStep >= 1 ? "text-white" : "text-secondary"}>1</span>
                     </div>
                     <span className="small fw-medium">Type de compte</span>
                   </div>
-                  
-                  <div className="mx-2 border-top flex-grow-1" style={{borderColor: "#e5e5e5", height: "1px"}}></div>
-                  
+
+                  <div className="mx-2 border-top flex-grow-1" style={{ borderColor: "#e5e5e5", height: "1px" }}></div>
+
                   <div className={`d-flex align-items-center ${currentStep >= 2 ? "text-success" : "text-secondary"}`}>
-                    <div className={`d-flex align-items-center justify-content-center rounded-circle me-2 ${currentStep >= 2 ? "bg-success" : "bg-light border"}`} 
-                      style={{width: "28px", height: "28px"}}>
+                    <div
+                      className={`d-flex align-items-center justify-content-center rounded-circle me-2 ${
+                        currentStep >= 2 ? "stepper-active" : "bg-light border"
+                      }`}
+                      style={{ width: "28px", height: "28px" }}
+                    >
                       <span className={currentStep >= 2 ? "text-white" : "text-secondary"}>2</span>
                     </div>
                     <span className="small fw-medium">Infos personnelles</span>
                   </div>
-                  
+
                   {accountType === "entreprise" && (
                     <>
-                      <div className="mx-2 border-top flex-grow-1" style={{borderColor: "#e5e5e5", height: "1px"}}></div>
-                      
+                      <div className="mx-2 border-top flex-grow-1" style={{ borderColor: "#e5e5e5", height: "1px" }}></div>
+
                       <div className={`d-flex align-items-center ${currentStep >= 3 ? "text-success" : "text-secondary"}`}>
-                        <div className={`d-flex align-items-center justify-content-center rounded-circle me-2 ${currentStep >= 3 ? "bg-success" : "bg-light border"}`} 
-                          style={{width: "28px", height: "28px"}}>
+                        <div
+                          className={`d-flex align-items-center justify-content-center rounded-circle me-2 ${
+                            currentStep >= 3 ? "stepper-active" : "bg-light border"
+                          }`}
+                          style={{ width: "28px", height: "28px" }}
+                        >
                           <span className={currentStep >= 3 ? "text-white" : "text-secondary"}>3</span>
                         </div>
                         <span className="small fw-medium">Infos entreprise</span>
@@ -169,28 +181,32 @@ const SignupPage = () => {
                   )}
                 </div>
               </div>
-
               <form onSubmit={handleSubmit}>
                 {currentStep === 1 && (
                   <div id="account-type">
-                    <h2 className="d-flex align-items-center small fw-medium mb-3">
-                      <div className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 bg-success" style={{ width: "24px", height: "24px", fontSize: "12px" }}>1</div>
-                      Choisissez votre type de compte
-                    </h2>
+               <h2 className="d-flex align-items-center small fw-medium mb-3">
+                  <div
+                    className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 stepper-active"
+                    style={{ width: "24px", height: "24px", fontSize: "12px" }}
+                  >
+                    1
+                  </div>
+                  Choisissez votre type de compte
+                </h2>
 
                     <div className="d-flex flex-column flex-md-row gap-3 mb-4">
-                      <button
-                        type="button" 
-                        className={`btn ${accountType === "régulier" ? "btn-success" : "btn-outline-secondary"} flex-grow-1 py-3`} 
+                    <button
+                        type="button"
+                        className={`btn ${accountType === "régulier" ? "btn-success" : "btn-outline-secondary"} flex-grow-1 py-3`}
                         onClick={() => handleAccountTypeChange("régulier")}
                       >
                         <i className="bi bi-person me-2"></i>
                         Utilisateur Régulier
                       </button>
-                      
+
                       <button
-                        type="button" 
-                        className={`btn ${accountType === "entreprise" ? "btn-success" : "btn-outline-secondary"} flex-grow-1 py-3`} 
+                        type="button"
+                        className={`btn ${accountType === "entreprise" ? "btn-success" : "btn-outline-secondary"} flex-grow-1 py-3`}
                         onClick={() => handleAccountTypeChange("entreprise")}
                       >
                         <i className="bi bi-building me-2"></i>
@@ -208,10 +224,15 @@ const SignupPage = () => {
 
                 {currentStep === 2 && (
                   <div id="personal-info">
-                    <h2 className="d-flex align-items-center small fw-medium mb-3">
-                      <div className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 bg-success" style={{ width: "24px", height: "24px", fontSize: "12px" }}>2</div>
-                      Informations personnelles
-                    </h2>
+                   <h2 className="d-flex align-items-center small fw-medium mb-3">
+                    <div
+                      className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 stepper-active"
+                      style={{ width: "24px", height: "24px", fontSize: "12px" }}
+                    >
+                      1
+                    </div>
+                    Choisissez votre type de compte
+                  </h2>
 
                     <div className="row g-3 mb-4">
                       <div className="col-md-6">
@@ -329,7 +350,7 @@ const SignupPage = () => {
                 {currentStep === 3 && accountType === "entreprise" && (
                   <div id="company-info">
                     <h2 className="d-flex align-items-center small fw-medium mb-3">
-                      <div className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 bg-success" style={{ width: "24px", height: "24px", fontSize: "12px" }}>3</div>
+                      <div className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 stepper-active" style={{ width: "24px", height: "24px", fontSize: "12px" }}>3</div>
                       Informations sur l'entreprise
                     </h2>
 
