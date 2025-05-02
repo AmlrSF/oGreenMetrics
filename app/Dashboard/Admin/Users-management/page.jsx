@@ -367,9 +367,9 @@ const Page = () => {
                                 }
                               >
                                   {user.isVerified ? (
-                                    <IconUserX size={18} className="text-red" />
+                                    <IconUserX size={18}  />
                                   ) : (
-                                    <IconUserCheck  className="text-green" size={18}/>
+                                    <IconUserCheck   size={18}/>
                                   )}
                               </button>
                               <button
@@ -377,7 +377,7 @@ const Page = () => {
                                 onClick={() => deleteUser(user._id)}
                                 disabled={deletingIds.has(user._id)}
                               >
-                                <IconTrash size={18} className="text-red"/>
+                                <IconTrash size={18} />
                               </button>
                             </div>
                           </td>

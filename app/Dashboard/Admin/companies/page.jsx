@@ -191,16 +191,17 @@ const Page = () => {
         </div>
       )}
       <div
-        className="py-4 d-flex flex-column justify-content-center align-items-start 
+        className="py-4 d-flex flex-column 
+        justify-content-center align-items-start 
      "
       >
         <h3
-          className="fs-1 fw-bold"
+          className="fs-1 mb-0 fw-bold"
           style={{ fontSize: "30px", color: "#263589" }}
         >
           Administration des entreprises
         </h3>
-        <div className="card-subtitle">
+        <div className=" mb-0 card-subtitle">
           Gérez efficacement les statuts de vérification des entreprises.
         </div>
       </div>
@@ -302,20 +303,20 @@ const Page = () => {
                             <></>
                           ) : (
                             <td>
-                              <div className=" d-flex">
+                              <div className="gap-2 d-flex">
                                 <button
                                   onClick={() =>
                                     navigateToCompanyDetails(company._id)
                                   }
                                   className="btn btn-ghost-blue btn-icon"
                                 >
-                                  <IconEye size={18} className="text-primary" />
+                                  <IconEye size={18}  />
                                 </button>
                                 <button
                                   onClick={() => openModal(company)}
                                   className="btn btn-ghost-danger btn-icon"
                                 >
-                                  <IconTrash className="text-red" size={18} />
+                                  <IconTrash  size={18} />
                                 </button>
                               </div>
                             </td>

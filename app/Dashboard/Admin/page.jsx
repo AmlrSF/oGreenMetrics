@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
- 
+import {
   IconBuildingSkyscraper,
   IconFileText,
   IconUsers,
-  IconTrendingUp, 
+  IconTrendingUp,
 } from "@tabler/icons-react";
 
 const CompanyDash = () => {
@@ -25,11 +25,9 @@ const CompanyDash = () => {
       .get("http://localhost:4000/users")
       .then((response) => {
         const users = response.data;
-        const admins = users.filter(
-          (item) => item?.AdminRoles || item?.role === "Admin"
-        ).length;
+        const admins = users.filter((item) => item?.AdminRoles || item?.role=="Admin" ).length;
         const nonAdmins = users.filter(
-          (item) => item?.roles !== "Admin"
+          (item) => item?.roles !== "Admin" 
         ).length;
 
         setAdminCount(admins);
@@ -73,6 +71,7 @@ const CompanyDash = () => {
       color: "orange",
     },
   ];
+  
 
   return (
     <div className="page-body">
@@ -85,9 +84,9 @@ const CompanyDash = () => {
           </div>
         </div>
 
-        <div className="container-card">
+        <div className="container-card gap-1">
           {stats.map((stat, index) => (
-            <div key={index} className="flex-1">
+            <div key={index} className="flex-1 mb-2">
               <div className="card card-sm">
                 <div className="card-body">
                   <div className="d-flex align-items-center mb-3">
@@ -142,4 +141,4 @@ const CompanyDash = () => {
   );
 };
 
-export default CompanyDash 
+export default CompanyDash;

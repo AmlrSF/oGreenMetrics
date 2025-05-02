@@ -314,7 +314,7 @@ const Page = () => {
                               <span className="spinner-border spinner-border-sm" />
                             ) : (
                                        
-                              <IconTrash className="text-red" size={18} />
+                              <IconTrash  size={18} />
                                   
                             )}
                           </button>

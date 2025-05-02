@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
-import {
-  IconTrash,
-  IconEdit,
-  IconSearch,
-  IconChevronLeft,
-  IconChevronRight,
-} from "@tabler/icons-react";
+import { Trash2, Edit2, Search } from "lucide-react";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
 
-const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
+const DataTable = ({
+  headers,
+  dataHeader,
+  data,
+  tab,
+  onDelete,
+  onUpdate,
+  onAdd,
+  deletingIds,
+}) => {
   const [filteredData, setFilteredData] = useState(data);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDate, setSortDate] = useState("newest");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
+
+  //console.log(data);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -84,11 +90,14 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
   return (
     <div className="card">
       <div className="card-header">
-        <div className="d-flex flex-col sm:flex-row justify-content-between w-full align-items-start sm:align-items-center gap-3">
-          <div className="d-flex flex-col gap-2">
-            <div className="input-icon" style={{ width: "350px" }}>
+        <div
+          className="d-flex flex-col flex-wrap sm:flex-row justify-content-between 
+          w-full align-items-start sm:align-items-center gap-3"
+        >
+          <div className="d-flex flex-wrap gap-2">
+            <div className="input-icon " style={{ width: "350px" }}>
               <span className="input-icon-addon">
-                <IconSearch size={16} />
+                <Search size={16} />
               </span>
               <input
                 type="text"
@@ -99,15 +108,15 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="d-flex align-items-center gap-2">
               {categories.length > 0 && (
                 <select
-                  className="form-select"
+                  className="form-select "
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   style={{ width: "150px" }}
                 >
-                  <option value="all">All Types</option>
+                  <option value="all">Tous les Types</option>
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
@@ -117,18 +126,18 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
               )}
 
               <select
-                className="form-select"
+                className="form-select "
                 value={sortDate}
                 style={{ width: "150px" }}
                 onChange={(e) => setSortDate(e.target.value)}
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
+                <option value="newest">Les plus récents</option>
+                <option value="oldest">Les plus anciens</option>
               </select>
             </div>
           </div>
           <button className="btn btn-primary" onClick={onAdd}>
-            Add New
+            Ajouter un nouveau
           </button>
         </div>
       </div>
@@ -137,7 +146,7 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
         <table className="table table-vcenter card-table">
           <thead>
             <tr>
-              {headers?.map((header, index) => (
+              {dataHeader?.map((header, index) => (
                 <th key={index}>{header}</th>
               ))}
             </tr>
@@ -145,28 +154,23 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
           <tbody>
             {filteredData?.length === 0 ? (
               <tr>
-                <td colSpan={headers?.length} className="text-center text-muted">
-                  No data available
+                <td
+                  colSpan={headers?.length}
+                  className="text-center text-muted"
+                >
+                  Aucun données disponible.
                 </td>
               </tr>
             ) : (
               filteredData
-                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                ?.slice(
+                  (currentPage - 1) * itemsPerPage,
+                  currentPage * itemsPerPage
+                )
                 .map((row, rowIndex) => (
                   <tr key={rowIndex}>
                     {headers?.slice(0, -1).map((header, colIndex) => {
-                      let cellValue =
-                        row[
-                          header.toLowerCase() === "createdat"
-                            ? "createdAt"
-                            : header === "sousType"
-                            ? header
-                            : header === "Nombre d'employés"
-                            ? "nombreEmployes"
-                            : header === "Bus"
-                            ? "nomBus"
-                            : header.toLowerCase()
-                        ];
+                      let cellValue = row[header];
 
                       if (header.toLowerCase() === "createdat" && cellValue) {
                         cellValue = formatDate(cellValue);
@@ -191,14 +195,20 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
                         <button
                           className="btn btn-ghost-danger btn-icon"
                           onClick={() => onDelete(row._id)}
+                          disabled={deletingIds.has(row._id)}
                         >
-                          <IconTrash size={18} />
+                        
+                          {deletingIds.has(row._id) ? (
+                            <span className="spinner-border spinner-border-sm" />
+                          ) : (
+                           <IconTrash  size={18}/>
+                          )}
                         </button>
                         <button
                           className="btn btn-ghost-success btn-icon"
                           onClick={() => onUpdate(row._id)}
                         >
-                          <IconEdit size={18} />
+                          <IconEdit size={18}  />
                         </button>
                       </div>
                     </td>
@@ -211,38 +221,69 @@ const DataTable = ({ headers, data, tab, onDelete, onUpdate, onAdd }) => {
 
       <div className="card-footer d-flex align-items-center">
         <p className="m-0 text-secondary">
-          Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-          <span>{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of{" "}
-          <span>{filteredData.length}</span> entries
+          Showing <span>{(currentPage - 1) * itemsPerPage + 1}</span> à{" "}
+          <span>
+            {Math.min(currentPage * itemsPerPage, filteredData.length)}
+          </span>{" "}
+          of <span>{filteredData.length}</span> entries
         </p>
-        <ul className="pagination m-0 ms-auto">
+        <ul className="pagination d-flex gap-3 m-0 ms-auto">
           <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
             <button
               className="page-link"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             >
-              <IconChevronLeft size={20} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M15 6l-6 6l6 6" />
+              </svg>
             </button>
           </li>
           <li className="page-item active">
             <span
-              className="page-link"
-              style={{
-                backgroundColor: "#263589",
-                borderColor: "#263589",
-              }}
+              className="page-link bg-primary"
+              
             >
               {currentPage}
             </span>
           </li>
-          <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+          <li
+            className={`page-item ${
+              currentPage === totalPages ? "disabled" : ""
+            }`}
+          >
             <button
               className="page-link"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
             >
-              <IconChevronRight size={20} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M9 6l6 6l-6 6" />
+              </svg>
             </button>
           </li>
         </ul>

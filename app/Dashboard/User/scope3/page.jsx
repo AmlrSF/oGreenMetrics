@@ -279,9 +279,9 @@ const Scope3 = () => {
       border-b  justify-content-start align-items-center"
       >
         <div>
-          <h3 className="fs-1 fw-bold" style={{ color: "#263589" }}>
+          <h1 className="fs-1 fw-bold" style={{ color: "#263589" }}>
             Scope 3
-          </h3>
+          </h1>
           <p>
             <strong className="text-primary">Émissions indirectes</strong>{" "}
             issues des activités de la chaîne de valeur de l’organisation,
@@ -298,8 +298,8 @@ const Scope3 = () => {
               <li className="nav-item" key={tab?.id}>
                 <a
                   href={`#${tab?.id}`}
-                  className={`nav-link text-primary ${
-                    activeTab === tab?.id ? "active" : ""
+                  className={`nav-link text-bold text-primary ${
+                    activeTab === tab?.id ? "active 0" : ""
                   }`}
                   onClick={(e) => handleTabClick(tab?.id, e)}
                 >

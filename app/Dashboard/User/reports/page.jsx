@@ -3,14 +3,17 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
 import {
-  IconCalendar,
-  IconChartBar,
-  IconTrash,
-  IconFileText,
-  IconEye,
-} from "@tabler/icons-react";
+  Calendar,
+  BarChart2,
+  UserX,
+  UserCheck,
+  Trash2,
+  FileTextIcon,
+  Eye,
+} from "lucide-react";
 
 import { useRouter } from "next/navigation";
+import { IconEye, IconTrash } from "@tabler/icons-react";
 
 const Reporting = () => {
   const [reports, setReports] = useState([]);
@@ -424,12 +427,11 @@ const Reporting = () => {
 
       <div
         className="py-2 mb-4 d-flex 
-      border-b  justify-content-center align-items-start"
+      border-b  justify-content-center align-items-center"
       >
-        <div> 
-          <h3 className="fs-3 fw-bold" style={{ color: "#263589" }}>
-            Reporting
- 
+        <div>
+          <h3 className="fs-1 mb-0 fw-bold" style={{ color: "#263589" }}>
+          Rapports
           </h3>
           <div className="card-subtitle">
           Générez et gérez vos rapports d'impact environnemental
@@ -444,7 +446,7 @@ const Reporting = () => {
         </button>
       </div>
 
-      <div className="card pt-5">
+      <div className="card">
         <div className="card-body border-bottom py-3">
           <div className="d-flex">
             <div className="text-secondary d-flex align-items-center">
@@ -516,7 +518,7 @@ const Reporting = () => {
                           <td>
                             <div className="d-flex align-items-center">
                               <span className="avatar avatar-md bg-blue-lt text-blue me-2">
-                                <IconFileText size={18} />
+                                <FileTextIcon size={18} />
                               </span>
                               <div className="flex-fill">
                                 <div className="font-weight-medium">
@@ -532,7 +534,7 @@ const Reporting = () => {
                           </td>
                           <td>
                             <div className="d-flex align-items-center">
-                              <IconCalendar size={16} className="me-1" />
+                              <Calendar size={16} className="me-1" />
                               <span>{data.Year}</span>
                             </div>
                           </td>
@@ -557,7 +559,7 @@ const Reporting = () => {
                              items-center bg-blue-lt"
                             >
                               <div className="flex">
-                                <IconChartBar size={14} className="me-1" />
+                                <BarChart2 size={14} className="me-1" />
                                 {data.includeCharts ? "Yes" : "No"}
                               </div>
                             </span>
@@ -565,15 +567,15 @@ const Reporting = () => {
                           <td>
                             <div className="d-flex align-items-center">
                               <span
-                                className="badge mx-auto flex justify-content-center
+                                className="badge mx-auto flex justify-center
                             items-center
                              bg-pink-lt"
                               >
                                 <div
                                   className="flex items-center
-                               w-100 justify-content-center"
+                               w-full justify-center"
                                 >
-                                  <IconChartBar size={14} className="me-1" />
+                                  <BarChart2 size={14} className="me-1" />
                                   {data.includeRecomondations ? "Yes" : "No"}
                                 </div>
                               </span>
@@ -591,7 +593,7 @@ const Reporting = () => {
                                 onClick={() => deleteReport(data?._id)}
                                 className="btn btn-ghost-danger btn-icon"
                               >
-                                <IconTrash size={18} />
+                                <IconTrash className="text-red" size={18} />
                               </button>
                               <button
                                 className="btn btn-ghost-blue btn-icon"
@@ -601,7 +603,7 @@ const Reporting = () => {
                                   )
                                 }
                               >
-                                <IconEye size={18} />
+                                <IconEye className="text-primary" size={18} />
                               </button>
                             </div>
                           </td>
@@ -629,7 +631,7 @@ const Reporting = () => {
                 </span>{" "}
                 sur <span>{filteredReports?.length}</span> entrées
               </p>
-              <ul className="pagination m-0 ms-auto">
+              <ul className="pagination m-0 ms-auto d-flex gap-3">
                 <li
                   className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >
@@ -658,11 +660,8 @@ const Reporting = () => {
                 </li>
                 <li className="page-item active">
                   <span
-                    className="page-link"
-                    style={{
-                      backgroundColor: "#263589",
-                      borderColor: "#263589",
-                    }}
+                    className="page-link bg-primary"
+                   
                   >
                     {currentPage}
                   </span>
