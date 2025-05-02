@@ -370,7 +370,7 @@ const Page = () => {
                             <></>
                           ) : (
                             <td>
-                              <div className=" d-flex align-items-center justify-content-center ">
+                              <div className=" d-flex gap-2 align-items-center justify-content-center ">
                                 <button
                                   onClick={() => openModal("approve", user)}
                                   className={`btn btn-ghost-${
@@ -378,9 +378,9 @@ const Page = () => {
                                   } btn-icon`}
                                 >
                                   {user.isVerified ? (
-                                    <IconUserX size={18} className="text-red" />
+                                    <IconUserX size={18}  />
                                   ) : (
-                                    <IconUserCheck  className="text-green" size={18}/>
+                                    <IconUserCheck   size={18}/>
                                   )}
                                 </button>
                                 <button
@@ -389,7 +389,7 @@ const Page = () => {
                                   
                                 >
                                   
-                                 <IconTrash className="text-red" size={18} />
+                                 <IconTrash  size={18} />
                                   
                                 </button>
                               </div>

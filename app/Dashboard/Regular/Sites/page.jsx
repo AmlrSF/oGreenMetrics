@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { IconEye, IconTrash, IconCalculator } from "@tabler/icons-react";
+import { Eye, Trash2, Calculator } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const SitesPage = () => {
@@ -54,20 +54,24 @@ const SitesPage = () => {
   const filterAndSortSites = () => {
     let filtered = [...sites];
 
+    // Apply filters
     if (currentFilter === "green") {
       filtered = filtered.filter((site) => site.green);
     } else if (currentFilter === "non-green") {
       filtered = filtered.filter((site) => !site.green);
     }
 
+    // Apply sorting
     filtered.sort((a, b) => {
-      return sortOrder === "latest"
-        ? new Date(b.createdAt) - new Date(a.createdAt)
-        : new Date(a.createdAt) - new Date(b.createdAt);
+      if (sortOrder === "latest") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      } else {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      }
     });
 
     setFilteredSites(filtered);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when filtering/sorting
   };
 
   const handleDelete = async (siteId) => {
@@ -87,7 +91,6 @@ const SitesPage = () => {
       setError("Failed to delete site. Please try again later.");
     }
   };
-
   const paginateData = filteredSites.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -95,15 +98,24 @@ const SitesPage = () => {
 
   return (
     <div className="container-xl">
-      <div className="flex items-center border-b mb-5 justify-content-between">
-        <div className="py-10 d-flex flex-column justify-content-center align-items-start">
-          <h3 className="text-2xl mb-0 font-bold">Website Carbon Footprint</h3>
-          <div className="card-subtitle">
+      <div className="d-flex  align-items-center py-2 mb-4 justify-content-between">
+        <div className="  d-flex 
+         flex-column justify-content-center align-items-start">
+          <h3
+            className="text-2xl mb-0 font-bold "
+          
+          >
+            Website Carbon Footprint
+          </h3>
+          <div className=" mb-0card-subtitle">
             Monitor and analyze the environmental impact of websites
           </div>
         </div>
-        <button className="btn btn-primary ms-auto d-flex align-items-center gap-2">
-          <IconCalculator size={18} />
+        <button
+          className="btn btn-primary ms-auto d-flex align-items-center gap-2"
+       
+        >
+          <Calculator size={18} />
           Calculate New Site
         </button>
       </div>
@@ -200,18 +212,16 @@ const SitesPage = () => {
                       <td>
                         <div className="btn-list flex-nowrap">
                           <button
-                            onClick={() =>
-                              router.push(`/Dashboard/Regular/Sites/${site._id}`)
-                            }
-                            className="btn btn-ghost-primary btn-icon"
+                            onClick={() => router.push(`/Dashboard/Regular/Sites/${site._id}`)}
+                            className="btn btn-ghost-blue btn-icon"
                           >
-                            <IconEye size={18} />
+                            <Eye size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(site._id)}
                             className="btn btn-ghost-danger btn-icon"
                           >
-                            <IconTrash size={18} />
+                            <Trash2  size={18} />
                           </button>
                         </div>
                       </td>
@@ -229,8 +239,10 @@ const SitesPage = () => {
                 </span>{" "}
                 of <span>{filteredSites.length}</span> entries
               </p>
-              <ul className="pagination m-0 ms-auto">
-                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <ul className="pagination d-flex gap-3 m-0 ms-auto">
+                <li
+                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                >
                   <button
                     className="page-link"
                     onClick={() =>
@@ -256,11 +268,8 @@ const SitesPage = () => {
                 </li>
                 <li className="page-item active">
                   <span
-                    className="page-link"
-                    style={{
-                      backgroundColor: "#263589",
-                      borderColor: "#263589",
-                    }}
+                    className="page-link bg-primary"
+                
                   >
                     {currentPage}
                   </span>

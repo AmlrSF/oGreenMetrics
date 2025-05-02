@@ -19,11 +19,11 @@ const OTPVerificationPage = () => {
   // Function to show alerts
   const showAlert = (message, type) => {
     const id = Math.random().toString(36).substr(2, 9);
-    setAlerts(prev => [...prev, { id, message, type }]);
-    
+    setAlerts((prev) => [...prev, { id, message, type }]);
+
     // Remove alert after 3 seconds
     setTimeout(() => {
-      setAlerts(prev => prev.filter(alert => alert.id !== id));
+      setAlerts((prev) => prev.filter((alert) => alert.id !== id));
     }, 3000);
   };
 
@@ -137,29 +137,37 @@ const OTPVerificationPage = () => {
   };
 
   if (!isSuccess) {
-    return <div className="d-flex justify-content-center align-items-center min-vh-100">
-      <div className="spinner-border text-primary" role="status">
-        <span className="visually-hidden">Loading...</span>
+    return (
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
       </div>
-    </div>;
+    );
   }
 
   return (
-    <div className="min-vh-100 d-flex justify-content-center align-items-center bg-light position-relative">
+    <div className="page page-center bg-light">
       {/* Alerts container */}
       <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
         {alerts.map((alert) => (
-          <div 
-            key={alert.id} 
-            className={`alert alert-${alert.type} alert-dismissible fade show`}
+          <div
+            key={alert.id}
+            className={`alert alert-${alert.type} alert-dismissible`}
             role="alert"
           >
-            {alert.type === 'success' ? 
-              <IconCheck className="me-2" /> : 
-              <IconAlertCircle className="me-2" />
-            }
+            {alert.type === "success" ? (
+              <IconCheck className="alert-icon" />
+            ) : (
+              <IconAlertCircle className="alert-icon" />
+            )}
             <div>{alert.message}</div>
-            <button type="button" className="btn-close" onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}></button>
+            <a
+              className="btn-close"
+              onClick={() =>
+                setAlerts((prev) => prev.filter((a) => a.id !== alert.id))
+              }
+            ></a>
           </div>
         ))}
       </div>
@@ -184,26 +192,30 @@ const OTPVerificationPage = () => {
         />
       </div>
 
-      <div className="container-xl">
+      <div className="container-lg py-4">
         <div className="card shadow">
           <div className="card-body p-4">
-            <div className="d-flex mb-4">
-              <Image
-                src="/logo.png"
-                width={150}
-                height={150}
-                alt="logo"
-                style={{ width: "auto", height: "auto" }}
-              />
-            </div>
-
             <div className="row align-items-center g-4">
-              <div className="col-md-6 text-center text-md-start">
-                <h2 className="fs-3 mb-2">Verification</h2>
-                <p className="text-muted mb-4">
-                  Veuillez vérifier le code de vérification dans votre boîte de
-                  réception <span className="text-decoration-underline fw-semibold">{email}</span>
-                </p>
+              <div className="col-12 col-md-6">
+                <div className="text-center mb-4">
+                  <Image
+                    src="/logo.png"
+                    width={150}
+                    height={60}
+                    alt="GreenMetric"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <h1 className="h3 mb-1">Verification</h1>
+                  <p className="text-muted small">
+                    Veuillez vérifier le code de vérification dans votre boîte
+                    de réception{" "}
+                    <span className="text-decoration-underline fw-semibold">
+                      {email}
+                    </span>{" "}
+                  </p>
+                </div>
 
                 <div className="d-flex justify-content-center justify-content-md-start gap-2 mb-4">
                   {otp.map((digit, index) => (
@@ -229,8 +241,9 @@ const OTPVerificationPage = () => {
                     <button
                       onClick={handleResend}
                       disabled={!canResend}
-                      className="btn btn-link p-0 text-decoration-none"
-                      style={{ color: canResend ? "var(--bs-primary)" : "", opacity: canResend ? "1" : "0.5" }}
+                      className={`btn btn-link p-0 text-primary ${
+                        !canResend && "opacity-50 disabled"
+                      }`}
                     >
                       Resend code
                     </button>
@@ -247,24 +260,30 @@ const OTPVerificationPage = () => {
                   className="btn btn-primary w-100 py-2"
                   disabled={loading}
                 >
-                  {loading ? 
+                  {loading ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
                       Vérification en cours...
-                    </> : 
-                    "Vérifier le compte"}
+                    </>
+                  ) : (
+                    "Vérifier le compte"
+                  )}
                 </button>
               </div>
-              
-              <div className="col-md-6 d-none d-md-block">
-                <div className="text-center">
-                  <img
-                    src="/Auth illustrations/otp.png"
-                    alt="Verification illustration"
-                    className="img-fluid"
-                    style={{ maxHeight: "320px" }}
-                  />
-                </div>
+
+              <div className="col-12 col-md-6 d-none d-md-block text-center mt-4 mt-md-0">
+                <Image
+                  src="/Auth illustrations/otp.png"
+                  width={500}
+                  height={500}
+                  alt="Login illustration"
+                  className="mx-auto"
+                  objectFit="contain"
+                />
               </div>
             </div>
           </div>
