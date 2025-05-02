@@ -13,6 +13,8 @@ const Scope2 = () => {
   const [itemsPerPage] = useState(3);
   const [company, setCompany] = useState(null);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);  
+  const [deletingIds, setDeletingIds] = useState(new Set());  
 
   const [scope2Data, setScope2Data] = useState({
     electricity: { yearlyConsumption: 0, emissions: 0, country: null },
@@ -137,6 +139,7 @@ const Scope2 = () => {
       ],
     },
   };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -252,6 +255,8 @@ const Scope2 = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent multiple submissions
+    setIsSubmitting(true);
 
     if (!company || !company._id) {
       const errorMsg =
@@ -259,6 +264,7 @@ const Scope2 = () => {
       console.error(errorMsg, company);
       setError(errorMsg);
       alert(errorMsg);
+      setIsSubmitting(false);
       return;
     }
 
@@ -271,6 +277,7 @@ const Scope2 = () => {
       alert(
         `Please fill in these required fields: ${missingFields.join(", ")}`
       );
+      setIsSubmitting(false);
       return;
     }
 
@@ -319,17 +326,33 @@ const Scope2 = () => {
     } catch (err) {
       console.error("Submission error:", err);
       alert(`Submission failed: ${err.message}`);
+    } finally {
+      setIsSubmitting(false); // Reset submitting state
     }
   };
 
-  const handleDelete = async (recordId, itemId) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
+  const handleDelete = async (recordId, itemId = null) => {
+    const id = itemId || recordId; // Use itemId for heating/cooling, recordId for electricity
+    if (deletingIds.has(id)) return; // Prevent multiple deletions
+    setDeletingIds((prev) => new Set([...prev, id]));
+
+    if (!window.confirm("Are you sure you want to delete this item?")) {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+      return;
+    }
 
     try {
       let endpoint;
       if (activeTab === "electricity") {
         endpoint = `http://localhost:4000/energy-consumption/${recordId}`;
-        const response = await fetch(endpoint, { method: "DELETE" });
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          credentials: "include",
+        });
         if (!response.ok) throw new Error("Failed to delete");
         setScope2Data((prev) => ({
           ...prev,
@@ -337,13 +360,19 @@ const Scope2 = () => {
         }));
       } else if (activeTab === "heating") {
         endpoint = `http://localhost:4000/heating/${recordId}/heater/${itemId}`;
-        const response = await fetch(endpoint, { method: "DELETE" });
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          credentials: "include",
+        });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || "Failed to delete");
         setScope2Data((prev) => ({ ...prev, heating: result.data }));
       } else if (activeTab === "cooling") {
         endpoint = `http://localhost:4000/cooling/${recordId}/cooler/${itemId}`;
-        const response = await fetch(endpoint, { method: "DELETE" });
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          credentials: "include",
+        });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || "Failed to delete");
         setScope2Data((prev) => ({ ...prev, cooling: result.data }));
@@ -351,6 +380,12 @@ const Scope2 = () => {
       fetchScope2Data();
     } catch (error) {
       alert(`Failed to delete: ${error.message}`);
+    } finally {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      }); // Remove id from deletingIds
     }
   };
 
@@ -376,8 +411,17 @@ const Scope2 = () => {
 
     return (
       <div className="table-container p-5">
-        <div className="table-responsive">
-          <table className="table table-vcenter card-table">
+          <div className="d-flex justify-content-end mb-5">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => toggleModal(true)}
+          >
+            <IconPlus className="mr-2" size={16} /> Ajouter
+          </button>
+        </div>
+        <div className="table-responsive">   
+          <table className="table table-vcenter card-table">           
             <thead>
               <tr>
                 {currentTab.headers.map((header, index) => (
@@ -406,31 +450,38 @@ const Scope2 = () => {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>{" "}
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                       </button>
                       <button
                         className="btn btn-ghost-danger btn-icon"
                         onClick={() => handleDelete(data._id)}
+                        disabled={deletingIds.has(data._id)} // Disable button if deleting
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M3 6h18"></path>{" "}
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>{" "}
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>{" "}
-                          <line x1="10" y1="11" x2="10" y2="17"></line>{" "}
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
+                        {deletingIds.has(data._id) ? (
+                          <span className="spinner-border spinner-border-sm" />
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                          >
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M4 7l16 0" />
+                            <path d="M10 11l0 6" />
+                            <path d="M14 11l0 6" />
+                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                          </svg>
+                        )}
                       </button>
                     </div>
                   </td>
@@ -460,31 +511,38 @@ const Scope2 = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>{" "}
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                           </svg>
                         </button>
                         <button
                           className="btn btn-ghost-danger btn-icon"
                           onClick={() => handleDelete(data._id, heater._id)}
+                          disabled={deletingIds.has(heater._id)} // Disable button if deleting
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M3 6h18"></path>{" "}
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>{" "}
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>{" "}
-                            <line x1="10" y1="11" x2="10" y2="17"></line>{" "}
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
+                          {deletingIds.has(heater._id) ? (
+                            <span className="spinner-border spinner-border-sm" />
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path d="M4 7l16 0" />
+                              <path d="M10 11l0 6" />
+                              <path d="M14 11l0 6" />
+                              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                            </svg>
+                          )}
                         </button>
                       </div>
                     </td>
@@ -515,31 +573,38 @@ const Scope2 = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>{" "}
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                           </svg>
                         </button>
                         <button
                           className="btn btn-ghost-danger btn-icon"
                           onClick={() => handleDelete(data._id, cooler._id)}
+                          disabled={deletingIds.has(cooler._id)} // Disable button if deleting
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M3 6h18"></path>{" "}
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>{" "}
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>{" "}
-                            <line x1="10" y1="11" x2="10" y2="17"></line>{" "}
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
+                          {deletingIds.has(cooler._id) ? (
+                            <span className="spinner-border spinner-border-sm" />
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path d="M4 7l16 0" />
+                              <path d="M10 11l0 6" />
+                              <path d="M14 11l0 6" />
+                              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                            </svg>
+                          )}
                         </button>
                       </div>
                     </td>
@@ -605,15 +670,7 @@ const Scope2 = () => {
               </ul>
             </nav>
           )}
-        <div className="d-flex justify-content-end mt-4">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => toggleModal(true)}
-          >
-            <IconPlus className="mr-2" size={16} /> Ajouter
-          </button>
-        </div>
+      
       </div>
     );
   };
@@ -657,6 +714,7 @@ const Scope2 = () => {
       </div>
     ));
   };
+
   const renderModal = () => {
     if (!isModalOpen) return null;
     const currentTab = tabs[activeTab];
@@ -687,12 +745,23 @@ const Scope2 = () => {
                   type="button"
                   className="btn btn-link link-secondary"
                   onClick={() => toggleModal(false)}
+                  disabled={isSubmitting} // Disable cancel button during submission
                 >
-                  {" "}
                   Annuler
                 </button>
-                <button type="submit" className="btn btn-primary ms-auto">
-                  {isEditMode ? "Modifier" : "Ajouter"}
+                <button
+                  type="submit"
+                  className="btn btn-primary ms-auto"
+                  disabled={isSubmitting} // Disable submit button during submission
+                >
+                  {isSubmitting ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      En cours...
+                    </span>
+                  ) : (
+                    isEditMode ? "Modifier" : "Ajouter"
+                  )}
                 </button>
               </div>
             </form>
@@ -701,11 +770,11 @@ const Scope2 = () => {
       </div>
     );
   };
+
   return (
     <div className="container-xl">
       <div
-        className="py-2 mb-4 d-flex 
-  border-b justify-content-start align-items-center"
+        className="py-2 mb-4 d-flex border-b justify-content-start align-items-center"
       >
         <div>
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
@@ -742,4 +811,5 @@ const Scope2 = () => {
     </div>
   );
 };
-export default Scope2;
+
+export default Scope2; 

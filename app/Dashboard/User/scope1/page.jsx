@@ -18,6 +18,8 @@ const Scope1 = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [modalMode, setModalMode] = useState("add");
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // New state for form submission
+  const [deletingIds, setDeletingIds] = useState(new Set()); // New state for tracking deletions
   const itemsPerPage = 3;
 
   useEffect(() => {
@@ -76,6 +78,9 @@ const Scope1 = () => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent multiple submissions
+    setIsSubmitting(true);
+
     const formData = new FormData(e.target);
     const newItem = {
       nom: formData.get("nom"),
@@ -102,6 +107,8 @@ const Scope1 = () => {
       } catch (error) {
         console.error("Error adding fuel combustion:", error);
         setError(error.message);
+      } finally {
+        setIsSubmitting(false); // Reset submitting state
       }
     } else {
       newItem.ligneDeProduction = formData.get("ligneDeProduction");
@@ -121,12 +128,17 @@ const Scope1 = () => {
       } catch (error) {
         console.error("Error adding production:", error);
         setError(error.message);
+      } finally {
+        setIsSubmitting(false); // Reset submitting state
       }
     }
   };
 
   const handleEdit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent multiple submissions
+    setIsSubmitting(true);
+
     const formData = new FormData(e.target);
     const updatedItem = {
       nom: formData.get("nom"),
@@ -156,6 +168,8 @@ const Scope1 = () => {
       } catch (error) {
         console.error("Error updating fuel combustion:", error);
         setError(error.message);
+      } finally {
+        setIsSubmitting(false); // Reset submitting state
       }
     } else {
       updatedItem.ligneDeProduction = formData.get("ligneDeProduction");
@@ -177,11 +191,16 @@ const Scope1 = () => {
       } catch (error) {
         console.error("Error updating production:", error);
         setError(error.message);
+      } finally {
+        setIsSubmitting(false); // Reset submitting state
       }
     }
   };
 
   const handleDelete = async (id) => {
+    if (deletingIds.has(id)) return; // Prevent multiple deletions
+    setDeletingIds((prev) => new Set([...prev, id]));
+
     const endpoint =
       activeTab === "Combustion de carburant"
         ? `/fuelcombustion/${id}`
@@ -205,6 +224,12 @@ const Scope1 = () => {
     } catch (error) {
       console.error("Error deleting item:", error.message);
       setError(error.message);
+    } finally {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      }); // Remove id from deletingIds
     }
   };
 
@@ -332,24 +357,31 @@ const Scope1 = () => {
                         <button
                           className="btn btn-ghost-danger btn-icon"
                           onClick={() => setConfirmDelete(item)}
+                          disabled={deletingIds.has(item._id)} // Disable button if deleting
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
+                          {deletingIds.has(item._id) ? (
+                            <span className="spinner-border spinner-border-sm" />
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path d="M4 7l16 0" />
+                              <path d="M10 11l0 6" />
+                              <path d="M14 11l0 6" />
+                              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                            </svg>
+                          )}
                         </button>
                       </div>
                     </td>
@@ -609,11 +641,23 @@ const Scope1 = () => {
                     type="button"
                     className="btn btn-link link-secondary"
                     onClick={() => toggleModal(false)}
+                    disabled={isSubmitting} // Disable cancel button during submission
                   >
                     Annuler
                   </button>
-                  <button type="submit" className="btn btn-primary ms-auto">
-                    {modalMode === "add" ? "Ajouter" : "Mettre à jour"}
+                  <button
+                    type="submit"
+                    className="btn btn-primary ms-auto"
+                    disabled={isSubmitting} // Disable submit button during submission
+                  >
+                    {isSubmitting ? (
+                      <span>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        En cours...
+                      </span>
+                    ) : (
+                      modalMode === "add" ? "Ajouter" : "Mettre à jour"
+                    )}
                   </button>
                 </div>
               </form>
@@ -651,6 +695,7 @@ const Scope1 = () => {
                   type="button"
                   className="btn btn-link link-secondary"
                   onClick={() => setConfirmDelete(null)}
+                  disabled={deletingIds.has(confirmDelete._id)} // Disable cancel button during deletion
                 >
                   Annuler
                 </button>
@@ -658,8 +703,16 @@ const Scope1 = () => {
                   type="button"
                   className="btn btn-danger ms-auto"
                   onClick={() => handleDelete(confirmDelete._id)}
+                  disabled={deletingIds.has(confirmDelete._id)} // Disable delete button during deletion
                 >
-                  Supprimer
+                  {deletingIds.has(confirmDelete._id) ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Suppression...
+                    </span>
+                  ) : (
+                    "Supprimer"
+                  )}
                 </button>
               </div>
             </div>

@@ -439,9 +439,7 @@ const CompanyDash = () => {
               Tableau de bord des émissions
             </h2>
           </div>
-          <div className="col-sm-auto text-muted mt-1">
-            Surveillez l'empreinte carbone de votre entreprise
-          </div>
+    
         </div>
       </div>
 
