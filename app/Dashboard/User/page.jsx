@@ -16,7 +16,7 @@ import {
   BarElement,
 } from "chart.js";
 
-import { TrendingUp, BarChart3, PieChart, Calendar } from "lucide-react";
+import { IconTrendingUp, IconChartBar, IconChartPie, IconCalendar,IconTruck,IconLamp,IconActivity,IconBuildingFactory } from "@tabler/icons-react";
 
 ChartJS.register(
   CategoryScale,
@@ -32,8 +32,7 @@ ChartJS.register(
 );
 
 import { Bar, Line, Doughnut } from "react-chartjs-2";
-import { Truck, Factory, Lightbulb, Activity } from "lucide-react";
-import { formatDate } from "@/lib/Utils";
+ import { formatDate } from "@/lib/Utils";
 
 const COLORS = ["#206bc4", "#42e189", "#d618d6"];
 const TIME_RANGES = ["7 Days", "30 Days", "3 Months", "1 Year"];
@@ -240,12 +239,10 @@ const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
 
         <div className="d-flex align-items-center mb-3">
           <div className="h2 mb-0 me-2">{Number(value).toFixed(2)} tCO₂e</div>
-          <TrendingUp className="icon-sm text-green" />
+          <IconTrendingUp className="icon-sm text-green" />
         </div>
 
-        {/* <div style={{ height: "12rem" }}>
-          <Bar data={barChartData} options={options} />
-        </div> */}
+      
       </div>
     </div>
   );
@@ -435,10 +432,10 @@ const CompanyDash = () => {
   return (
     <div className="container-xl">
       <div className="page-header d-print-none mb-2">
-        <div className="row flex-warp  align-items-center g-2">
-          <div className="col-sm  mb-sm-0 mb-2 d-flex align-items-center justify-content-between">
-            <h2 style={{ color: "#263589" }} className="page-title mb-0 fs-3  fw-bold d-flex align-items-center">
-          
+        <div className="row align-items-center g-2">
+          <div className="col-sm mb-sm-0 mb-2 d-flex align-items-center justify-content-between">
+            <h2 className="page-title mb-0 d-flex align-items-center">
+              <IconChartBar className="d-none d-sm-block me-2" />
               Tableau de bord des émissions
             </h2>
           </div>
@@ -451,7 +448,7 @@ const CompanyDash = () => {
       <div className="container-card mb-2">
         <EmissionCard
           title="Émissions Scope 1"
-          icon={Factory}
+          icon={IconBuildingFactory}
           value={processedEmissions.scope1.total}
           color={COLORS[0]}
           data={processedEmissions.scope1.data}
@@ -459,7 +456,7 @@ const CompanyDash = () => {
         />
         <EmissionCard
           title="Émissions Scope 2"
-          icon={Lightbulb}
+          icon={IconLamp}
           value={processedEmissions.scope2.total}
           color={COLORS[1]}
           data={processedEmissions.scope2.data}
@@ -467,7 +464,7 @@ const CompanyDash = () => {
         />
         <EmissionCard
           title="Émissions Scope 3"
-          icon={Truck}
+          icon={IconTruck}
           value={processedEmissions.scope3.total}
           color={COLORS[2]}
           data={processedEmissions.scope3.data}
@@ -476,13 +473,13 @@ const CompanyDash = () => {
       </div>
 
       <div className="row row-deck row-cards">
-        <div className="col-md-6 mb-2">
+        <div className="col-md-6">
           <div className="card">
             <div className="card-header">
-              <h5 className="d-flex align-items-center gap-1">
-                <PieChart className="icon me-2" />
+              <h3 className="flex items-center gap-1">
+                <IconChartBar className="icon me-2" />
                 Répartition des émissions
-              </h5>
+              </h3>
             </div>
             <div className="card-body">
               <div style={{ height: "18rem" }}>
@@ -492,13 +489,13 @@ const CompanyDash = () => {
           </div>
         </div>
 
-        <div className="col-md-6  mb-2">
+        <div className="col-md-6">
           <div className="card">
             <div className="card-header">
-              <h5 className="d-flex align-items-center gap-1">
-                <TrendingUp className="icon me-2" />
+              <h3 className="flex items-center gap-1">
+                <IconTrendingUp className="icon me-2" />
                 Émissions par source
-              </h5>
+              </h3>
             </div>
             <div className="card-body">
               <div style={{ height: "18rem" }}>

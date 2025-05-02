@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
+import { IconMenu2, IconUser, IconX } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
@@ -67,8 +67,8 @@ const Navbar = () => {
 
           <div className="d-flex align-items-center gap-3">
             <div className="d-none d-md-flex align-items-center justify-content-center gap-2">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-user"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></svg>
-              <div className="d-flex flex-column align-items-start">
+            <IconUser width={35} height={35} />
+            <div className="d-flex flex-column align-items-start">
                 <p className="m-0 small fw-medium">Bonjour</p>
                 <p className="m-0 small">Contactez-vous</p>
               </div>
@@ -87,11 +87,12 @@ const Navbar = () => {
             className="d-md-none position-relative z-index-5 btn btn-link p-2"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? (
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  classname="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-            ) : (
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-menu"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 8l16 0" /><path d="M4 16l16 0" /></svg>
-            )}
+           {isOpen ? (
+  <IconX className="icon text-white" size={24} />
+) : (
+  <IconMenu2 className="icon text-muted" size={24} />
+)}
+
           </button>
         </div>
       </nav>

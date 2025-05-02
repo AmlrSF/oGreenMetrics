@@ -1,4 +1,4 @@
-import { AlertCircle } from "lucide-react";
+import { IconAlertCircle } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 
 export default function VerificationRequired({naviagteToLoginPage}) {
@@ -15,7 +15,7 @@ export default function VerificationRequired({naviagteToLoginPage}) {
           <div className="card-body text-center">
             
             <div className="avatar avatar-lg bg-lime-100 text-lime-600 mb-3">
-              <AlertCircle className="icon-lg" />
+              <IconAlertCircle className="icon-lg" />
             </div>
 
             

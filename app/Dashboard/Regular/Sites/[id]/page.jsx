@@ -1,10 +1,15 @@
+"use client";
 
-
-"use client"
-
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { Cpu, Cloud, Globe, ThermometerSun, Battery, BarChart } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import {
+  IconCpu,
+  IconCloud,
+  IconGlobe,
+  IconThermometer,
+  IconBattery3,
+  IconChartBar,
+} from "@tabler/icons-react";
 
 const page = () => {
   const [result, setResult] = useState(null);
@@ -19,7 +24,7 @@ const page = () => {
         console.log(data);
         setResult(data?.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
 
@@ -35,8 +40,8 @@ const page = () => {
               <div className="card">
                 <div className="card-body">
                   <div className="d-flex align-items-center">
-                    <div className={`avatar ${result?.green ? 'bg-green-lt' : 'bg-red-lt'}`}>
-                      <Cpu className="icon" />
+                    <div className={`avatar ${result?.green ? "bg-green-lt" : "bg-red-lt"}`}>
+                      <IconCpu size={24} />
                     </div>
                     <div className="ms-3">
                       <div className="font-weight-medium">Rating {result?.rating}</div>
@@ -54,7 +59,7 @@ const page = () => {
                 <div className="card-body">
                   <div className="d-flex align-items-center">
                     <div className="avatar bg-blue-lt">
-                      <Cloud className="icon" />
+                      <IconCloud size={24} />
                     </div>
                     <div className="ms-3">
                       <div className="font-weight-medium">
@@ -72,7 +77,7 @@ const page = () => {
                 <div className="card-body">
                   <div className="d-flex align-items-center">
                     <div className="avatar bg-purple-lt">
-                      <Cloud className="icon" />
+                      <IconCloud size={24} />
                     </div>
                     <div className="ms-3">
                       <div className="font-weight-medium">
@@ -90,7 +95,7 @@ const page = () => {
                 <div className="card-body">
                   <div className="d-flex align-items-center">
                     <div className="avatar bg-green-lt">
-                      <Globe className="icon" />
+                      <IconGlobe size={24} />
                     </div>
                     <div className="ms-3">
                       <div className="font-weight-medium">
@@ -109,13 +114,13 @@ const page = () => {
               <h3 className="card-title">Detailed Statistics</h3>
             </div>
             <div className="card-body pb-0">
-              <div className="row ">
+              <div className="row">
                 <div className="col-md-6 mb-3">
                   <div className="card">
                     <div className="card-body">
                       <div className="d-flex align-items-center mb-3">
                         <div className="avatar bg-orange-lt">
-                          <ThermometerSun className="icon" />
+                          <IconThermometer size={24} />
                         </div>
                         <div className="ms-3">
                           <div className="font-weight-medium">Energy Consumption</div>
@@ -126,7 +131,7 @@ const page = () => {
                       </div>
                       <div className="d-flex align-items-center">
                         <div className="avatar bg-blue-lt">
-                          <Battery className="icon" />
+                          <IconBattery3 size={24} />
                         </div>
                         <div className="ms-3">
                           <div className="font-weight-medium">Adjusted Bytes</div>
@@ -144,7 +149,7 @@ const page = () => {
                     <div className="card-body">
                       <div className="d-flex align-items-center mb-3">
                         <div className="avatar bg-purple-lt">
-                          <Cloud className="icon" />
+                          <IconCloud size={24} />
                         </div>
                         <div className="ms-3">
                           <div className="font-weight-medium">CO2 Renewable</div>
@@ -155,7 +160,7 @@ const page = () => {
                       </div>
                       <div className="d-flex align-items-center">
                         <div className="avatar bg-green-lt">
-                          <BarChart className="icon" />
+                          <IconChartBar size={24} />
                         </div>
                         <div className="ms-3">
                           <div className="font-weight-medium">CO2 Volume</div>

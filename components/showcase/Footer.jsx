@@ -1,15 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  IconBrandFacebook,
-  IconBrandTwitter,
-  IconBrandLinkedin,
-  IconBrandInstagram,
-  IconMapPin,
-  IconPhone,
-  IconMail,
-} from '@tabler/icons-react';
+import { IconMapPin, IconPhone, IconMail, IconBrandFacebook, IconBrandTwitter, IconBrandLinkedin, IconBrandInstagram } from '@tabler/icons-react';
 
 const Footer = () => {
   return (
@@ -43,9 +35,11 @@ const Footer = () => {
             </p>
             <div className="d-flex gap-3">
             <SocialIcon Icon={IconBrandFacebook} />
-<SocialIcon Icon={IconBrandTwitter} />
-<SocialIcon Icon={IconBrandLinkedin} />
-<SocialIcon Icon={IconBrandInstagram} />
+            <SocialIcon Icon={IconBrandTwitter} />
+            <SocialIcon Icon={IconBrandLinkedin} />
+            <SocialIcon Icon={IconBrandInstagram} />
+
+
             </div>
           </div>
 
@@ -65,8 +59,8 @@ const Footer = () => {
             <h5 className="text-white text-uppercase fw-medium mb-2">Nous contacter</h5>
             <div className="ps-0">
             <ContactInfo Icon={IconMapPin} text="123 rue de la Terre, 75000 Paris" />
-<ContactInfo Icon={IconPhone} text="+33 1 23 45 67 89" />
-<ContactInfo Icon={IconMail} text="contact@greenmetric.com" />
+            <ContactInfo Icon={IconPhone} text="+33 1 23 45 67 89" />
+            <ContactInfo Icon={IconMail} text="contact@greenmetric.com" />
             </div>
           </div>
         </div>

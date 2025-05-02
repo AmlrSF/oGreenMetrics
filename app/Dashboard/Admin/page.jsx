@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
+ 
   IconBuildingSkyscraper,
   IconFileText,
   IconUsers,
-  IconTrendingUp,
+  IconTrendingUp, 
 } from "@tabler/icons-react";
 
 const CompanyDash = () => {
@@ -25,9 +25,11 @@ const CompanyDash = () => {
       .get("http://localhost:4000/users")
       .then((response) => {
         const users = response.data;
-        const admins = users.filter((item) => item?.AdminRoles || item?.role=="Admin" ).length;
+        const admins = users.filter(
+          (item) => item?.AdminRoles || item?.role === "Admin"
+        ).length;
         const nonAdmins = users.filter(
-          (item) => item?.roles !== "Admin" 
+          (item) => item?.roles !== "Admin"
         ).length;
 
         setAdminCount(admins);
@@ -71,7 +73,6 @@ const CompanyDash = () => {
       color: "orange",
     },
   ];
-  
 
   return (
     <div className="page-body">
@@ -141,4 +142,4 @@ const CompanyDash = () => {
   );
 };
 
-export default CompanyDash;
+export default CompanyDash 

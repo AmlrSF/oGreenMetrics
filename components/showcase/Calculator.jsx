@@ -3,6 +3,13 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import {
+  IconSearch,
+  IconCopy,
+  IconWorld,
+} from "@tabler/icons-react"; 
+
+
 const Calculator = () => {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState(null);
@@ -86,11 +93,9 @@ const Calculator = () => {
                     {loading ? (
                       <span className="spinner-border spinner-border-sm me-2"></span>
                     ) : (
-                      <svg  xmlns="http://www.w3.org/2000/svg" 
-                       width="24"  height="24"  viewBox="0 0 24 24" 
-                        fill="none"  stroke="currentColor"  
-                        strokeWidth="2"  strokeLinecap="round" 
-                         strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
+
+                      <IconSearch className="icon me-2" />
+
                     )}
                     Calculate
                   </button>
@@ -169,11 +174,8 @@ const Calculator = () => {
                               <div className="mb-1 text-left text-white">
                                 This is cleaner than{" "}
                                 <span className="badge bg-cyan-lt text-cyan me-1">
-                                  {((result?.cleanerThan || 0) * 100).toFixed(
-                                    0
-                                  )}
-                                  %
-                                </span>
+                                  {((result?.cleanerThan || 0) * 100).toFixed(0)}%
+                                </span>{" "}
                                 of all web pages globally.
                               </div>
                               <div className="d-flex align-items-center gap-2">
@@ -197,13 +199,10 @@ const Calculator = () => {
                                     }}
                                   ></div>
                                 </div>
-                                <span className="text-white fw-semibold">
-                                  F
-                                </span>
+                                <span className="text-white fw-semibold">F</span>
                               </div>
-                            
+
                               <p className="text-left">
-                                {" "}
                                 Please{" "}
                                 <a href="/login" className="fw-bold text-black">
                                   log in

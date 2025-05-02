@@ -1,30 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { IconBell } from "@tabler/icons-react";
-
+import { IconBellUp } from "@tabler/icons-react"; 
 import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
-import { useNotifications } from "@/components/Commun/context/NotificationContext";
 
 const Navbar = ({ user, isAdmin }) => {
   const router = useRouter();
-  const [showNotifications, setShowNotifications] = useState(false);
-  const { notifications, markAsRead, markAllRead } = useNotifications();
-  
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleNavigation = () => {
     router.push(`/Dashboard/${isAdmin ? "Admin" : "User"}/profile`);
-  };
-
-  const handleMarkAsRead = (id) => {
-    markAsRead(id);
-  };
-
-  const handleMarkAllRead = () => {
-    markAllRead();
-    setShowNotifications(false);  
   };
 
   return (
@@ -36,60 +21,19 @@ const Navbar = ({ user, isAdmin }) => {
             <button
               className="btn position-relative"
               style={{ border: "none", background: "none" }}
-              onClick={() => setShowNotifications(!showNotifications)}
             >
-         <IconBell size={20} className="text-white" />
-
-              {unreadCount > 0 && (
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
+              <IconBellUp size={20} className="text-white" />
             </button>
 
             {/* Notification dropdown */}
-            {showNotifications && (
-              <div
-                className="position-absolute end-0 mt-2 shadow-lg rounded-3 bg-white"
-                style={{ width: "320px", zIndex: 1000, maxHeight: "400px", overflowY: "auto" }}
-              >
-                <div className="p-2 border-bottom d-flex justify-content-between align-items-center">
-                  <h6 className="m-0">Notifications</h6>
-                  {unreadCount > 0 && (
-                    <button
-                      className="btn btn-sm btn-link text-decoration-none"
-                      onClick={handleMarkAllRead}
-                    >
-                      Tout marquer comme lu
-                    </button>
-                  )}
-                </div>
-                <div>
-                  {notifications.length === 0 ? (
-                    <div className="p-3 text-center text-muted">Aucune notification</div>
-                  ) : (
-                    notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-3 border-bottom notification-item ${
-                          !notification.read ? "bg-light" : ""
-                        }`}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleMarkAsRead(notification.id)}>
-                        <div className="d-flex">
-                          </div>
-                          <div>
-                            <div className="fw-semibold">{notification.title}</div>
-                            <div className="text-muted small">{notification.message}</div>
-                            <div className="text-muted small mt-1">{notification.time}</div>
-                          </div>
-                        </div>
-                 
-                    ))
-                  )}
-                </div>
+            <div
+              className="position-absolute end-0 mt-2 shadow-lg rounded-3 bg-white"
+              style={{ width: "320px", zIndex: 1000, maxHeight: "400px", overflowY: "auto" }}
+            >
+              <div>
+                {/* Notifications will go here */}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Profile */}
@@ -111,7 +55,7 @@ const Navbar = ({ user, isAdmin }) => {
                 <img
                   src={user?.photo_de_profil}
                   alt={`${user?.prenom} ${user?.nom}`}
-                  className="rounded-circle w-[25px] h-[25px]"
+                  className="rounded-circle"
                 />
               ) : (
                 <span style={{ color: "#8ebe21" }}>{getInitials(user?.prenom, user?.nom)}</span>

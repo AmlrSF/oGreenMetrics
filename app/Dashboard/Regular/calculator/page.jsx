@@ -2,19 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Search,
-  Leaf,
-  Globe,
-  AlertCircle,
-  Users,
-  Copy,
-  Check,
-  Coffee,
-  BatteryCharging,
-  Plus,
-  Minus,
-} from "lucide-react";
+import {IconSearch,IconLeaf,IconGlobe,IconAlertCircle,IconCopy,IconCheck,	IconBatteryCharging,IconPlus,IconMinus,} from "@tabler/icons-react";
+
 
 function WebsiteCalculator() {
   const [url, setUrl] = useState("");
@@ -167,7 +156,7 @@ function WebsiteCalculator() {
                 </div>
                 <div className="col-3 text-end sm:block hidden">
                   <div className="badge bg-green-lt d-inline-flex align-items-center p-2">
-                    <Leaf className="icon " />
+                    <IconLeaf className="icon " />
                     Eco-friendly tool
                   </div>
                 </div>
@@ -190,7 +179,7 @@ function WebsiteCalculator() {
                     {loading ? (
                       <span className="spinner-border spinner-border-sm me-2"></span>
                     ) : (
-                      <Search className="icon me-2" />
+                      <IconSearch className="icon me-2" />
                     )}
                     Calculate
                   </button>
@@ -198,7 +187,7 @@ function WebsiteCalculator() {
               </form>
               {error && (
                 <div className="alert alert-danger mt-3">
-                  <AlertCircle className="icon me-2" />
+                  <IconAlertCircle className="icon me-2" />
                   {error}
                 </div>
               )}
@@ -291,7 +280,7 @@ function WebsiteCalculator() {
                           className="btn btn-light btn-sm"
                           title="Copy URL"
                         >
-                          <Copy className="icon me-1" /> Copy URL
+                          <IconCopy className="icon me-1" /> Copy URL
                         </button>
                       </div>
                     </div>
@@ -308,7 +297,7 @@ function WebsiteCalculator() {
                   <div className="card shadow" style={{ borderRadius: 20 }}>
                     <div className="card-body p-4">
                       <div className="d-flex align-items-center mb-4">
-                        <Globe className="icon me-2 text-primary" size={30} />
+                        <IconGlobe className="icon me-2 text-primary" size={30} />
                         <span
                           className="fw-bold fs-4 px-3 py-1"
                           style={{
@@ -332,7 +321,7 @@ function WebsiteCalculator() {
                             style={{ width: 48, height: 48 }}
                             disabled={counter === 1}
                           >
-                            <Minus height={40} width={40} />
+                            <IconMinus height={40} width={40} />
                           </button>
 
                           <div
@@ -353,7 +342,7 @@ function WebsiteCalculator() {
                             style={{ width: 48, height: 48 }}
                             disabled={counter === 10000}
                           >
-                            <Plus height={40} width={40} />
+                            <IconPlus height={40} width={40} />
                           </button>
                         </div>
 
@@ -380,7 +369,7 @@ function WebsiteCalculator() {
                   <div className="card shadow" style={{ borderRadius: 20 }}>
                     <div className="card-body p-4">
                       <div className="d-flex align-items-center ">
-                        <BatteryCharging
+                        <IconBatteryCharging
                           className="icon me-2 text-green"
                           size={30}
                         />
@@ -404,7 +393,7 @@ function WebsiteCalculator() {
                     {saving ? (
                       <span className="spinner-border spinner-border-sm me-2"></span>
                     ) : (
-                      <Check className="icon me-2" />
+                      <IconCheck className="icon me-2" />
                     )}
                     Save to my dashboard
                   </button>

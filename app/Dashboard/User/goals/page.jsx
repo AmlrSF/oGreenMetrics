@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { useNotifications } from "@/components/Commun/context/NotificationContext";
 
 const GoalsPage = () => {
   const [company, setCompany] = useState(null);
@@ -40,7 +39,6 @@ const GoalsPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
-  const { addNotification } = useNotifications(); // Use the notification context
 
   const sumEmissions = (arr) => {
     if (!arr || !Array.isArray(arr)) return 0;
@@ -277,7 +275,7 @@ const GoalsPage = () => {
     e.preventDefault();
 
     if (!editingGoal?._id) {
-      toast.error("Aucun objectif sélectionné pour la mise à jour");
+      toast.error("Aucun objectifениями для обновления не выбрано");
       return;
     }
 
@@ -286,27 +284,27 @@ const GoalsPage = () => {
 
     if (editingGoal.scope1Goal > 0 && editingGoal.scope1Goal >= currentEmissions.scope1) {
       errorMessages.push(
-        `L'objectif Scope 1 doit être inférieur aux émissions actuelles (${currentEmissions.scope1} tCO₂e)`
+        `Цель по Scope 1 должна быть меньше текущих выбросов (${currentEmissions.scope1} т CO₂e)`
       );
       hasError = true;
     }
 
     if (editingGoal.scope2Goal > 0 && editingGoal.scope2Goal >= currentEmissions.scope2) {
       errorMessages.push(
-        `L'objectif Scope 2 doit être inférieur aux émissions actuelles (${currentEmissions.scope2} tCO₂e)`
+        `Цель по Scope 2 должна быть меньше текущих выбросов (${currentEmissions.scope2} т CO₂e)`
       );
       hasError = true;
     }
 
     if (editingGoal.scope3Goal > 0 && editingGoal.scope3Goal >= currentEmissions.scope3) {
       errorMessages.push(
-        `L'objectif Scope 3 doit être inférieur aux émissions actuelles (${currentEmissions.scope3} tCO₂e)`
+        `Цель по Scope 3 должна быть меньше текущих выбросов (${currentEmissions.scope3} т CO₂e)`
       );
       hasError = true;
     }
 
     if (editingGoal.scope1Goal <= 0 && editingGoal.scope2Goal <= 0 && editingGoal.scope3Goal <= 0) {
-      errorMessages.push("Au moins un scope doit avoir une valeur d'objectif supérieure à 0");
+      errorMessages.push("Хотя бы один Scope должен иметь цель выше 0");
       hasError = true;
     }
 
@@ -332,23 +330,23 @@ const GoalsPage = () => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error updating goal");
+      if (!res.ok) throw new Error(data.message || "Ошибка обновления цели");
 
       setShowEditModal(false);
 
-      setAlertMessage("Objectif mis à jour avec succès!");
+      setAlertMessage("Цель успешно обновлена!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
 
       fetchGoals(company._id);
     } catch (err) {
-      console.error("Update error:", err);
-      toast.error(`Erreur: ${err.message}`);
+      console.error("Ошибка обновления:", err);
+      toast.error(`Ошибка: ${err.message}`);
     }
   };
 
   const handleDeleteGoal = async (goalId) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cet objectif?")) {
+    if (!confirm("Вы уверены, что хотите удалить эту цель?")) {
       return;
     }
 
@@ -363,61 +361,27 @@ const GoalsPage = () => {
         throw new Error(data.message);
       }
 
-      setAlertMessage("Objectif supprimé avec succès!");
+      setAlertMessage("Цель успешно удалена!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
 
       fetchGoals(company._id);
     } catch (err) {
-      toast.error(`Erreur: ${err.message}`);
+      toast.error(`Ошибка: ${err.message}`);
     }
-  };
-
-  const checkAchievedGoals = (goals, emissions) => {
-    const achievedGoals = [];
-    
-    goals.forEach((goal) => {
-      const isScope1Achieved = goal.scope1Goal === 0 || emissions.scope1 <= goal.scope1Goal;
-      const isScope2Achieved = goal.scope2Goal === 0 || emissions.scope2 <= goal.scope2Goal;
-      const isScope3Achieved = goal.scope3Goal === 0 || emissions.scope3 <= goal.scope3Goal;
-      
-      const allScopesAchieved = isScope1Achieved && isScope2Achieved && isScope3Achieved;
-      
-      // Only consider this a newly achieved goal if:
-      // 1. It's now achieved
-      // 2. It was previously not marked as achieved
-      // 3. We haven't already sent a notification for it
-      if (allScopesAchieved && goal.status !== "achieved") {
-        achievedGoals.push({
-          ...goal,
-          newlyAchieved: true,
-        });
-        
-        // Update the goal status in the database
-        fetch(`http://localhost:4000/goals/${goal._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ ...goal, status: "achieved" }),
-        }).catch((error) => console.error("Error updating goal status:", error));
-      }
-    });
-    
-    return achievedGoals;
   };
 
   const fetchGoals = async (companyId) => {
     try {
       const res = await fetch(`http://localhost:4000/goals/all/${companyId}`);
       const data = await res.json();
-  
+
       if (data.success && Array.isArray(data.data)) {
-        // First update the statuses based on current emissions
         const updatedGoals = data.data.map((goal) => {
           const isScope1Achieved = goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
           const isScope2Achieved = goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
           const isScope3Achieved = goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
-  
+
           let status = "pending";
           if (isScope1Achieved && isScope2Achieved && isScope3Achieved) {
             status = "achieved";
@@ -427,7 +391,7 @@ const GoalsPage = () => {
               goal.scope2Goal > 0 ? 1 : 0,
               goal.scope3Goal > 0 ? 1 : 0,
             ].reduce((a, b) => a + b, 0);
-  
+
             const scope1Progress =
               goal.scope1Goal > 0
                 ? Math.min(
@@ -464,39 +428,23 @@ const GoalsPage = () => {
                     )
                   )
                 : 0;
-  
+
             const totalProgress =
               totalScopes > 0 ? (scope1Progress + scope2Progress + scope3Progress) / totalScopes : 0;
-  
+
             status = totalProgress > 50 ? "in-progress" : "pending";
           }
-  
+
           return {
             ...goal,
             status,
           };
         });
-  
+
         setGoalsList(updatedGoals);
-        
-        // Then check which goals have newly been achieved
-        const achievedGoals = checkAchievedGoals(data.data, currentEmissions);
-        
-        // Send notifications for newly achieved goals
-        achievedGoals.forEach((goal) => {
-          if (goal.newlyAchieved) {
-            addNotification({
-              type: "achievement",
-              title: "Objectif atteint! 🎉",
-              message: `Vous avez atteint votre objectif de réduction d'émissions "${goal.name}"!`,
-              goalId: goal._id, // Add goal ID to prevent duplicate notifications
-              time: new Date().toLocaleString(),
-            });
-          }
-        });
       }
     } catch (error) {
-      console.error("Error fetching goals:", error);
+      console.error("Ошибка получения целей:", error);
     }
   };
 
@@ -510,7 +458,7 @@ const GoalsPage = () => {
         });
         const authData = await authRes.json();
         const userId = authData?.user?._id;
-        if (!userId) throw new Error("Non autorisé");
+        if (!userId) throw new Error("Не авторизован");
 
         const compRes = await fetch(
           `http://localhost:4000/GetCompanyByOwnerID/${userId}`
@@ -524,9 +472,11 @@ const GoalsPage = () => {
         await fetchGoals(compData.data._id);
       } catch (err) {
         console.error(err);
-        toast.error("Échec de la récupération des données");
+        toast.error("Не удалось загрузить данные");
       } finally {
-        setLoading(false);
+       
+
+ setLoading(false);
       }
     };
 
@@ -539,7 +489,7 @@ const GoalsPage = () => {
             setCurrentEmissions(emissions);
             fetchGoals(company._id);
           })
-          .catch((error) => console.error("Error in periodic check:", error));
+          .catch((error) => console.error("Ошибка периодической проверки:", error));
       }
     }, 30 * 60 * 1000);
 
@@ -735,133 +685,23 @@ const GoalsPage = () => {
         )}
 
         <div className="page-body">
-          
-           
-            <div className="row row-cards">
-              <div className="col-md-12">
-                <div className="card">
-                  <div className="card-header">
-                    <h3 className="card-title">Aperçu des Émissions Actuelles</h3>
-                  </div>
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-md-4 mb-3">
-                        <div className="card card-sm">
-                          <div className="card-body">
-                            <div className="row align-items-center">
-                              <div className="col-auto">
-                                <span className="bg-red text-white avatar">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="icon icon-tabler icon-tabler-factory"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth="2"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                    <path d="M4 21c1.147 -4.02 1.983 -8.027 2 -12h6c.017 3.973 .853 7.98 2 12"></path>
-                                    <path d="M12.5 13h4.5c.025 2.612 .894 5.296 2 8"></path>
-                                    <path d="M9 5a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1"></path>
-                                    <path d="M3 21l19 0"></path>
-                                  </svg>
-                                </span>
-                              </div>
-                              <div className="col">
-                                <div className="font-weight-medium">
-                                  Scope 1: {currentEmissions.scope1} tCO₂e
-                                </div>
-                                <div className="text-muted">Émissions directes</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-4 mb-3">
-                        <div className="card card-sm">
-                          <div className="card-body">
-                            <div className="row align-items-center">
-                              <div className="col-auto">
-                                <span className="bg-blue text-white avatar">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="icon icon-tabler icon-tabler-bolt"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth="2"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                    <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path>
-                                  </svg>
-                                </span>
-                              </div>
-                              <div className="col">
-                                <div className="font-weight-medium">
-                                  Scope 2: {currentEmissions.scope2} tCO₂e
-                                </div>
-                                <div className="text-muted">
-                                  Émissions indirectes liées à l'énergie
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-md-4 mb-3">
-                        <div className="card card-sm">
-                          <div className="card-body">
-                            <div className="row align-items-center">
-                              <div className="col-auto">
-                                <span className="bg-green text-white avatar">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="icon icon-tabler icon-tabler-truck"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth="2"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                    <path d="M4 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                    <path d="M16 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                    <path d="M16 5h6a1 1 0 0 1 1 1v7h-8v-5h-13v-1a1 1 0 0 1 1 -1h9a5 5 0 0 1 4 2z"></path>
-                                    <path d="M15 17h-7"></path>
-                                  </svg>
-                                </span>
-                              </div>
-                              <div className="col">
-                                <div className="font-weight-medium">
-                                  Scope 3: {currentEmissions.scope3} tCO₂e
-                                </div>
-                                <div className="text-muted">Autres émissions indirectes</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-12 mt-2">
+          <div className="row row-cards">
+            <div className="col-md-12">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="card-title">Aperçu des Émissions Actuelles</h3>
+                </div>
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-4 mb-3">
                       <div className="card card-sm">
                         <div className="card-body">
                           <div className="row align-items-center">
                             <div className="col-auto">
-                              <span className="bg-azure text-white avatar">
+                              <span className="bg-red text-white avatar">
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
-                                  className="icon icon-tabler icon-tabler-world"
+                                  className="icon icon-tabler icon-tabler-factory"
                                   width="24"
                                   height="24"
                                   viewBox="0 0 24 24"
@@ -872,20 +712,127 @@ const GoalsPage = () => {
                                   strokeLinejoin="round"
                                 >
                                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                  <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
-                                  <path d="M3.6 9h16.8"></path>
-                                  <path d="M3.6 15h16.8"></path>
-                                  <path d="M11.5 3a17 17 0 0 0 0 18"></path>
-                                  <path d="M12.5 3a17 17 0 0 1 0 18"></path>
+                                  <path d="M4 21c1.147 -4.02 1.983 -8.027 2 -12h6c.017 3.973 .853 7.98 2 12"></path>
+                                  <path d="M12.5 13h4.5c.025 2.612 .894 5.296 2 8"></path>
+                                  <path d="M9 5a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1"></path>
+                                  <path d="M3 21l19 0"></path>
                                 </svg>
                               </span>
                             </div>
                             <div className="col">
                               <div className="font-weight-medium">
-                                Émissions Totales: {currentEmissions.total} tCO₂e
+                                Scope 1: {currentEmissions.scope1} tCO₂e
                               </div>
-                              <div className="text-muted">Empreinte carbone globale</div>
+                              <div className="text-muted">Émissions directes</div>
                             </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <div className="card card-sm">
+                        <div className="card-body">
+                          <div className="row align-items-center">
+                            <div className="col-auto">
+                              <span className="bg-blue text-white avatar">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="icon icon-tabler icon-tabler-bolt"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                  <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path>
+                                </svg>
+                              </span>
+                            </div>
+                            <div className="col">
+                              <div className="font-weight-medium">
+                                Scope 2: {currentEmissions.scope2} tCO₂e
+                              </div>
+                              <div className="text-muted">
+                                Émissions indirectes liées à l'énergie
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <div className="card card-sm">
+                        <div className="card-body">
+                          <div className="row align-items-center">
+                            <div className="col-auto">
+                              <span className="bg-green text-white avatar">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="icon icon-tabler icon-tabler-truck"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                  <path d="M4 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                  <path d="M16 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                  <path d="M16 5h6a1 1 0 0 1 1 1v7h-8v-5h-13v-1a1 1 0 0 1 1 -1h9a5 5 0 0 1 4 2z"></path>
+                                  <path d="M15 17h-7"></path>
+                                </svg>
+                              </span>
+                            </div>
+                            <div className="col">
+                              <div className="font-weight-medium">
+                                Scope 3: {currentEmissions.scopeocker3} tCO₂e
+                              </div>
+                              <div className="text-muted">Autres émissions indirectes</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 mt-2">
+                    <div className="card card-sm">
+                      <div className="card-body">
+                        <div className="row align-items-center">
+                          <div className="col-auto">
+                            <span className="bg-azure text-white avatar">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="icon icon-tabler icon-tabler-world"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                strokeWidth="2"
+                                stroke="currentColor"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                                <path d="M3.6 9h16.8"></path>
+                                <path d="M3.6 15h16.8"></path>
+                                <path d="M11.5 3a17 17 0 0 0 0 18"></path>
+                                <path d="M12.5 3a17 17 0 0 1 0 18"></path>
+                              </svg>
+                            </span>
+                          </div>
+                          <div className="col">
+                            <div className="font-weight-medium">
+                              Émissions Totales: {currentEmissions.total} tCO₂e
+                            </div>
+                            <div className="text-muted">Empreinte carbone globale</div>
                           </div>
                         </div>
                       </div>
@@ -893,19 +840,47 @@ const GoalsPage = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="col-md-12">
-                <div className="card">
-                  <div className="card-header">
-                    <h3 className="card-title">Vos Objectifs de Réduction</h3>
-                  </div>
-                  <div className="card-body">
-                    {goalsList.length === 0 ? (
-                      <div className="empty">
-                        <div className="empty-icon">
+            <div className="col-md-12">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="card-title">Vos Objectifs de Réduction</h3>
+                </div>
+                <div className="card-body">
+                  {goalsList.length === 0 ? (
+                    <div className="empty">
+                      <div className="empty-icon">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="icon icon-tabler icon-tabler-target"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="currentColor"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                          <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                          <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"></path>
+                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                        </svg>
+                      </div>
+                      <p className="empty-title">Aucun objectif de réduction pour l'instant</p>
+                      <p className="empty-subtitle text-muted">
+                        Commencez par ajouter votre premier objectif de réduction d'émissions
+                      </p>
+                      <div className="empty-action">
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => setShowAddModal(true)}
+                        >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="icon icon-tabler icon-tabler-target"
+                            className="icon"
                             width="24"
                             height="24"
                             viewBox="0 0 24 24"
@@ -915,20 +890,152 @@ const GoalsPage = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                            <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                            <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"></path>
-                            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12 5l0 14" />
+                            <path d="M5 12l14 0" />
                           </svg>
-                        </div>
-                        <p className="empty-title">Aucun objectif de réduction pour l'instant</p>
-                        <p className="empty-subtitle text-muted">
-                          Commencez par ajouter votre premier objectif de réduction d'émissions
-                        </p>
-                        <div className="empty-action">
+                          Ajouter un objectif
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-vcenter card-table">
+                        <thead>
+                          <tr>
+                            <th>Nom</th>
+                            <th>Année</th>
+                            <th>Scope 1</th>
+                            <th>Scope 2</th>
+                            <th>Scope 3</th>
+                            <th>Total</th>
+                            <th>Statut</th>
+                            <th>Créé le</th>
+                            <th className="w-1">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentGoals.map((goal) => {
+                            const isScope1Achieved =
+                              goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
+                            const isScope2Achieved =
+                              goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
+                            const isScope3Achieved =
+                              goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
+                            const allScopesAchieved =
+                              isScope1Achieved && isScope2Achieved && isScope3Achieved;
+
+                            return (
+                              <tr key={goal._id}>
+                                <td>
+                                  <span
+                                    className="avatar avatar-md text-white me-2"
+                                    style={{ backgroundColor: "#263589" }}
+                                  >
+                                    {goal.name.charAt(0)}
+                                  </span>
+                                  {goal.name}
+                                </td>
+                                <td>{goal.year}</td>
+                                <td>
+                                  {goal.scope1Goal > 0 ? (
+                                    <span className={isScope1Achieved ? "text-success" : ""}>
+                                      {goal.scope1Goal} tCO₂e
+                                      {isScope1Achieved && " ✓"}
+                                    </span>
+                                  ) : "-"}
+                                </td>
+                                <td>
+                                  {goal.scope2Goal > 0 ? (
+                                    <span className={isScope2Achieved ? "text-success" : ""}>
+                                      {goal.scope2Goal} tCO₂e
+                                      {isScope2Achieved && " ✓"}
+                                    </span>
+                                  ) : "-"}
+                                </td>
+                                <td>
+                                  {goal.scope3Goal > 0 ? (
+                                    <span className={isScope3Achieved ? "text-success" : ""}>
+                                      {goal.scope3Goal} tCO₂e
+                                      {isScope3Achieved && " ✓"}
+                                    </span>
+                                  ) : "-"}
+                                </td>
+                                <td>{goal.totalGoal.toFixed(1)} tCO₂e</td>
+                                <td>
+                                  {allScopesAchieved && (
+                                    <span className="badge bg-green-lt">Atteint</span>
+                                  )}
+                                  {!allScopesAchieved && (
+                                    <span className="badge bg-yellow-lt">En cours</span>
+                                  )}
+                                </td>
+                                <td className="text-muted">{formatDate(goal.createdAt)}</td>
+                                <td>
+                                  <div className="btn-list flex-nowrap">
+                                    <button
+                                      className="btn btn-sm btn-icon btn-ghost-secondary"
+                                      onClick={() => handleEditGoal(goal)}
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2 -2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                      </svg>
+                                    </button>
+                                    <button
+                                      className="btn btn-sm btn-icon btn-ghost-secondary text-danger"
+                                      onClick={() => handleDeleteGoal(goal._id)}
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="M3 6h18"></path>
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {goalsList.length > 0 && (
+                    <div className="card-footer d-flex align-items-center">
+                      <p className="m-0 text-muted">
+                        Affichage de <span>{indexOfFirstItem + 1}</span> à{" "}
+                        <span>{Math.min(indexOfLastItem, goalsList.length)}</span> sur{" "}
+                        <span>{goalsList.length}</span> entrées
+                      </p>
+                      <ul className="pagination m-0 ms-auto">
+                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                           <button
-                            className="btn btn-primary"
-                            onClick={() => setShowAddModal(true)}
+                            className="page-link"
+                            onClick={() => setCurrentPage(currentPage - 1)}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -942,217 +1049,57 @@ const GoalsPage = () => {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                             >
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                              <path d="M12 5l0 14" />
-                              <path d="M5 12l14 0" />
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                              <path d="M15 6l-6 6l6 6"></path>
                             </svg>
-                            Ajouter un objectif
                           </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="table-responsive">
-                        <table className="table table-vcenter card-table">
-                          <thead>
-                            <tr>
-                              <th>Nom</th>
-                              <th>Année</th>
-                              <th>Scope 1</th>
-                              <th>Scope 2</th>
-                              <th>Scope 3</th>
-                              <th>Total</th>
-                              <th>Statut</th>
-                              <th>Créé le</th>
-                              <th className="w-1">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {currentGoals.map((goal) => {
-                              const isScope1Achieved =
-                                goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
-                              const isScope2Achieved =
-                                goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
-                              const isScope3Achieved =
-                                goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
-                              const allScopesAchieved =
-                                isScope1Achieved && isScope2Achieved && isScope3Achieved;
+                        </li>
 
-                              return (
-                                <tr key={goal._id}>
-                                  <td>
-                                    <span
-                                      className="avatar avatar-md text-white me-2"
-                                      style={{ backgroundColor: "#263589" }}
-                                    >
-                                      {goal.name.charAt(0)}
-                                    </span>
-                                    {goal.name}
-                                  </td>
-                                  <td>{goal.year}</td>
-                                  <td>
-                                    {goal.scope1Goal > 0 ? (
-                                      <span className={isScope1Achieved ? "text-success" : ""}>
-                                        {goal.scope1Goal} tCO₂e
-                                        {isScope1Achieved && " ✓"}
-                                      </span>
-                                    ) : "-"}
-                                  </td>
-                                  <td>
-                                    {goal.scope2Goal > 0 ? (
-                                      <span className={isScope2Achieved ? "text-success" : ""}>
-                                        {goal.scope2Goal} tCO₂e
-                                        {isScope2Achieved && " ✓"}
-                                      </span>
-                                    ) : "-"}
-                                  </td>
-                                  <td>
-                                    {goal.scope3Goal > 0 ? (
-                                      <span className={isScope3Achieved ? "text-success" : ""}>
-                                        {goal.scope3Goal} tCO₂e
-                                        {isScope3Achieved && " ✓"}
-                                      </span>
-                                    ) : "-"}
-                                  </td>
-                                  <td>{goal.totalGoal.toFixed(1)} tCO₂e</td>
-                                  <td>
-                                    {allScopesAchieved && (
-                                      <span className="badge bg-green-lt">Atteint</span>
-                                    )}
-                                    {!allScopesAchieved && (
-                                      <span className="badge bg-yellow-lt">En cours</span>
-                                    )}
-                                  </td>
-                                  <td className="text-muted">{formatDate(goal.createdAt)}</td>
-                                  <td>
-                                    <div className="btn-list flex-nowrap">
-                                      <button
-                                        className="btn btn-sm btn-icon btn-ghost-secondary"
-                                        onClick={() => handleEditGoal(goal)}
-                                      >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width="18"
-                                          height="18"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        >
-                                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                      </button>
-                                      <button
-                                        className="btn btn-sm btn-icon btn-ghost-secondary text-danger"
-                                        onClick={() => handleDeleteGoal(goal._id)}
-                                      >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width="18"
-                                          height="18"
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth="2"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        >
-                                          <path d="M3 6h18"></path>
-                                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                          <line x1="10" y1="11" x2="10" y2="17"></line>
-                                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                                        </svg>
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-
-                    {goalsList.length > 0 && (
-                      <div className="card-footer d-flex align-items-center">
-                        <p className="m-0 text-muted">
-                          Affichage de <span>{indexOfFirstItem + 1}</span> à{" "}
-                          <span>{Math.min(indexOfLastItem, goalsList.length)}</span> sur{" "}
-                          <span>{goalsList.length}</span> entrées
-                        </p>
-                        <ul className="pagination m-0 ms-auto">
-                          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                            <button
-                              className="page-link"
-                              onClick={() => setCurrentPage(currentPage - 1)}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="icon"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                                stroke="currentColor"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M15 6l-6 6l6 6"></path>
-                              </svg>
-                            </button>
-                          </li>
-
-                          {Array.from({ length: totalPages }, (_, i) => (
-                            <li
-                              className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
-                              key={i}
-                            >
-                              <button
-                                className="page-link"
-                                onClick={() => setCurrentPage(i + 1)}
-                              >
-                                {i + 1}
-                              </button>
-                            </li>
-                          ))}
-
+                        {Array.from({ length: totalPages }, (_, i) => (
                           <li
-                            className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                            className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                            key={i}
                           >
                             <button
                               className="page-link"
-                              onClick={() => setCurrentPage(currentPage + 1)}
+                              onClick={() => setCurrentPage(i + 1)}
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="icon"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                                stroke="currentColor"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M9 6l6 6l-6 6"></path>
-                              </svg>
+                              {i + 1}
                             </button>
                           </li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                        ))}
+
+                        <li
+                          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                        >
+                          <button
+                            className="page-link"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="icon"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              strokeWidth="2"
+                              stroke="currentColor"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                              <path d="M9 6l6 6l-6 6"></path>
+                            </svg>
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-           
+          </div>
         </div>
       </div>
 

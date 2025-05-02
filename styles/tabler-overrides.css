@@ -1,30 +1,57 @@
-.btn-primary {
-  background-color: var(--primary-clr);
-}
-
-.form-control:focus {
-  border-color: var(--primary-clr);
-  box-shadow: 0 0 0 0.25rem rgba(var(--primary-clr-rgb), 0.25);
-}
-
 :root {
   --tblr-primary: var(--primary-clr);
+  --primary-clr: #8ebe21;
 }
 
 .btn-primary {
   background-color: var(--tblr-primary);
+  border-color: var(--tblr-primary);
 }
 
-.card {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+/* Style for outline buttons (Utilisateur Régulier and Propriétaire d'Entreprise) */
+.btn-outline-secondary {
+  border-color: var(--tblr-primary);
+  color: var(--tblr-primary);
+  background-color: transparent;
+}
+
+/* Hover state for outline buttons */
+.btn-outline-secondary:hover {
+  background-color: var(--tblr-primary);
+  border-color: var(--tblr-primary);
+  color: #fff; /* White text on hover for contrast */
+}
+
+/* Active state (when button is selected) */
+.btn-success {
+  background-color: var(--tblr-primary);
+  border-color: var(--tblr-primary);
+  color: #fff;
+}
+
+/* Ensure active button doesn't change on hover */
+.btn-success:hover {
+  background-color: var(--tblr-primary);
+  border-color: var(--tblr-primary);
+  color: #fff;
 }
 
 .form-control:focus {
   border-color: var(--tblr-primary);
-  box-shadow: 0 0 0 0.25rem rgba(var(--tblr-primary-rgb), 0.25);
+  box-shadow: 0 0 0 0.25rem rgba(142, 190, 33, 0.25);
+}
+
+.card {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
 .input-group .btn {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
+}
+
+/* Stepper active state */
+.stepper-active {
+  background-color: var(--tblr-primary);
+  border-color: var(--tblr-primary);
 }
