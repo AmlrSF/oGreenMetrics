@@ -45,17 +45,21 @@ const Scope3 = () => {
 
           setCompany(CompanyData?.data);
 
-          const response = await fetch(
-            `http://localhost:4000/transport/${Company?._id}`,
-            {
-              method: "GET",
+          if(CompanyData?.Data?._id){
+            const response = await fetch(
+              `http://localhost:4000/transport/${Company?._id}`,
+              {
+                method: "GET",
+              }
+            );
+            const data = await response.json();
+  
+            if (response.ok) {
+              setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
             }
-          );
-          const data = await response.json();
-
-          if (response.ok) {
-            setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
+            
           }
+          
         } else {
           console.log("User not found");
         }

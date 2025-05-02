@@ -6,7 +6,7 @@ import {
   IconChartBar,
   IconFileText,
   IconCalendar,
-  IconBuilding,
+  IconBuildingFactory,
   IconArrowLeft,
   IconDownload,
   IconPrinter,
@@ -14,7 +14,6 @@ import {
   IconTruck,
   IconBriefcase,
   IconTrash,
-  IconFactory,
   IconBatteryCharging,
   IconSnowflake,
 } from "@tabler/icons-react";
@@ -333,7 +332,7 @@ const ViewReport = ({ id }) => {
                   <div className="row align-items-center">
                     <div className="col-auto">
                       <span className="bg-primary text-white avatar">
-                        <Factory size={24} />
+                        <IconBuildingFactory size={24} />
                       </span>
                     </div>
                     <div className="col">
@@ -359,7 +358,7 @@ const ViewReport = ({ id }) => {
                 role="tab"
                 aria-selected={activeTab === "overview"}
               >
-                <IconBarChart size={16} className="me-2" />
+              <IconChartBar size={16} className="me-2" />
                 Aperçu
               </button>
             </li>
@@ -605,7 +604,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <IconFactory className="me-2" size={20} />
+                    <IconBuildingFactory className="me-2" size={20} />
                     Processus de Production
                   </h3>
                   <div className="card-actions">
@@ -991,7 +990,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <Truck className="me-2" size={20} />
+                    <IconTruck className="me-2" size={20} />
                     Transport & Distribution
                   </h3>
                   <div className="card-actions">
@@ -1107,7 +1106,7 @@ const ViewReport = ({ id }) => {
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    <IconBuilding className="me-2" size={20} />
+                    <IconBuildingFactory className="me-2" size={20} />
                     Biens d'équipement
                   </h3>
                   <div className="card-actions">
