@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Eye, Trash2, Calculator } from "lucide-react";
-import { useRouter } from "next/navigation";
+   import { useRouter } from "next/navigation";
+import { IconCalculator, IconEye, IconTrash } from "@tabler/icons-react";
 
 const SitesPage = () => {
   const [sites, setSites] = useState([]);
@@ -43,6 +43,8 @@ const SitesPage = () => {
         (item) => item?.userId === authData?.user._id
       );
       setSites(userSites);
+      console.log(userSites);
+      
     } catch (err) {
       setError("Failed to fetch sites. Please try again later.");
       console.error("Error:", err);
@@ -115,7 +117,7 @@ const SitesPage = () => {
           className="btn btn-primary ms-auto d-flex align-items-center gap-2"
        
         >
-          <Calculator size={18} />
+          <IconCalculator size={18} />
           Calculate New Site
         </button>
       </div>
@@ -215,13 +217,13 @@ const SitesPage = () => {
                             onClick={() => router.push(`/Dashboard/Regular/Sites/${site._id}`)}
                             className="btn btn-ghost-blue btn-icon"
                           >
-                            <Eye size={18} />
+                            <IconEye size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(site._id)}
                             className="btn btn-ghost-danger btn-icon"
                           >
-                            <Trash2  size={18} />
+                            <IconTrash  size={18} />
                           </button>
                         </div>
                       </td>

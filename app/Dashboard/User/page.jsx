@@ -16,7 +16,9 @@ import {
   BarElement,
 } from "chart.js";
 
-import { IconTrendingUp, IconChartBar, IconChartPie, IconCalendar,IconTruck,IconLamp,IconActivity,IconBuildingFactory } from "@tabler/icons-react";
+import { IconTrendingUp, IconChartBar, 
+  IconChartPie, IconCalendar,IconTruck,IconLamp,IconActivity,
+  IconBuildingFactory } from "@tabler/icons-react";
 
 ChartJS.register(
   CategoryScale,

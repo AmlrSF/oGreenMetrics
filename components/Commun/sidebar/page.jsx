@@ -280,7 +280,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                      style={{color: isLinkActive(item.href) ? colors.primary : colors.white}} />
                     
                     {!isCollapsed && (
-                      <span className="fs-6 font-medium"
+                      <span className="fs-4 font-medium"
                        style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}}>{item.label}</span>
                     )}
                   </Link>

@@ -16,6 +16,7 @@
     "bootstrap": "^5.3.5",
     "chart.js": "^4.4.8",
     "framer-motion": "^12.4.10",
+    "html2pdf.js": "^0.10.3",
     "js-cookie": "^3.0.5",
     "next": "^15.2.4",
     "react": "^19.0.0",

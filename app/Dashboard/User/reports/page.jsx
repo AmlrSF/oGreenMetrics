@@ -2,18 +2,10 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
-import {
-  Calendar,
-  BarChart2,
-  UserX,
-  UserCheck,
-  Trash2,
-  FileTextIcon,
-  Eye,
-} from "lucide-react";
+
 
 import { useRouter } from "next/navigation";
-import { IconEye, IconTrash } from "@tabler/icons-react";
+import { IconCalendar, IconChartBar, IconEye, IconFileText, IconTrash } from "@tabler/icons-react";
 
 const Reporting = () => {
   const [reports, setReports] = useState([]);
@@ -518,7 +510,7 @@ const Reporting = () => {
                           <td>
                             <div className="d-flex align-items-center">
                               <span className="avatar avatar-md bg-blue-lt text-blue me-2">
-                                <FileTextIcon size={18} />
+                                <IconFileText size={18} />
                               </span>
                               <div className="flex-fill">
                                 <div className="font-weight-medium">
@@ -534,7 +526,7 @@ const Reporting = () => {
                           </td>
                           <td>
                             <div className="d-flex align-items-center">
-                              <Calendar size={16} className="me-1" />
+                              <IconCalendar size={16} className="me-1" />
                               <span>{data.Year}</span>
                             </div>
                           </td>
@@ -559,7 +551,7 @@ const Reporting = () => {
                              items-center bg-blue-lt"
                             >
                               <div className="flex">
-                                <BarChart2 size={14} className="me-1" />
+                                <IconChartBar size={14} className="me-1" />
                                 {data.includeCharts ? "Yes" : "No"}
                               </div>
                             </span>
@@ -575,7 +567,7 @@ const Reporting = () => {
                                   className="flex items-center
                                w-full justify-center"
                                 >
-                                  <BarChart2 size={14} className="me-1" />
+                                  <IconChartBar size={14} className="me-1" />
                                   {data.includeRecomondations ? "Yes" : "No"}
                                 </div>
                               </span>
@@ -593,7 +585,7 @@ const Reporting = () => {
                                 onClick={() => deleteReport(data?._id)}
                                 className="btn btn-ghost-danger btn-icon"
                               >
-                                <IconTrash className="text-red" size={18} />
+                                <IconTrash  size={18} />
                               </button>
                               <button
                                 className="btn btn-ghost-blue btn-icon"
@@ -603,7 +595,7 @@ const Reporting = () => {
                                   )
                                 }
                               >
-                                <IconEye className="text-primary" size={18} />
+                                <IconEye  size={18} />
                               </button>
                             </div>
                           </td>

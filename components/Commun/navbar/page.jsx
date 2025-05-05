@@ -8,12 +8,26 @@ import { useRouter } from "next/navigation";
 const Navbar = ({ user, isAdmin }) => {
   const router = useRouter();
 
+  
   const handleNavigation = () => {
-    router.push(`/Dashboard/${isAdmin ? "Admin" : "User"}/profile`);
+    switch (user?.role) {
+      case "Admin":
+        router.push("/Dashboard/Admin/profile");
+        break;
+      case "entreprise":
+        router.push("/Dashboard/User/profile");
+        break;
+      case "régulier":
+        router.push("/Dashboard/Regular/profile");
+        break;
+      default:
+        console.warn("Unknown role:", user?.role);
+        router.push("/"); 
+    }
   };
 
   return (
-    <nav className="navbar py-2 navbar-expand-lg" style={{ backgroundColor: "#8ebe21" }}>
+    <nav className="position-sticky sticky-top navbar  py-2 navbar-expand-lg" style={{ backgroundColor: "#8ebe21" }}>
       <div className="container-xl d-flex justify-content-end px-4">
         <div className="d-flex align-items-center gap-3">
           {/* Notification bell */}

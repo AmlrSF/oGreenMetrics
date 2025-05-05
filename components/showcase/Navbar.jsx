@@ -36,7 +36,8 @@ const Navbar = () => {
   };
 
   return (
-    <div className="position-relative bg-white shadow sticky-top">
+    <div className="position-relative  bg-white shadow
+     position-sticky sticky-top">
       <nav className="container">
         <div className="d-flex justify-content-between align-items-center">
           <Link href="/" className="position-relative z-index-5">

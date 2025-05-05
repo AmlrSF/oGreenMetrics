@@ -36,6 +36,8 @@ a:hover {
   gap: 10px;
 }
 
+container-card
+
 .navlinks a::after {
   content: "";
   width: 0%;
