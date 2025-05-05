@@ -6,32 +6,11 @@ import { toast } from "react-hot-toast";
 const GoalsPage = () => {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentEmissions, setCurrentEmissions] = useState({
-    scope1: 0,
-    scope2: 0,
-    scope3: 0,
-    total: 0,
-  });
+  const [currentEmissions, setCurrentEmissions] = useState({scope1: 0,scope2: 0,scope3: 0,total: 0,});
   const [goalsList, setGoalsList] = useState([]);
-  const [newGoal, setNewGoal] = useState({
-    name: "Objectif de Réduction Carbone",
-    year: new Date().getFullYear(),
-    scope1Goal: 0,
-    scope2Goal: 0,
-    scope3Goal: 0,
-    description: "",
-  });
-  const [selectedScopes, setSelectedScopes] = useState({
-    scope1: false,
-    scope2: false,
-    scope3: false,
-  });
-  const [validationErrors, setValidationErrors] = useState({
-    scope1Goal: "",
-    scope2Goal: "",
-    scope3Goal: "",
-    general: "",
-  });
+  const [newGoal, setNewGoal] = useState({ name: "Objectif de Réduction Carbone", year: new Date().getFullYear(), scope1Goal: 0, scope2Goal: 0, scope3Goal: 0, description: "",});
+  const [selectedScopes, setSelectedScopes] = useState({ scope1: false, scope2: false, scope3: false,});
+  const [validationErrors, setValidationErrors] = useState({scope1Goal: "",scope2Goal: "",scope3Goal: "",general: "",});
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [editingGoal, setEditingGoal] = useState(null);
@@ -51,10 +30,8 @@ const GoalsPage = () => {
       newValue = parseInt(value) || new Date().getFullYear();
     } else if (["scope1Goal", "scope2Goal", "scope3Goal"].includes(field)) {
       newValue = parseFloat(value) || 0;
-
       const scopeNumber = field.replace("scope", "").replace("Goal", "");
       const currentValue = currentEmissions[`scope${scopeNumber}`];
-
       if (newValue > 0 && newValue >= currentValue) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -67,7 +44,6 @@ const GoalsPage = () => {
         }));
       }
     }
-
     setNewGoal((prev) => ({
       ...prev,
       [field]: newValue,
@@ -76,22 +52,18 @@ const GoalsPage = () => {
 
   const toggleScope = (scopeNumber) => {
     const scopeKey = `scope${scopeNumber}`;
-
     setSelectedScopes((prev) => {
       const newState = { ...prev, [scopeKey]: !prev[scopeKey] };
-
       if (!newState[scopeKey]) {
         setNewGoal((prevGoal) => ({
           ...prevGoal,
           [`${scopeKey}Goal`]: 0,
         }));
-
         setValidationErrors((prevErrors) => ({
           ...prevErrors,
           [`${scopeKey}Goal`]: "",
         }));
       }
-
       return newState;
     });
   };
@@ -101,25 +73,20 @@ const GoalsPage = () => {
       const reportRes = await fetch(`http://localhost:4000/report/full/${companyId}`);
       const reportJson = await reportRes.json();
       const reportData = reportJson.data;
-
       const scope1Fuel = reportData.scope1Data?.fuelCombution?.[0]?.totalEmissions || 0;
       const scope1Production = reportData.scope1Data?.production?.[0]?.totalEmissions || 0;
       const scope1 = parseFloat(scope1Fuel) + parseFloat(scope1Production);
-
       const scope2Heating = reportData.scope2Data?.heating?.totalEmissions || 0;
       const scope2Cooling = reportData.scope2Data?.cooling?.totalEmissions || 0;
       const scope2Energy = reportData.scope2Data?.energyConsumption?.emissions || 0;
       const scope2 =
         parseFloat(scope2Heating) + parseFloat(scope2Cooling) + parseFloat(scope2Energy);
-
       const scope3 =
         sumEmissions(reportData.scope3Data?.transport) +
         sumEmissions(reportData.scope3Data?.dechet) +
         sumEmissions(reportData.scope3Data?.capitalGood) +
         sumEmissions(reportData.scope3Data?.businessTravel);
-
       const total = scope1 + scope2 + scope3;
-
       return {
         scope1: parseFloat(scope1.toFixed(2)),
         scope2: parseFloat(scope2.toFixed(2)),
@@ -140,22 +107,18 @@ const GoalsPage = () => {
       scope3Goal: "",
       general: "",
     };
-
     if (newGoal.name.trim() === "") {
       errors.general = "Le nom de l'objectif est requis";
       setValidationErrors(errors);
       return { valid: false, messages: [errors.general] };
     }
-
     const hasSelectedScope = selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3;
     if (!hasSelectedScope) {
       errors.general = "Veuillez sélectionner au moins un scope";
       setValidationErrors(errors);
       return { valid: false, messages: [errors.general] };
     }
-
     let hasValidGoal = false;
-
     if (selectedScopes.scope1) {
       if (newGoal.scope1Goal <= 0) {
         errors.scope1Goal = "Veuillez entrer une valeur d'objectif supérieure à 0";
@@ -165,7 +128,6 @@ const GoalsPage = () => {
         hasValidGoal = true;
       }
     }
-
     if (selectedScopes.scope2) {
       if (newGoal.scope2Goal <= 0) {
         errors.scope2Goal = "Veuillez entrer une valeur d'objectif supérieure à 0";
@@ -175,7 +137,6 @@ const GoalsPage = () => {
         hasValidGoal = true;
       }
     }
-
     if (selectedScopes.scope3) {
       if (newGoal.scope3Goal <= 0) {
         errors.scope3Goal = "Veuillez entrer une valeur d'objectif supérieure à 0";
@@ -185,7 +146,6 @@ const GoalsPage = () => {
         hasValidGoal = true;
       }
     }
-
     if (!hasValidGoal) {
       if (!errors.general) {
         errors.general = "Au moins un scope sélectionné doit avoir un objectif valide";
@@ -193,33 +153,24 @@ const GoalsPage = () => {
       setValidationErrors(errors);
       return {
         valid: false,
-        messages: [
-          errors.general,
-          errors.scope1Goal,
-          errors.scope2Goal,
-          errors.scope3Goal,
-        ].filter(Boolean),
+        messages: [ errors.general, errors.scope1Goal, errors.scope2Goal, errors.scope3Goal,  ].filter(Boolean),
       };
     }
-
     setValidationErrors(errors);
     return { valid: true, messages: [] };
   };
 
   const handleAddGoal = async (e) => {
     e.preventDefault();
-
     if (!company?._id) {
       toast.error("Entreprise non trouvée");
       return;
     }
-
     const { valid, messages } = validateGoals();
     if (!valid) {
       messages.forEach((msg) => toast.error(msg));
       return;
     }
-
     try {
       const payload = {
         ...newGoal,
@@ -228,22 +179,18 @@ const GoalsPage = () => {
         scope2Goal: selectedScopes.scope2 ? newGoal.scope2Goal : 0,
         scope3Goal: selectedScopes.scope3 ? newGoal.scope3Goal : 0,
       };
-
       payload.totalGoal =
         (selectedScopes.scope1 ? parseFloat(newGoal.scope1Goal) : 0) +
         (selectedScopes.scope2 ? parseFloat(newGoal.scope2Goal) : 0) +
         (selectedScopes.scope3 ? parseFloat(newGoal.scope3Goal) : 0);
-
       const res = await fetch("http://localhost:4000/goals/new", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-
       setNewGoal({
         name: "Objectif de Réduction Carbone",
         year: new Date().getFullYear(),
@@ -252,67 +199,54 @@ const GoalsPage = () => {
         scope3Goal: 0,
         description: "",
       });
-
       setSelectedScopes({
         scope1: false,
         scope2: false,
         scope3: false,
       });
-
       setShowAddModal(false);
-
       setAlertMessage("Objectif ajouté avec succès!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
-
       fetchGoals(company._id);
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
     }
   };
-
   const handleUpdateGoal = async (e) => {
     e.preventDefault();
-
     if (!editingGoal?._id) {
-      toast.error("Aucun objectifениями для обновления не выбрано");
+      toast.error("No objects selected for update");
       return;
     }
-
     let hasError = false;
     let errorMessages = [];
-
     if (editingGoal.scope1Goal > 0 && editingGoal.scope1Goal >= currentEmissions.scope1) {
       errorMessages.push(
-        `Цель по Scope 1 должна быть меньше текущих выбросов (${currentEmissions.scope1} т CO₂e)`
+        `goal по Scope 1 The goal must be less than current emissions (${currentEmissions.scope1} т CO₂e)`
       );
       hasError = true;
     }
-
     if (editingGoal.scope2Goal > 0 && editingGoal.scope2Goal >= currentEmissions.scope2) {
       errorMessages.push(
-        `Цель по Scope 2 должна быть меньше текущих выбросов (${currentEmissions.scope2} т CO₂e)`
+        `goal по Scope 2 The goal must be less than current emissions (${currentEmissions.scope2} т CO₂e)`
       );
       hasError = true;
     }
-
     if (editingGoal.scope3Goal > 0 && editingGoal.scope3Goal >= currentEmissions.scope3) {
       errorMessages.push(
-        `Цель по Scope 3 должна быть меньше текущих выбросов (${currentEmissions.scope3} т CO₂e)`
+        `goal по Scope 3 The goal must be less than current emissions (${currentEmissions.scope3} т CO₂e)`
       );
       hasError = true;
     }
-
     if (editingGoal.scope1Goal <= 0 && editingGoal.scope2Goal <= 0 && editingGoal.scope3Goal <= 0) {
-      errorMessages.push("Хотя бы один Scope должен иметь цель выше 0");
+      errorMessages.push("At least one Scope must have a goal greater than 0 0");
       hasError = true;
     }
-
     if (hasError) {
       errorMessages.forEach((msg) => toast.error(msg));
       return;
     }
-
     try {
       const updatedGoal = {
         ...editingGoal,
@@ -321,53 +255,41 @@ const GoalsPage = () => {
           parseFloat(editingGoal.scope2Goal || 0) +
           parseFloat(editingGoal.scope3Goal || 0),
       };
-
       const res = await fetch(`http://localhost:4000/goals/${editingGoal._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(updatedGoal),
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Ошибка обновления цели");
-
+      if (!res.ok) throw new Error(data.message);
       setShowEditModal(false);
-
-      setAlertMessage("Цель успешно обновлена!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
-
       fetchGoals(company._id);
     } catch (err) {
-      console.error("Ошибка обновления:", err);
-      toast.error(`Ошибка: ${err.message}`);
-    }
+     }
   };
 
   const handleDeleteGoal = async (goalId) => {
-    if (!confirm("Вы уверены, что хотите удалить эту цель?")) {
+    if (!confirm("Are you sure you want to delete this goal?")) {
       return;
     }
-
     try {
       const res = await fetch(`http://localhost:4000/goals/${goalId}`, {
         method: "DELETE",
         credentials: "include",
       });
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message);
       }
-
-      setAlertMessage("Цель успешно удалена!");
+      setAlertMessage("goal successfully removed!");
       setShowSuccessAlert(true);
       setTimeout(() => setShowSuccessAlert(false), 3000);
-
       fetchGoals(company._id);
     } catch (err) {
-      toast.error(`Ошибка: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     }
   };
 
@@ -375,13 +297,11 @@ const GoalsPage = () => {
     try {
       const res = await fetch(`http://localhost:4000/goals/all/${companyId}`);
       const data = await res.json();
-
       if (data.success && Array.isArray(data.data)) {
         const updatedGoals = data.data.map((goal) => {
           const isScope1Achieved = goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
           const isScope2Achieved = goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
           const isScope3Achieved = goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
-
           let status = "pending";
           if (isScope1Achieved && isScope2Achieved && isScope3Achieved) {
             status = "achieved";
@@ -391,60 +311,22 @@ const GoalsPage = () => {
               goal.scope2Goal > 0 ? 1 : 0,
               goal.scope3Goal > 0 ? 1 : 0,
             ].reduce((a, b) => a + b, 0);
-
-            const scope1Progress =
-              goal.scope1Goal > 0
-                ? Math.min(
-                    100,
-                    Math.max(
-                      0,
-                      ((currentEmissions.scope1 - goal.scope1Goal) /
-                        (goal.initialScope1 || currentEmissions.scope1)) *
-                        100
-                    )
-                  )
-                : 0;
-            const scope2Progress =
-              goal.scope2Goal > 0
-                ? Math.min(
-                    100,
-                    Math.max(
-                      0,
-                      ((currentEmissions.scope2 - goal.scope2Goal) /
-                        (goal.initialScope2 || currentEmissions.scope2)) *
-                        100
-                    )
-                  )
-                : 0;
-            const scope3Progress =
-              goal.scope3Goal > 0
-                ? Math.min(
-                    100,
-                    Math.max(
-                      0,
-                      ((currentEmissions.scope3 - goal.scope3Goal) /
-                        (goal.initialScope3 || currentEmissions.scope3)) *
-                        100
-                    )
-                  )
-                : 0;
-
+            const scope1Progress = goal.scope1Goal > 0 ? Math.min(100,Math.max( 0, ((currentEmissions.scope1 - goal.scope1Goal) / (goal.initialScope1 || currentEmissions.scope1)) *100)) : 0;
+            const scope2Progress = goal.scope2Goal > 0 ? Math.min(100,Math.max( 0, ((currentEmissions.scope2 - goal.scope2Goal) / (goal.initialScope2 || currentEmissions.scope2)) *100)) : 0;
+            const scope3Progress = goal.scope3Goal > 0 ? Math.min(100,Math.max( 0, ((currentEmissions.scope3 - goal.scope3Goal) / (goal.initialScope3 || currentEmissions.scope3)) *100)) : 0;
             const totalProgress =
-              totalScopes > 0 ? (scope1Progress + scope2Progress + scope3Progress) / totalScopes : 0;
-
-            status = totalProgress > 50 ? "in-progress" : "pending";
+              totalScopes > 0 ? (scope1Progress + scope2Progress + scope3Progress) / totalScopes : 0; 
+              status = totalProgress > 50 ? "in-progress" : "pending";
           }
-
           return {
             ...goal,
             status,
           };
         });
-
         setGoalsList(updatedGoals);
       }
     } catch (error) {
-      console.error("Ошибка получения целей:", error);
+      console.error("Error getting targets:", error);
     }
   };
 
@@ -459,29 +341,22 @@ const GoalsPage = () => {
         const authData = await authRes.json();
         const userId = authData?.user?._id;
         if (!userId) throw new Error("Не авторизован");
-
         const compRes = await fetch(
-          `http://localhost:4000/GetCompanyByOwnerID/${userId}`
-        );
+          `http://localhost:4000/GetCompanyByOwnerID/${userId}` );
         const compData = await compRes.json();
         setCompany(compData.data);
-
         const emissions = await fetchAndCalculateEmissions(compData.data._id);
         setCurrentEmissions(emissions);
-
         await fetchGoals(compData.data._id);
       } catch (err) {
         console.error(err);
-        toast.error("Не удалось загрузить данные");
-      } finally {
-       
-
- setLoading(false);
+        toast.error("Failed to load data");
+      } finally { 
+      setLoading(false);
       }
     };
 
     fetchData();
-
     const intervalId = setInterval(() => {
       if (company?._id) {
         fetchAndCalculateEmissions(company._id)
@@ -489,7 +364,7 @@ const GoalsPage = () => {
             setCurrentEmissions(emissions);
             fetchGoals(company._id);
           })
-          .catch((error) => console.error("Ошибка периодической проверки:", error));
+          .catch((error) => console.error("error fetching and calculating data ", error));
       }
     }, 30 * 60 * 1000);
 
@@ -624,33 +499,12 @@ const GoalsPage = () => {
             </div>
             <div className="col-auto ms-auto d-print-none">
               <div className="btn-list">
-                <button
-                  type="button"
-                  className="btn btn-primary d-none d-sm-inline-block"
-                  onClick={() => setShowAddModal(true)}
-                >
+                <button type="button" className="btn btn-primary d-none d-sm-inline-block" onClick={() => setShowAddModal(true)}>
                   Ajouter un nouvel objectif
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary d-sm-none btn-icon"
-                  onClick={() => setShowAddModal(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="icon"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    stroke="currentColor"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M12 5l0 14" />
-                    <path d="M5 12l14 0" />
+                <button type="button" className="btn btn-primary d-sm-none btn-icon" onClick={() => setShowAddModal(true)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" > 
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" />
                   </svg>
                 </button>
               </div>
@@ -662,20 +516,8 @@ const GoalsPage = () => {
           <div className="alert alert-success alert-dismissible" role="alert">
             <div className="d-flex">
               <div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="icon alert-icon"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <path d="M5 12l5 5l10 -10"></path>
+                <svg xmlns="http://www.w3.org/2000/svg" className="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M5 12l5 5l10 -10"></path>
                 </svg>
               </div>
               <div>{alertMessage}</div>
@@ -699,23 +541,7 @@ const GoalsPage = () => {
                           <div className="row align-items-center">
                             <div className="col-auto">
                               <span className="bg-red text-white avatar">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="icon icon-tabler icon-tabler-factory"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                  stroke="currentColor"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                  <path d="M4 21c1.147 -4.02 1.983 -8.027 2 -12h6c.017 3.973 .853 7.98 2 12"></path>
-                                  <path d="M12.5 13h4.5c.025 2.612 .894 5.296 2 8"></path>
-                                  <path d="M9 5a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1"></path>
-                                  <path d="M3 21l19 0"></path>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-factory" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M4 21c1.147 -4.02 1.983 -8.027 2 -12h6c.017 3.973 .853 7.98 2 12"></path> <path d="M12.5 13h4.5c.025 2.612 .894 5.296 2 8"></path> <path d="M9 5a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1a2.4 2.4 0 0 0 2 1a2.4 2.4 0 0 0 2 -1a2.4 2.4 0 0 1 2 -1a2.4 2.4 0 0 1 2 1"></path> <path d="M3 21l19 0"></path>
                                 </svg>
                               </span>
                             </div>
@@ -735,20 +561,8 @@ const GoalsPage = () => {
                           <div className="row align-items-center">
                             <div className="col-auto">
                               <span className="bg-blue text-white avatar">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="icon icon-tabler icon-tabler-bolt"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                  stroke="currentColor"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                  <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-bolt" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                                > <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path>
                                 </svg>
                               </span>
                             </div>
@@ -770,23 +584,8 @@ const GoalsPage = () => {
                           <div className="row align-items-center">
                             <div className="col-auto">
                               <span className="bg-green text-white avatar">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="icon icon-tabler icon-tabler-truck"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth="2"
-                                  stroke="currentColor"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                  <path d="M4 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                  <path d="M16 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                  <path d="M16 5h6a1 1 0 0 1 1 1v7h-8v-5h-13v-1a1 1 0 0 1 1 -1h9a5 5 0 0 1 4 2z"></path>
-                                  <path d="M15 17h-7"></path>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-truck" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M4 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path> <path d="M16 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path> <path d="M16 5h6a1 1 0 0 1 1 1v7h-8v-5h-13v-1a1 1 0 0 1 1 -1h9a5 5 0 0 1 4 2z"></path> <path d="M15 17h-7"></path>
                                 </svg>
                               </span>
                             </div>
@@ -807,24 +606,8 @@ const GoalsPage = () => {
                         <div className="row align-items-center">
                           <div className="col-auto">
                             <span className="bg-azure text-white avatar">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="icon icon-tabler icon-tabler-world"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                                stroke="currentColor"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
-                                <path d="M3.6 9h16.8"></path>
-                                <path d="M3.6 15h16.8"></path>
-                                <path d="M11.5 3a17 17 0 0 0 0 18"></path>
-                                <path d="M12.5 3a17 17 0 0 1 0 18"></path>
+                              <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-world" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>       <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>   <path d="M3.6 9h16.8"></path>    <path d="M3.6 15h16.8"></path>   <path d="M11.5 3a17 17 0 0 0 0 18"></path>  <path d="M12.5 3a17 17 0 0 1 0 18"></path>
                               </svg>
                             </span>
                           </div>
@@ -851,22 +634,8 @@ const GoalsPage = () => {
                   {goalsList.length === 0 ? (
                     <div className="empty">
                       <div className="empty-icon">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="icon icon-tabler icon-tabler-target"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          strokeWidth="2"
-                          stroke="currentColor"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                          <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                          <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"></path>
-                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-target" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>   <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>    <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"></path>  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
                         </svg>
                       </div>
                       <p className="empty-title">Aucun objectif de réduction pour l'instant</p>
@@ -874,25 +643,9 @@ const GoalsPage = () => {
                         Commencez par ajouter votre premier objectif de réduction d'émissions
                       </p>
                       <div className="empty-action">
-                        <button
-                          className="btn btn-primary"
-                          onClick={() => setShowAddModal(true)}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="icon"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                            stroke="currentColor"
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M12 5l0 14" />
-                            <path d="M5 12l14 0" />
+                        <button    className="btn btn-primary"    onClick={() => setShowAddModal(true)} >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"> 
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />     <path d="M12 5l0 14" /> <path d="M5 12l14 0" />
                           </svg>
                           Ajouter un objectif
                         </button>
@@ -973,45 +726,14 @@ const GoalsPage = () => {
                                 <td className="text-muted">{formatDate(goal.createdAt)}</td>
                                 <td>
                                   <div className="btn-list flex-nowrap">
-                                    <button
-                                      className="btn btn-sm btn-icon btn-ghost-secondary"
-                                      onClick={() => handleEditGoal(goal)}
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="18"
-                                        height="18"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      >
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2 -2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    <button   className="btn btn-sm btn-icon btn-ghost-secondary" onClick={() => handleEditGoal(goal)} >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2 -2v-7"></path> <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                       </svg>
                                     </button>
-                                    <button
-                                      className="btn btn-sm btn-icon btn-ghost-secondary text-danger"
-                                      onClick={() => handleDeleteGoal(goal._id)}
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="18"
-                                        height="18"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      >
-                                        <path d="M3 6h18"></path>
-                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                    <button  className="btn btn-sm btn-icon btn-ghost-secondary text-danger"   onClick={() => handleDeleteGoal(goal._id)} >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M3 6h18"></path>  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>   <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>  <line x1="10" y1="11" x2="10" y2="17"></line> <line x1="14" y1="11" x2="14" y2="17"></line>
                                       </svg>
                                     </button>
                                   </div>
@@ -1033,61 +755,24 @@ const GoalsPage = () => {
                       </p>
                       <ul className="pagination m-0 ms-auto">
                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                          <button
-                            className="page-link"
-                            onClick={() => setCurrentPage(currentPage - 1)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="icon"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              strokeWidth="2"
-                              stroke="currentColor"
-                              fill="none"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                              <path d="M15 6l-6 6l6 6"></path>
+                          <button   className="page-link"   onClick={() => setCurrentPage(currentPage - 1)} >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M15 6l-6 6l6 6"></path>
                             </svg>
                           </button>
                         </li>
 
                         {Array.from({ length: totalPages }, (_, i) => (
-                          <li
-                            className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
-                            key={i}
-                          >
+                          <li   className={`page-item ${currentPage === i + 1 ? "active" : ""}`}  key={i}  >
                             <button
-                              className="page-link"
-                              onClick={() => setCurrentPage(i + 1)}
-                            >
-                              {i + 1}
+                              className="page-link" onClick={() => setCurrentPage(i + 1)}   >  {i + 1}
                             </button>
                           </li>
                         ))}
 
-                        <li
-                          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
-                        >
-                          <button
-                            className="page-link"
-                            onClick={() => setCurrentPage(currentPage + 1)}
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="icon"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              strokeWidth="2"
-                              stroke="currentColor"
-                              fill="none"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
+                        <li  className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}  >
+                          <button  className="page-link"  onClick={() => setCurrentPage(currentPage + 1)} >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                               <path d="M9 6l6 6l-6 6"></path>
                             </svg>
@@ -1104,47 +789,24 @@ const GoalsPage = () => {
       </div>
 
       {showAddModal && (
-        <div
-          className="modal modal-blur show"
-          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          tabIndex="-1"
-          role="dialog"
-        >
+        <div className="modal modal-blur show"  style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}  tabIndex="-1"  role="dialog" >
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Ajouter un nouvel objectif de réduction d'émissions</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowAddModal(false)}
+                <button  type="button"  className="btn-close" onClick={() => setShowAddModal(false)}
                 ></button>
               </div>
               <form onSubmit={handleAddGoal}>
                 <div className="modal-body">
                   <div className="mb-3">
                     <label className="form-label">Nom de l'objectif</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Ex: Objectif de réduction carbone 2025"
-                      value={newGoal.name}
-                      onChange={(e) => handleGoalChange("name", e.target.value)}
-                      required
-                    />
+                    <input type="text" className="form-control" placeholder="Ex: Objectif de réduction carbone 2025" value={newGoal.name} onChange={(e) => handleGoalChange("name", e.target.value)} required/>
                   </div>
 
                   <div className="mb-3">
                     <label className="form-label">Année cible</label>
-                    <input
-                      type="number"
-                      min={new Date().getFullYear()}
-                      max={new Date().getFullYear() + 30}
-                      className="form-control"
-                      value={newGoal.year}
-                      onChange={(e) => handleGoalChange("year", e.target.value)}
-                      required
-                    />
+                    <input  type="number" min={new Date().getFullYear()} max={new Date().getFullYear() + 30} className="form-control" value={newGoal.year} onChange={(e) => handleGoalChange("year", e.target.value)} required/>
                   </div>
 
                   {validationErrors.general && (
@@ -1156,17 +818,9 @@ const GoalsPage = () => {
                   <div className="form-label mb-2">Sélectionnez les scopes pour définir des objectifs</div>
                   <div className="form-selectgroup-boxes row mb-3">
                     <div className="col-md-4">
-                      <label
-                        className={`form-selectgroup-item ${selectedScopes.scope1 ? "active" : ""}`}
-                      >
+                      <label   className={`form-selectgroup-item ${selectedScopes.scope1 ? "active" : ""}`}  >
                         <input
-                          type="checkbox"
-                          name="scope-1"
-                          value="1"
-                          className="form-selectgroup-input"
-                          checked={selectedScopes.scope1}
-                          onChange={() => toggleScope(1)}
-                        />
+                          type="checkbox" name="scope-1" value="1" className="form-selectgroup-input" checked={selectedScopes.scope1} onChange={() => toggleScope(1)} />
                         <span className="form-selectgroup-label d-flex align-items-center p-3">
                           <span className="me-3">
                             <span className="form-selectgroup-check"></span>
@@ -1182,16 +836,9 @@ const GoalsPage = () => {
                     </div>
                     <div className="col-md-4">
                       <label
-                        className={`form-selectgroup-item ${selectedScopes.scope2 ? "active" : ""}`}
-                      >
+                        className={`form-selectgroup-item ${selectedScopes.scope2 ? "active" : ""}`}  >
                         <input
-                          type="checkbox"
-                          name="scope-2"
-                          value="1"
-                          className="form-selectgroup-input"
-                          checked={selectedScopes.scope2}
-                          onChange={() => toggleScope(2)}
-                        />
+                          type="checkbox" name="scope-2" value="1" className="form-selectgroup-input" checked={selectedScopes.scope2} onChange={() => toggleScope(2)}  />
                         <span className="form-selectgroup-label d-flex align-items-center p-3">
                           <span className="me-3">
                             <span className="form-selectgroup-check"></span>
@@ -1207,16 +854,9 @@ const GoalsPage = () => {
                     </div>
                     <div className="col-md-4">
                       <label
-                        className={`form-selectgroup-item ${selectedScopes.scope3 ? "active" : ""}`}
-                      >
+                        className={`form-selectgroup-item ${selectedScopes.scope3 ? "active" : ""}`}   >
                         <input
-                          type="checkbox"
-                          name="scope-3"
-                          value="1"
-                          className="form-selectgroup-input"
-                          checked={selectedScopes.scope3}
-                          onChange={() => toggleScope(3)}
-                        />
+                          type="checkbox" name="scope-3" value="1" className="form-selectgroup-input" checked={selectedScopes.scope3} onChange={() => toggleScope(3)} />
                         <span className="form-selectgroup-label d-flex align-items-center p-3">
                           <span className="me-3">
                             <span className="form-selectgroup-check"></span>
@@ -1236,13 +876,7 @@ const GoalsPage = () => {
                     <div className="mb-3">
                       <label className="form-label">Objectif Scope 1 (tCO₂e)</label>
                       <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        max={currentEmissions.scope1 - 0.01}
-                        className={`form-control ${validationErrors.scope1Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"
-                        value={newGoal.scope1Goal}
+                        type="number" step="0.01" min="0.01" max={currentEmissions.scope1 - 0.01} className={`form-control ${validationErrors.scope1Goal ? "is-invalid" : ""}`} placeholder="Émissions cibles en tCO₂e" value={newGoal.scope1Goal}
                         onChange={(e) => handleGoalChange("scope1Goal", e.target.value)}
                         required={selectedScopes.scope1}
                       />
@@ -1260,16 +894,7 @@ const GoalsPage = () => {
                   {selectedScopes.scope2 && (
                     <div className="mb-3">
                       <label className="form-label">Objectif Scope 2 (tCO₂e)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        max={currentEmissions.scope2 - 0.01}
-                        className={`form-control ${validationErrors.scope2Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"
-                        value={newGoal.scope2Goal}
-                        onChange={(e) => handleGoalChange("scope2Goal", e.target.value)}
-                        required={selectedScopes.scope2}
+                      <input type="number" step="0.01" min="0.01" max={currentEmissions.scope2 - 0.01} className={`form-control ${validationErrors.scope2Goal ? "is-invalid" : ""}`} placeholder="Émissions cibles en tCO₂e" value={newGoal.scope2Goal} onChange={(e) => handleGoalChange("scope2Goal", e.target.value)} required={selectedScopes.scope2}
                       />
                       {validationErrors.scope2Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope2Goal}</div>
@@ -1285,17 +910,8 @@ const GoalsPage = () => {
                   {selectedScopes.scope3 && (
                     <div className="mb-3">
                       <label className="form-label">Objectif Scope 3 (tCO₂e)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        max={currentEmissions.scope3 - 0.01}
-                        className={`form-control ${validationErrors.scope3Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"
-                        value={newGoal.scope3Goal}
-                        onChange={(e) => handleGoalChange("scope3Goal", e.target.value)}
-                        required={selectedScopes.scope3}
-                      />
+                      <input  type="number" step="0.01" min="0.01" max={currentEmissions.scope3 - 0.01} className={`form-control ${validationErrors.scope3Goal ? "is-invalid" : ""}`} placeholder="Émissions cibles en tCO₂e" value={newGoal.scope3Goal}
+                        onChange={(e) => handleGoalChange("scope3Goal", e.target.value)}  required={selectedScopes.scope3} />
                       {validationErrors.scope3Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope3Goal}</div>
                       ) : (
@@ -1310,10 +926,7 @@ const GoalsPage = () => {
                   <div className="mb-3">
                     <label className="form-label">Description (Optionnel)</label>
                     <textarea
-                      className="form-control"
-                      rows="3"
-                      placeholder="Décrivez votre stratégie de réduction"
-                      value={newGoal.description}
+                      className="form-control" rows="3" placeholder="Décrivez votre stratégie de réduction" value={newGoal.description}
                       onChange={(e) => handleGoalChange("description", e.target.value)}
                     ></textarea>
                   </div>
@@ -1322,22 +935,8 @@ const GoalsPage = () => {
                     <div className="alert alert-info" role="alert">
                       <div className="d-flex">
                         <div>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="icon alert-icon"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                            stroke="currentColor"
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                            <path d="M12 9h.01"></path>
-                            <path d="M11 12h1v4h1"></path>
-                            <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 9h.01"></path> <path d="M11 12h1v4h1"></path> <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
                           </svg>
                         </div>
                         <div>
@@ -1350,8 +949,7 @@ const GoalsPage = () => {
                             {calculatePotentialReduction().percentage}%)
                           </div>
                           <div className="text-muted mt-2">
-                            <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos
-                            émissions actuelles seront inférieures ou égales à la valeur cible.
+                            <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos   émissions actuelles seront inférieures ou égales à la valeur cible.
                           </div>
                         </div>
                       </div>
@@ -1360,32 +958,10 @@ const GoalsPage = () => {
                 </div>
                 <div className="modal-footer">
                   <button
-                    type="button"
-                    className="btn btn-link link-secondary"
-                    onClick={() => setShowAddModal(false)}
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary ms-auto"
-                    disabled={!(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="icon"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M12 5l0 14" />
-                      <path d="M5 12l14 0" />
+                    type="button"  className="btn btn-link link-secondary"  onClick={() => setShowAddModal(false)}  >  Annuler   </button>
+                  <button type="submit" className="btn btn-primary ms-auto" disabled={!(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3)}  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" />
                     </svg>
                     Ajouter l'objectif
                   </button>
@@ -1397,11 +973,7 @@ const GoalsPage = () => {
       )}
 
       {showEditModal && editingGoal && (
-        <div
-          className="modal modal-blur show"
-          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          tabIndex="-1"
-          role="dialog"
+        <div className="modal modal-blur show" style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }} tabIndex="-1" role="dialog"
         >
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
@@ -1418,29 +990,15 @@ const GoalsPage = () => {
                   <div className="mb-3">
                     <label className="form-label">Nom de l'objectif</label>
                     <input
-                      type="text"
-                      className="form-control"
-                      value={editingGoal.name}
-                      onChange={(e) => setEditingGoal({ ...editingGoal, name: e.target.value })}
-                      required
+                      type="text" className="form-control" value={editingGoal.name} onChange={(e) => setEditingGoal({ ...editingGoal, name: e.target.value })} required
                     />
                   </div>
 
                   <div className="mb-3">
                     <label className="form-label">Année cible</label>
                     <input
-                      type="number"
-                      min={new Date().getFullYear()}
-                      max={new Date().getFullYear() + 30}
-                      className="form-control"
-                      value={editingGoal.year}
-                      onChange={(e) =>
-                        setEditingGoal({
-                          ...editingGoal,
-                          year: parseInt(e.target.value) || new Date().getFullYear(),
-                        })
-                      }
-                      required
+                      type="number" min={new Date().getFullYear()} max={new Date().getFullYear() + 30} className="form-control" value={editingGoal.year}
+                      onChange={(e) =>   setEditingGoal({  ...editingGoal,  year: parseInt(e.target.value) || new Date().getFullYear(),  })  }  required
                     />
                   </div>
 
@@ -1456,12 +1014,7 @@ const GoalsPage = () => {
                           </span>
                         </label>
                         <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={currentEmissions.scope1}
-                          className="form-control"
-                          value={editingGoal.scope1Goal}
+                          type="number" step="0.01" min="0" max={currentEmissions.scope1} className="form-control" value={editingGoal.scope1Goal}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
                             setEditingGoal({ ...editingGoal, scope1Goal: value });
@@ -1493,12 +1046,7 @@ const GoalsPage = () => {
                           </span>
                         </label>
                         <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={currentEmissions.scope2}
-                          className="form-control"
-                          value={editingGoal.scope2Goal}
+                          type="number" step="0.01" min="0" max={currentEmissions.scope2} className="form-control" value={editingGoal.scope2Goal}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
                             setEditingGoal({ ...editingGoal, scope2Goal: value });
@@ -1530,12 +1078,7 @@ const GoalsPage = () => {
                           </span>
                         </label>
                         <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={currentEmissions.scope3}
-                          className="form-control"
-                          value={editingGoal.scope3Goal}
+                          type="number" step="0.01" min="0" max={currentEmissions.scope3} className="form-control" value={editingGoal.scope3Goal}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
                             setEditingGoal({ ...editingGoal, scope3Goal: value });
@@ -1560,10 +1103,7 @@ const GoalsPage = () => {
 
                   <div className="mb-3">
                     <label className="form-label">Description</label>
-                    <textarea
-                      className="form-control"
-                      rows="3"
-                      value={editingGoal.description || ""}
+                    <textarea className="form-control" rows="3" value={editingGoal.description || ""}
                       onChange={(e) =>
                         setEditingGoal({ ...editingGoal, description: e.target.value })
                       }
@@ -1574,21 +1114,9 @@ const GoalsPage = () => {
                     <div className="d-flex">
                       <div>
                         <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="icon alert-icon"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          strokeWidth="2"
-                          stroke="currentColor"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                          xmlns="http://www.w3.org/2000/svg" className="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
                         >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                          <path d="M12 9h.01"></path>
-                          <path d="M11 12h1v4h1"></path>
-                          <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>   <path d="M12 9h.01"></path>    <path d="M11 12h1v4h1"></path> <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
                         </svg>
                       </div>
                       <div>
@@ -1603,36 +1131,21 @@ const GoalsPage = () => {
                             : 0.0}%)
                         </div>
                         <div className="text-muted mt-2">
-                          <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos
-                          émissions actuelles seront inférieures ou égales à la valeur cible.
+                          <strong>Statut de l'objectif:</strong> L'objectif sera attein  émissions actuelles seront inférieures ou égales à la valeur cible.
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-link link-secondary"
-                    onClick={() => setShowEditModal(false)}
+                  <button    type="button"   className="btn btn-link link-secondary"  onClick={() => setShowEditModal(false)}
                   >
                     Annuler
                   </button>
                   <button type="submit" className="btn btn-primary ms-auto">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="icon"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <svg  xmlns="http://www.w3.org/2000/svg" className="icon" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"
                     >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M5 12l5 5l10 -10" />
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />  <path d="M5 12l5 5l10 -10" />
                     </svg>
                     Mettre à jour l'objectif
                   </button>

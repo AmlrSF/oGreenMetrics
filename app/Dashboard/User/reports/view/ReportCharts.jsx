@@ -53,7 +53,7 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
   }, [report, activeTab]);
 
   const initializeCharts = () => {
-    const emissionTotals = calculateTotalEmissions();
+    const emissionTotals = calculateTotalEmissions;  
     const scope1Details = getScope1Details();
     const scope2Details = getScope2Details();
     const scope3Details = getScope3Details();
