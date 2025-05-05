@@ -171,7 +171,8 @@ const Dashboard = () => {
         <div className="col-xl-6">
           <div className="card shadow mb-4">
             <div className="card-header py-3">
-              <h6 className="m-0 font-weight-bold text-primary">Rating Distribution</h6>
+              <h2 className="m-0 font-weight-bold text-primary">
+                 Distribution</h2>
             </div>
             <div className="card-body">
               <div className="chart-pie d-flex justify-content-center align-content-center pt-4">
@@ -184,7 +185,7 @@ const Dashboard = () => {
         <div className="col-xl-6">
           <div className="card shadow mb-4">
             <div className="card-header py-3">
-              <h6 className="m-0 font-weight-bold text-primary">Recent Sites</h6>
+              <h2 className="m-0 font-weight-bold text-primary">Recent Sites</h2>
             </div>
             <div className="card-body">
               <div className="table-responsive">
