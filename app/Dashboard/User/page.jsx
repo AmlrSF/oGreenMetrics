@@ -16,9 +16,16 @@ import {
   BarElement,
 } from "chart.js";
 
-import { IconTrendingUp, IconChartBar, 
-  IconChartPie, IconCalendar,IconTruck,IconLamp,IconActivity,
-  IconBuildingFactory } from "@tabler/icons-react";
+import {
+  IconTrendingUp,
+  IconChartBar,
+  IconChartPie,
+  IconCalendar,
+  IconTruck,
+  IconLamp,
+  IconActivity,
+  IconBuildingFactory,
+} from "@tabler/icons-react";
 
 ChartJS.register(
   CategoryScale,
@@ -34,7 +41,7 @@ ChartJS.register(
 );
 
 import { Bar, Line, Doughnut } from "react-chartjs-2";
- import { formatDate } from "@/lib/Utils";
+import { formatDate } from "@/lib/Utils";
 
 const COLORS = ["#206bc4", "#42e189", "#d618d6"];
 const TIME_RANGES = ["7 Days", "30 Days", "3 Months", "1 Year"];
@@ -243,8 +250,6 @@ const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
           <div className="h2 mb-0 me-2">{Number(value).toFixed(2)} tCO₂e</div>
           <IconTrendingUp className="icon-sm text-green" />
         </div>
-
-      
       </div>
     </div>
   );
@@ -320,7 +325,11 @@ const CompanyDash = () => {
   if (loading || !processedEmissions) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <div className="spinner-border text-primary" role="status" style={{ width: '2rem', height: '2rem' }}>
+        <div
+          className="spinner-border text-primary"
+          role="status"
+          style={{ width: "2rem", height: "2rem" }}
+        >
           <span className="visually-hidden">Loading...</span>
         </div>
       </div>
@@ -447,7 +456,14 @@ const CompanyDash = () => {
         </div>
       </div>
 
-      <div className="container-card mb-2">
+      <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+        gap: "10px",
+      }}      
+        className=" mb-2"
+      >
         <EmissionCard
           title="Émissions Scope 1"
           icon={IconBuildingFactory}

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const Hero = () => {
   return (
-    <section className="relative">
+    <section id="home" className="relative">
       <div className="container h-100 hero min-h-[90vh] 
       d-flex align-items-center ">
       <div className="d-flex align-items-center 

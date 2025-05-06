@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
-import { Trash2, Edit2, Search } from "lucide-react";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+
+import { IconEdit, IconSearch, IconTrash } from "@tabler/icons-react";
 
 const DataTable = ({
   headers,
@@ -97,7 +97,7 @@ const DataTable = ({
           <div className="d-flex flex-wrap gap-2">
             <div className="input-icon " style={{ width: "350px" }}>
               <span className="input-icon-addon">
-                <Search size={16} />
+                <IconSearch size={16} />
               </span>
               <input
                 type="text"

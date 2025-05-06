@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+
 import { useRouter } from "next/navigation";
 import {
   IconChartBar,
@@ -18,6 +19,7 @@ import {
   IconSnowflake,
 } from "@tabler/icons-react";
 import ReportCharts from "./ReportCharts";
+import html2pdf from "html2pdf.js";
 
 const ViewReport = ({ id }) => {
   const [report, setReport] = useState(null);
@@ -25,6 +27,37 @@ const ViewReport = ({ id }) => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const router = useRouter();
+  const tabs = ["overview", "scope1", "scope2", "scope3"];
+
+  const handleDownloadPdf = async () => {
+   
+    try {
+      const element = document.querySelector(".report_data");
+
+      if (!element) {
+        console.error("Report data element not found");
+        return;
+      }
+
+      const opt = {
+        margin: 1,
+        filename: "report.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+      };
+
+      // tabs.forEach(async(tab) => {
+      //     setActiveTab(tab);
+      //     await html2pdf().set(opt).from(element).save();
+      // });
+
+      await html2pdf().set(opt).from(element).save();
+ 
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchReportData = async () => {
@@ -58,10 +91,8 @@ const ViewReport = ({ id }) => {
     fetchReportData();
   }, [id]);
 
-  // Memoize report
   const memoizedReport = useMemo(() => report, [report]);
 
-  // Calculate emissions (memoized to prevent recalculation)
   const calculateTotalEmissions = useMemo(() => {
     if (!memoizedReport) return { scope1: 0, scope2: 0, scope3: 0, total: 0 };
 
@@ -314,7 +345,6 @@ const ViewReport = ({ id }) => {
     return Number(num).toLocaleString("en-US", { maximumFractionDigits: 2 });
   };
 
-  // Conditional rendering for loading, error, and no data states
   if (loading) {
     return (
       <div className="container-xl py-4">
@@ -340,77 +370,32 @@ const ViewReport = ({ id }) => {
       </div>
     );
   }
-
-  const handleDownloadPdf = React.useCallback(async () => {
-    try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const element = document.querySelector(".report_data");
-
-      if (!element) {
-        console.error("Report data element not found");
-        return;
-      }
-
-      const opt = {
-        margin: 1,
-        filename: "report.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-      };
-
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    }
-  }, []);
-
   const handlePrint = () => {
     const printContent = document.querySelector(".report_data");
-
-    if (!printContent) {
-      console.error("Print content not found");
-      return;
-    }
-    const printWindow = window.open("", "_blank");
-
-    if (!printWindow) {
-      alert("Please allow pop-ups to print");
-      return;
-    }
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              padding: 20px;
-            }
-            @media print {
-              @page {
-                margin: 0.5cm;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          ${printContent.innerHTML}
-        </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-
-    printWindow.onload = function () {
+  
+    if (printContent) {
+      const printWindow = window.open("", "", "width=800,height=600");
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Print Report</title>
+            <style>
+              /* Optional: include any styles you need for printing */
+              body { font-family: Arial; padding: 20px; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
       printWindow.focus();
       printWindow.print();
-      printWindow.onafterprint = function () {
-        printWindow.close();
-      };
-    };
+      printWindow.close();
+    }
   };
+  
 
   return (
     <div className="container-xl py-4">
@@ -440,7 +425,7 @@ const ViewReport = ({ id }) => {
               <button
                 className="btn btn-outline-primary
                btn-icon"
-                onClick={handleDownloadPdf()}
+                onClick={handleDownloadPdf}
               >
                 <IconDownload size={18} />
               </button>
@@ -450,7 +435,7 @@ const ViewReport = ({ id }) => {
       </div>
 
       <div className="report_data">
-        <div className="card p-4 ">
+        <div className="card p-4 mb-3 ">
           <div className="row">
             <div className="col-lg-8">
               <p className="text-secondary mb-3">
@@ -587,7 +572,7 @@ const ViewReport = ({ id }) => {
         </div>
 
         {/* Tab Content */}
-        {activeTab === "overview" && (
+        {(activeTab === "overview" || activeTab === "all") && (
           <>
             <div className="row row-cards">
               <div className="col-md-6">
@@ -695,7 +680,7 @@ const ViewReport = ({ id }) => {
                       Informations sur le rapport généré
                     </h3>
                   </div>
-                  <div className="card-body">
+                  <div className="card-body pb-6">
                     <dl className="row">
                       <dt className="col-5">Nom du rapport :</dt>
                       <dd className="col-7">{memoizedReport.name}</dd>
@@ -753,7 +738,7 @@ const ViewReport = ({ id }) => {
           </>
         )}
 
-        {activeTab === "scope1" && (
+        {(activeTab === "scope1" || activeTab === "all") && (
           <>
             <ReportCharts
               report={memoizedReport}
@@ -948,7 +933,7 @@ const ViewReport = ({ id }) => {
           </>
         )}
 
-        {activeTab === "scope2" && (
+        {(activeTab === "scope2" || activeTab === "all") && (
           <>
             <ReportCharts
               report={memoizedReport}
@@ -1301,7 +1286,7 @@ const ViewReport = ({ id }) => {
           </>
         )}
 
-        {activeTab === "scope3" && (
+        {(activeTab === "scope3" || activeTab === "all") && (
           <>
             <ReportCharts
               report={memoizedReport}

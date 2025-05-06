@@ -44,7 +44,7 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
       }
       Object.values(charts).forEach(chart => {
         if (chart) {
-          console.log("Destroying chart:", chart.canvas.id);
+          console.log("Destroying chart:", chart.canvas?.id);
           chart.destroy();
         }
       });
@@ -53,7 +53,7 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
   }, [report, activeTab]);
 
   const initializeCharts = () => {
-    const emissionTotals = calculateTotalEmissions();
+    const emissionTotals = calculateTotalEmissions;
     const scope1Details = getScope1Details();
     const scope2Details = getScope2Details();
     const scope3Details = getScope3Details();
@@ -597,50 +597,50 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
         <div className="row row-cards mt-3">
           {activeTab === "overview" && (
             <>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Émissions par scope</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="scopeDistributionChart" ref={scopeDistributionChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="scopeDistributionChart" ref={scopeDistributionChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Émissions par source</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="emissionsBySourceChart" ref={emissionsBySourceChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="emissionsBySourceChart" ref={emissionsBySourceChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Intensité des émissions par activité</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="emissionIntensityChart" ref={emissionIntensityChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="emissionIntensityChart" ref={emissionIntensityChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Comparaison de l’empreinte carbone</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="carbonFootprintChart" ref={carbonFootprintChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas  id="carbonFootprintChart" ref={carbonFootprintChartRef}></canvas>
                     </div>
                   </div>
                 </div>
@@ -651,8 +651,8 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
                     <h3 className="card-title">Émissions par catégorie</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="emissionsByCategoryChart" ref={emissionsByCategoryChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="emissionsByCategoryChart" ref={emissionsByCategoryChartRef}></canvas>
                     </div>
                   </div>
                 </div>
@@ -661,38 +661,38 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
           )}
           {activeTab === "scope1" && (
             <>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Répartition des émissions Scope 1</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="scope1BreakdownChart" ref={scope1BreakdownChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="scope1BreakdownChart" ref={scope1BreakdownChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Émissions par Type de Carburant</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="fuelTypeChart" ref={fuelTypeChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="fuelTypeChart" ref={fuelTypeChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Intensité des Émissions de Carburant</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="fuelEmissionIntensityChart" ref={fuelEmissionIntensityChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="fuelEmissionIntensityChart" ref={fuelEmissionIntensityChartRef}></canvas>
                     </div>
                   </div>
                 </div>
@@ -701,38 +701,38 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
           )}
           {activeTab === "scope2" && (
             <>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Répartition des émissions du Scope 2</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="scope2BreakdownChart" ref={scope2BreakdownChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="scope2BreakdownChart" ref={scope2BreakdownChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Sources d'Électricité</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="electricitySourceChart" ref={electricitySourceChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center  justify-content-center">
+                      <canvas className="w-100" id="electricitySourceChart" ref={electricitySourceChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Consommation d'Énergie par Type</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
-                      <canvas id="energyConsumptionChart" ref={energyConsumptionChartRef}></canvas>
+                      <canvas className="w-100" id="energyConsumptionChart" ref={energyConsumptionChartRef}></canvas>
                     </div>
                   </div>
                 </div>
@@ -741,38 +741,38 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
           )}
           {activeTab === "scope3" && (
             <>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Répartition des émissions du Scope 3</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
-                      <canvas id="scope3BreakdownChart" ref={scope3BreakdownChartRef}></canvas>
+                      <canvas className="w-100" id="scope3BreakdownChart" ref={scope3BreakdownChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Émissions par mode de transport</h3>
                   </div>
                   <div className="card-body">
                     <div style={{ height: "300px" }}>
-                      <canvas id="transportModeChart" ref={transportModeChartRef}></canvas>
+                      <canvas className="w-100" id="transportModeChart" ref={transportModeChartRef}></canvas>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Émissions de déchets par type</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="wasteTypeChart" ref={wasteTypeChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="wasteTypeChart" ref={wasteTypeChartRef}></canvas>
                     </div>
                   </div>
                 </div>
@@ -783,8 +783,8 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
                     <h3 className="card-title">Émissions de déplacements professionnels par objectif</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="businessTravelChart" ref={businessTravelChartRef}></canvas>
+                    <div style={{ height: "300px" }} className="d-flex align-items-center justify-content-center">
+                      <canvas className="w-100" id="businessTravelChart" ref={businessTravelChartRef}></canvas>
                     </div>
                   </div>
                 </div>

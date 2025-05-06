@@ -59,8 +59,8 @@ const Navbar = ({ user, isAdmin }) => {
             <div
               className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
               style={{
-                width: "25px",
-                height: "25px",
+                width: "30px",
+                height: "30px",
                 backgroundColor: "#fff",
                 overflow: "hidden",
               }}
@@ -70,6 +70,9 @@ const Navbar = ({ user, isAdmin }) => {
                   src={user?.photo_de_profil}
                   alt={`${user?.prenom} ${user?.nom}`}
                   className="rounded-circle"
+                  style={{
+                    width: "25px",
+                    height: "25px",}}
                 />
               ) : (
                 <span style={{ color: "#8ebe21" }}>{getInitials(user?.prenom, user?.nom)}</span>

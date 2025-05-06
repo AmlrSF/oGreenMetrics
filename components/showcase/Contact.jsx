@@ -22,7 +22,7 @@ const Contact = () => {
   };
 
   return (
-    <section className="container ctct">
+    <section id="contact" className="container ctct">
       <div
         className="row justify-content-center 
        "
