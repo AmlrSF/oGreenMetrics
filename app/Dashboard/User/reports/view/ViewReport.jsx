@@ -39,18 +39,31 @@ const ViewReport = ({ id }) => {
         return;
       }
 
-      const opt = {
-        margin: 1,
-        filename: "report.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-      };
 
-      // tabs.forEach(async(tab) => {
-      //     setActiveTab(tab);
-      //     await html2pdf().set(opt).from(element).save();
-      // });
+
+      const opt = {
+        margin:       [0.5, 0.5, 0.5, 0.5], 
+        filename:    `${new Date().toLocaleDateString('en-US').replace(/\//g, '-')}_report_${activeTab}.pdf`, 
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  {
+          scale: 2,
+          logging: false,
+          letterRendering: true,
+          useCORS: true, 
+        },
+        jsPDF: {
+          unit: 'in',
+          format: 'letter',
+          orientation: 'portrait',
+        },
+        pagebreak: {
+          mode: ['avoid-all', 'css', 'legacy'],
+          avoid: ['.recharts-wrapper', 'img', '.avoid-break'], 
+        },
+      };
+      
+  
+
 
       await html2pdf().set(opt).from(element).save();
  
@@ -370,31 +383,7 @@ const ViewReport = ({ id }) => {
       </div>
     );
   }
-  const handlePrint = () => {
-    const printContent = document.querySelector(".report_data");
-  
-    if (printContent) {
-      const printWindow = window.open("", "", "width=800,height=600");
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Print Report</title>
-            <style>
-              /* Optional: include any styles you need for printing */
-              body { font-family: Arial; padding: 20px; }
-            </style>
-          </head>
-          <body>
-            ${printContent.innerHTML}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }
-  };
+ 
   
 
   return (
@@ -418,7 +407,7 @@ const ViewReport = ({ id }) => {
               <button
                 className="btn btn-outline-primary 
                btn-icon"
-                onClick={handlePrint}
+                onClick={()=> window.print()}
               >
                 <IconPrinter size={18} />
               </button>
@@ -574,8 +563,8 @@ const ViewReport = ({ id }) => {
         {/* Tab Content */}
         {(activeTab === "overview" || activeTab === "all") && (
           <>
-            <div className="row row-cards">
-              <div className="col-md-6">
+            <div className=" row-cards">
+              <div className=" mb-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">Résumé des émissions</h3>
@@ -673,7 +662,7 @@ const ViewReport = ({ id }) => {
                   </div>
                 </div>
               </div>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">
@@ -1208,7 +1197,7 @@ const ViewReport = ({ id }) => {
                   </div>
                   <div className="card-body">
                     <div className="row align-items-center">
-                      <div className="col-md-6">
+                      <div className="">
                         <dl className="row">
                           <dt className="col-5">Pays :</dt>
                           <dd className="col-7">
@@ -1244,7 +1233,7 @@ const ViewReport = ({ id }) => {
                           </dd>
                         </dl>
                       </div>
-                      <div className="col-md-6">
+                      <div className="">
                         <div className="alert alert-info">
                           <div className="d-flex">
                             <div>
@@ -1303,7 +1292,7 @@ const ViewReport = ({ id }) => {
             />
 
             <div className="row row-cards">
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">
@@ -1385,7 +1374,7 @@ const ViewReport = ({ id }) => {
                 </div>
               </div>
 
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">
@@ -1470,7 +1459,7 @@ const ViewReport = ({ id }) => {
                 </div>
               </div>
 
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">
@@ -1557,7 +1546,7 @@ const ViewReport = ({ id }) => {
                 </div>
               </div>
 
-              <div className="col-md-6 mt-3">
+              <div className=" mt-3">
                 <div className="card">
                   <div className="card-header">
                     <h3 className="card-title">

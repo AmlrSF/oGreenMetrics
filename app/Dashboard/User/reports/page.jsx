@@ -34,6 +34,7 @@ const Reporting = () => {
 
   useEffect(() => {
     const initializeData = async () => {
+     
       const id = await fetchUser();
       if (id) {
         fetchReports(id);
@@ -43,6 +44,7 @@ const Reporting = () => {
   }, []);
 
   const fetchUser = async () => {
+    setLoading(false)
     try {
       const userResponse = await fetch("http://localhost:4000/auth", {
         method: "POST",
