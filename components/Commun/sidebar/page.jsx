@@ -123,7 +123,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
         }}
       >
         <div
-          className="d-flex align-items-center p-2 mb-5 "
+          className="d-flex align-items-center mt-1 p-2 mb-5 "
           style={{
             justifyContent: isCollapsed ? "center" : "space-between",
             backgroundColor: colors.primary,

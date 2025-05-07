@@ -11,7 +11,7 @@ const DashboardLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { push } = useRouter();
+  const { push, back } = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -29,35 +29,39 @@ const DashboardLayout = ({ children }) => {
         });
 
         const data = await response.json();
+
         if (data?.user) {
-          setUser(data?.user);
-          console.log(data?.data);
-          if (data?.user?.role == "Admin") {
-            push("/Dashboard/Admin");
+          
+          if (data?.user?.role === "Admin"  ) {
+            setUser(data.user);
+            setIsLoading(false);
+           
+            if (data?.user?.AdminRoles) {
+              let adminRole = data?.user?.AdminRoles;
+              console.log(adminRole);
+  
+              if (adminRole?.companyManagement == "00") {
+                push("/Dashboard/Admin");
+              }
+  
+              if (adminRole?.roleManagement == "00") {
+                push("/Dashboard/Admin");
+              }
+  
+              if (adminRole?.userManagement == "00") {
+                push("/Dashboard/Admin");
+              }
+            }
+
+           
+          } else{
+            back();
           }
 
-          if (data?.user?.AdminRoles) {
-            let adminRole = data?.user?.AdminRoles;
-            console.log(adminRole);
-
-            if (adminRole?.companyManagement == "00") {
-              push("/Dashboard/Admin");
-            }
-
-            if (adminRole?.roleManagement == "00") {
-              push("/Dashboard/Admin");
-            }
-
-            if (adminRole?.userManagement == "00") {
-              push("/Dashboard/Admin");
-            }
-          }
-
-          setIsLoading(false);
-        } else {
-          console.log("Invalid role or no user, redirecting to login");
+        }else{
           push("/login");
         }
+
       } catch (error) {
         console.error("Authorization failed:", error);
         push("/login");
@@ -81,10 +85,11 @@ const DashboardLayout = ({ children }) => {
     }
   }, [isCollapsed]);
 
-  if (isLoading) {
+  if (isLoading  ) {
     return <Loader />;
   }
 
+  
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar
@@ -93,7 +98,6 @@ const DashboardLayout = ({ children }) => {
         setIsCollapsed={setIsCollapsed}
       />
       <div
-        
         className="flex-1 flex flex-col overflow-auto transition-all duration-300"
         style={{
           marginLeft: isCollapsed ? "60px" : "260px",
