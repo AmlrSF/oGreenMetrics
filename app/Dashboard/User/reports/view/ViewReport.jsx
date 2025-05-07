@@ -2,22 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  IconChartBar,
-  IconFileText,
-  IconCalendar,
-  IconBuildingFactory,
-  IconArrowLeft,
-  IconDownload,
-  IconPrinter,
-  IconFlame,
-  IconTruck,
-  IconBriefcase,
-  IconTrash,
-  IconBatteryCharging,
-  IconSnowflake,
-} from "@tabler/icons-react";
-import ReportCharts from "./ReportCharts";
+import { IconChartBar, IconFileText, IconCalendar, IconInfoCircle, IconBuildingFactory, IconArrowLeft, IconDownload, IconPrinter, IconFlame, IconTruck, IconBriefcase, IconTrash, IconBatteryCharging, IconSnowflake, IconBulb } from "@tabler/icons-react";
+import OverviewTab from "./OverviewTab";
+import Scope1Tab from "./Scope1Tab";
+import Scope2Tab from "./Scope2Tab";
+import Scope3Tab from "./Scope3Tab";
+import RecommendationsTab from "./RecommendationsTab";
 
 const ViewReport = ({ id }) => {
   const [report, setReport] = useState(null);
@@ -51,9 +41,7 @@ const ViewReport = ({ id }) => {
       } finally {
         setLoading(false);
       }
-    };
-
-    console.log("Fetching report with ID:", id); // Debug log
+    }; 
     fetchReportData();
   }, [id]);
 
@@ -274,6 +262,22 @@ const ViewReport = ({ id }) => {
     );
   }
 
+  // Prepare props for child components
+  const commonProps = {
+    report: memoizedReport,
+    calculateTotalEmissions,
+    getScope1Details,
+    getScope2Details,
+    getScope3Details,
+    getFuelTypes,
+    getCoolingTypes,
+    getHeatingTypes,
+    getTransportModes,
+    getWasteTypes,
+    formatNumber,
+    activeTab
+  };
+
   return (
     <div className="container-xl py-4">
       {/* Report Header */}
@@ -352,22 +356,22 @@ const ViewReport = ({ id }) => {
         <div className="card-body">
           <ul className="nav nav-tabs nav-fill" role="tablist">
             <li className="nav-item">
-              <button
-                className={`nav-link ${activeTab === "overview" ? "active" : ""}`}
-                onClick={() => setActiveTab("overview")}
-                role="tab"
+              <button 
+                className={`nav-link ${activeTab === "overview" ? "active" : ""}`} 
+                onClick={() => setActiveTab("overview")} 
+                role="tab" 
                 aria-selected={activeTab === "overview"}
               >
-              <IconChartBar size={16} className="me-2" />
+                <IconChartBar size={16} className="me-2" />
                 Aperçu
               </button>
             </li>
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope1 && (
               <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "scope1" ? "active" : ""}`}
-                  onClick={() => setActiveTab("scope1")}
-                  role="tab"
+                <button 
+                  className={`nav-link ${activeTab === "scope1" ? "active" : ""}`}   
+                  onClick={() => setActiveTab("scope1")}   
+                  role="tab"   
                   aria-selected={activeTab === "scope1"}
                 >
                   <IconFlame size={16} className="me-2" />
@@ -377,10 +381,10 @@ const ViewReport = ({ id }) => {
             )}
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope2 && (
               <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "scope2" ? "active" : ""}`}
-                  onClick={() => setActiveTab("scope2")}
-                  role="tab"
+                <button 
+                  className={`nav-link ${activeTab === "scope2" ? "active" : ""}`} 
+                  onClick={() => setActiveTab("scope2")} 
+                  role="tab" 
                   aria-selected={activeTab === "scope2"}
                 >
                   <IconBatteryCharging size={16} className="me-2" />
@@ -390,10 +394,10 @@ const ViewReport = ({ id }) => {
             )}
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope3 && (
               <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "scope3" ? "active" : ""}`}
-                  onClick={() => setActiveTab("scope3")}
-                  role="tab"
+                <button 
+                  className={`nav-link ${activeTab === "scope3" ? "active" : ""}`} 
+                  onClick={() => setActiveTab("scope3")} 
+                  role="tab" 
                   aria-selected={activeTab === "scope3"}
                 >
                   <IconTruck size={16} className="me-2" />
@@ -401,763 +405,27 @@ const ViewReport = ({ id }) => {
                 </button>
               </li>
             )}
+            <li className="nav-item">
+              <button 
+                className={`nav-link ${activeTab === "recommendations" ? "active" : ""}`} 
+                onClick={() => setActiveTab("recommendations")} 
+                role="tab" 
+                aria-selected={activeTab === "recommendations"}
+              >
+                <IconBulb size={16} className="me-2" />
+                Recommandations
+              </button>
+            </li>
           </ul>
         </div>
       </div>
 
       {/* Tab Content */}
-      {activeTab === "overview" && (
-        <>
-          <div className="row row-cards">
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">Résumé des émissions</h3>
-                </div>
-                <div className="card-body">
-                  <div className="mb-3">
-                    <div className="d-flex align-items-center justify-content-between mb-1">
-                      <span className="d-flex align-items-center">
-                        <span className="badge bg-blue-lt me-2">Scope 1</span>
-                        Émissions directes
-                      </span>
-                      <strong>{formatNumber(calculateTotalEmissions.scope1)} tCO₂</strong>
-                    </div>
-                    <div className="progress mb-3">
-                      <div
-                        className="progress-bar bg-blue"
-                        style={{ width: `${calculateTotalEmissions.total ? (calculateTotalEmissions.scope1 / calculateTotalEmissions.total) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <div className="d-flex align-items-center justify-content-between mb-1">
-                      <span className="d-flex align-items-center">
-                        <span className="badge bg-purple-lt me-2">Scope 2</span>
-                        Émissions indirectes
-                      </span>
-                      <strong>{formatNumber(calculateTotalEmissions.scope2)} tCO₂</strong>
-                    </div>
-                    <div className="progress mb-3">
-                      <div
-                        className="progress-bar bg-purple"
-                        style={{ width: `${calculateTotalEmissions.total ? (calculateTotalEmissions.scope2 / calculateTotalEmissions.total) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <div className="d-flex align-items-center justify-content-between mb-1">
-                      <span className="d-flex align-items-center">
-                        <span className="badge bg-green-lt me-2">Scope 3</span>
-                        Émissions indirectes
-                      </span>
-                      <strong>{formatNumber(calculateTotalEmissions.scope3)} tCO₂</strong>
-                    </div>
-                    <div className="progress mb-3">
-                      <div
-                        className="progress-bar bg-green"
-                        style={{ width: `${calculateTotalEmissions.total ? (calculateTotalEmissions.scope3 / calculateTotalEmissions.total) * 100 : 0}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <div className="d-flex align-items-center justify-content-between mb-1">
-                      <span className="font-weight-bold">Émissions totales</span>
-                      <strong>{formatNumber(calculateTotalEmissions.total)} tCO₂</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">Informations sur le rapport généré</h3>
-                </div>
-                <div className="card-body">
-                  <dl className="row">
-                    <dt className="col-5">Nom du rapport :</dt>
-                    <dd className="col-7">{memoizedReport.name}</dd>
-                    <dt className="col-5">Description :</dt>
-                    <dd className="col-7">{memoizedReport.description}</dd>
-                    <dt className="col-5">Année :</dt>
-                    <dd className="col-7">{memoizedReport.Year}</dd>
-                    <dt className="col-5">Type de rapport :</dt>
-                    <dd className="col-7">{memoizedReport.detailLevel === "detailed" ? "Detailed Report" : "Summary Report"}</dd>
-                    <dt className="col-5">Créé le :</dt>
-                    <dd className="col-7">{new Date(memoizedReport.createdAt).toLocaleDateString()}</dd>
-                    <dt className="col-5">Scopes inclus :</dt>
-                    <dd className="col-7">
-                      {memoizedReport.scope1 && <span className="badge bg-blue-lt me-1">Scope 1</span>}
-                      {memoizedReport.scope2 && <span className="badge bg-purple-lt me-1">Scope 2</span>}
-                      {memoizedReport.scope3 && <span className="badge bg-green-lt me-1">Scope 3</span>}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <ReportCharts
-            report={memoizedReport}
-            activeTab={activeTab}
-            calculateTotalEmissions={calculateTotalEmissions}
-            getScope1Details={getScope1Details}
-            getScope2Details={getScope2Details}
-            getScope3Details={getScope3Details}
-            getFuelTypes={getFuelTypes}
-            getCoolingTypes={getCoolingTypes}
-            getHeatingTypes={getHeatingTypes}
-            getTransportModes={getTransportModes}
-            getWasteTypes={getWasteTypes}
-          />
-        </>
-      )}
-
-      {activeTab === "scope1" && (
-        <>
-          <ReportCharts
-            report={memoizedReport}
-            activeTab={activeTab}
-            calculateTotalEmissions={calculateTotalEmissions}
-            getScope1Details={getScope1Details}
-            getScope2Details={getScope2Details}
-            getScope3Details={getScope3Details}
-            getFuelTypes={getFuelTypes}
-            getCoolingTypes={getCoolingTypes}
-            getHeatingTypes={getHeatingTypes}
-            getTransportModes={getTransportModes}
-            getWasteTypes={getWasteTypes}
-          />
-
-          <div className="row row-cards">
-            <div className="col-md-12">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconFlame className="me-2" size={20} />
-                    Combustion de Carburant par Type
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-blue text-white">
-                      {memoizedReport.scope1Data?.fuelCombution?.[0]?.totalEmissions?.toLocaleString() || 0} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  {getFuelTypes().length > 0 ? (
-                    <div className="table-responsive">
-                      <table className="table table-vcenter card-table table-striped">
-                        <thead>
-                          <tr>
-                            <th>Type de Carburant</th>
-                            <th>Nombre de Machines</th>
-                            <th>Quantité Totale</th>
-                            <th>Émissions CO₂ (tCO₂)</th>
-                            <th>Pourcentage</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {getFuelTypes().map((fuelType, index) => {
-                            const machines = memoizedReport.scope1Data?.fuelCombution?.[0]?.machines?.filter(
-                              m => m.typeDeCarburant === fuelType.type
-                            ) || [];
-                            const totalQuantity = machines.reduce((sum, m) => sum + m.quantite, 0);
-                            const percentage = (fuelType.emissions / (memoizedReport.scope1Data?.fuelCombution?.[0]?.totalEmissions || 1)) * 100;
-                            return (
-                              <tr key={index}>
-                                <td>
-                                  <span className="badge bg-blue-lt">{fuelType.type}</span>
-                                </td>
-                                <td>{machines.length}</td>
-                                <td>{totalQuantity.toLocaleString()}</td>
-                                <td><strong>{fuelType.emissions.toLocaleString()}</strong></td>
-                                <td>
-                                  <div className="d-flex align-items-center">
-                                    <span className="me-2">{percentage.toFixed(1)}%</span>
-                                    <div className="progress flex-grow-1" style={{ height: "6px" }}>
-                                      <div className="progress-bar bg-blue" style={{ width: `${percentage}%` }}></div>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colSpan="3" className="text-end"><strong>Total Emissions:</strong></td>
-                            <td><strong>{memoizedReport.scope1Data?.fuelCombution?.[0]?.totalEmissions?.toLocaleString() || 0} tCO₂</strong></td>
-                            <td>100%</td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="alert alert-info">Aucune donnée sur la combustion de carburant disponible.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-12 mt-3">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconBuildingFactory className="me-2" size={20} />
-                    Processus de Production
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-blue text-white">
-                      {memoizedReport.scope1Data?.production?.[0]?.totalEmissions?.toLocaleString() || 0} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  <div className="table-responsive">
-                    <table className="table table-vcenter card-table table-striped">
-                      <thead>
-                        <tr>
-                          <th>Nom du Produit</th>
-                          <th>Ligne de Production</th>
-                          <th>Quantité</th>
-                          <th>Émissions CO₂ (tCO₂)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {memoizedReport.scope1Data?.production?.[0]?.products?.map((product, index) => (
-                          <tr key={product._id || index}>
-                            <td>{product.nom}</td>
-                            <td>
-                              <span className="badge bg-azure-lt">{product.ligneDeProduction}</span>
-                            </td>
-                            <td>{product.quantite.toLocaleString()}</td>
-                            <td>
-                              <strong>{product.co2Emission.toLocaleString()}</strong>
-                            </td>
-                          </tr>
-                        )) || (
-                          <tr>
-                            <td colSpan="4" className="text-center">Aucune donnée disponible</td>
-                          </tr>
-                        )}
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <td colSpan="3" className="text-end"><strong>Émissions Totales:</strong></td>
-                          <td><strong>{memoizedReport.scope1Data?.production?.[0]?.totalEmissions?.toLocaleString() || 0} tCO₂</strong></td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {activeTab === "scope2" && (
-        <>
-          <ReportCharts
-            report={memoizedReport}
-            activeTab={activeTab}
-            calculateTotalEmissions={calculateTotalEmissions}
-            getScope1Details={getScope1Details}
-            getScope2Details={getScope2Details}
-            getScope3Details={getScope3Details}
-            getFuelTypes={getFuelTypes}
-            getCoolingTypes={getCoolingTypes}
-            getHeatingTypes={getHeatingTypes}
-            getTransportModes={getTransportModes}
-            getWasteTypes={getWasteTypes}
-          />
-
-          <div className="row row-cards">
-            <div className="col-md-12">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconSnowflake className="me-2" size={20} />
-                    Systèmes de Refroidissement par Type
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-purple text-white">
-                      {Array.isArray(memoizedReport.scope2Data?.cooling)
-                        ? memoizedReport.scope2Data?.cooling?.[0]?.totalEmissions?.toLocaleString()
-                        : memoizedReport.scope2Data?.cooling?.totalEmissions?.toLocaleString() || 0} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  {getCoolingTypes().length > 0 ? (
-                    <div className="table-responsive">
-                      <table className="table table-vcenter card-table table-striped">
-                        <thead>
-                          <tr>
-                            <th>Type de Refroidissement</th>
-                            <th>Nombre de Systèmes</th>
-                            <th>Énergie Totale (kWh)</th>
-                            <th>Émissions de CO₂ (tCO₂)</th>
-                            <th>Pourcentage</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {getCoolingTypes().map((coolingType, index) => {
-                            const coolers = (Array.isArray(memoizedReport.scope2Data?.cooling)
-                              ? memoizedReport.scope2Data?.cooling?.[0]?.coolers
-                              : memoizedReport.scope2Data?.cooling?.coolers
-                            )?.filter(c => c.type === coolingType.type) || [];
-                            const totalEnergy = coolers.reduce((sum, c) => sum + (c.energy || 0), 0);
-                            const totalEmissions = Array.isArray(memoizedReport.scope2Data?.cooling)
-                              ? memoizedReport.scope2Data?.cooling?.[0]?.totalEmissions
-                              : memoizedReport.scope2Data?.cooling?.totalEmissions || 1;
-                            const percentage = (coolingType.emissions / totalEmissions) * 100;
-                            return (
-                              <tr key={index}>
-                                <td>
-                                  <span className="badge bg-cyan-lt">{coolingType.type}</span>
-                                </td>
-                                <td>{coolers.length}</td>
-                                <td>{totalEnergy.toLocaleString()}</td>
-                                <td><strong>{coolingType.emissions.toLocaleString()}</strong></td>
-                                <td>
-                                  <div className="d-flex align-items-center">
-                                    <span className="me-2">{percentage.toFixed(1)}%</span>
-                                    <div className="progress flex-grow-1" style={{ height: "6px" }}>
-                                      <div className="progress-bar bg-cyan" style={{ width: `${percentage}%` }}></div>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colSpan="3" className="text-end"><strong>Émissions Totales:</strong></td>
-                            <td>
-                              <strong>
-                                {Array.isArray(memoizedReport.scope2Data?.cooling)
-                                  ? memoizedReport.scope2Data?.cooling?.[0]?.totalEmissions?.toLocaleString()
-                                  : memoizedReport.scope2Data?.cooling?.totalEmissions?.toLocaleString() || 0} tCO₂
-                              </strong>
-                            </td>
-                            <td>100%</td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="alert alert-info">Aucune donnée sur les systèmes de refroidissement disponible.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-12 mt-3">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconFlame className="me-2" size={20} />
-                    Systèmes de Chauffage par Type
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-purple text-white">
-                      {Array.isArray(memoizedReport.scope2Data?.heating)
-                        ? memoizedReport.scope2Data?.heating?.[0]?.totalEmissions?.toLocaleString()
-                        : memoizedReport.scope2Data?.heating?.totalEmissions?.toLocaleString() || 0} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  {getHeatingTypes().length > 0 ? (
-                    <div className="table-responsive">
-                      <table className="table table-vcenter card-table table-striped">
-                        <thead>
-                          <tr>
-                            <th>Type de Chauffage</th>
-                            <th>Nombre de Systèmes</th>
-                            <th>Énergie Totale (kWh)</th>
-                            <th>Émissions de CO₂ (tCO₂)</th>
-                            <th>Pourcentage</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {getHeatingTypes().map((heatingType, index) => {
-                            const heaters = (Array.isArray(memoizedReport.scope2Data?.heating)
-                              ? memoizedReport.scope2Data?.heating?.[0]?.heaters
-                              : memoizedReport.scope2Data?.heating?.heaters
-                            )?.filter(h => h.type === heatingType.type) || [];
-                            const totalEnergy = heaters.reduce((sum, h) => sum + (h.energy || 0), 0);
-                            const totalEmissions = Array.isArray(memoizedReport.scope2Data?.heating)
-                              ? memoizedReport.scope2Data?.heating?.[0]?.totalEmissions
-                              : memoizedReport.scope2Data?.heating?.totalEmissions || 1;
-                            const percentage = (heatingType.emissions / totalEmissions) * 100;
-                            return (
-                              <tr key={index}>
-                                <td>
-                                  <span className="badge bg-red-lt">{heatingType.type}</span>
-                                </td>
-                                <td>{heaters.length}</td>
-                                <td>{totalEnergy.toLocaleString()}</td>
-                                <td><strong>{heatingType.emissions.toLocaleString()}</strong></td>
-                                <td>
-                                  <div className="d-flex align-items-center">
-                                    <span className="me-2">{percentage.toFixed(1)}%</span>
-                                    <div className="progress flex-grow-1" style={{ height: "6px" }}>
-                                      <div className="progress-bar bg-red" style={{ width: `${percentage}%` }}></div>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colSpan="3" className="text-end"><strong>Émissions Totales:</strong></td>
-                            <td>
-                              <strong>
-                                {Array.isArray(memoizedReport.scope2Data?.heating)
-                                  ? memoizedReport.scope2Data?.heating?.[0]?.totalEmissions?.toLocaleString()
-                                  : memoizedReport.scope2Data?.heating?.totalEmissions?.toLocaleString() || 0} tCO₂
-                              </strong>
-                            </td>
-                            <td>100%</td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="alert alert-info">Aucune donnée sur les systèmes de chauffage disponible.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-12 mt-3">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconBatteryCharging className="me-2" size={20} />
-                    Consommation d'Énergie
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-purple text-white">
-                      {Array.isArray(memoizedReport.scope2Data?.energyConsumption)
-                        ? memoizedReport.scope2Data?.energyConsumption?.[0]?.emissions?.toLocaleString()
-                        : memoizedReport.scope2Data?.energyConsumption?.emissions?.toLocaleString() || 0} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  <div className="row align-items-center">
-                    <div className="col-md-6">
-                      <dl className="row">
-                        <dt className="col-5">Pays :</dt>
-                        <dd className="col-7">
-                          {Array.isArray(memoizedReport.scope2Data?.energyConsumption)
-                            ? memoizedReport.scope2Data?.energyConsumption?.[0]?.country
-                            : memoizedReport.scope2Data?.energyConsumption?.country || "N/A"}
-                        </dd>
-                        <dt className="col-5">Consommation Annuelle :</dt>
-                        <dd className="col-7">
-                          {Array.isArray(memoizedReport.scope2Data?.energyConsumption)
-                            ? memoizedReport.scope2Data?.energyConsumption?.[0]?.yearlyConsumption?.toLocaleString()
-                            : memoizedReport.scope2Data?.energyConsumption?.yearlyConsumption?.toLocaleString() || 0} kWh
-                        </dd>
-                        <dt className="col-5">Émissions Totales :</dt>
-                        <dd className="col-7">
-                          <strong>
-                            {Array.isArray(memoizedReport.scope2Data?.energyConsumption)
-                              ? memoizedReport.scope2Data?.energyConsumption?.[0]?.emissions?.toLocaleString()
-                              : memoizedReport.scope2Data?.energyConsumption?.emissions?.toLocaleString() || 0} tCO₂
-                          </strong>
-                        </dd>
-                      </dl>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="alert alert-info">
-                        <div className="d-flex">
-                          <div>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="icon alert-icon"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              strokeWidth="2"
-                              stroke="currentColor"
-                              fill="none"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                              <path d="M12 9h.01"></path>
-                              <path d="M11 12h1v4h1"></path>
-                              <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
-                            </svg>
-                          </div>
-                          <div>
-                            Les émissions liées à la consommation d'électricité sont calculées en fonction des facteurs d'émission spécifiques au pays.
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {activeTab === "scope3" && (
-        <>
-          <ReportCharts
-            report={memoizedReport}
-            activeTab={activeTab}
-            calculateTotalEmissions={calculateTotalEmissions}
-            getScope1Details={getScope1Details}
-            getScope2Details={getScope2Details}
-            getScope3Details={getScope3Details}
-            getFuelTypes={getFuelTypes}
-            getCoolingTypes={getCoolingTypes}
-            getHeatingTypes={getHeatingTypes}
-            getTransportModes={getTransportModes}
-            getWasteTypes={getWasteTypes}
-          />
-
-          <div className="row row-cards">
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconBriefcase className="me-2" size={20} />
-                    Déplacements professionnels
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-green text-white">
-                      {parseFloat(memoizedReport.scope3Data?.businessTravelEmissions || 0).toLocaleString()} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  <div className="table-responsive">
-                    <table className="table table-vcenter card-table table-striped">
-                      <thead>
-                        <tr>
-                          <th>But</th>
-                          <th>Mode</th>
-                          <th>Type</th>
-                          <th>Distance (km)</th>
-                          <th>Émissions de CO₂ (tCO₂)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {memoizedReport.scope3Data?.businessTravel?.map((travel, index) => (
-                          <tr key={travel._id || index}>
-                            <td>{travel.purpose}</td>
-                            <td>
-                              <span className="badge bg-teal-lt">{travel.mode}</span>
-                            </td>
-                            <td>{travel.type}</td>
-                            <td>{parseFloat(travel.distance).toLocaleString()}</td>
-                            <td>
-                              <strong>{parseFloat(travel.emissions).toLocaleString()}</strong>
-                            </td>
-                          </tr>
-                        )) || (
-                          <tr>
-                            <td colSpan="5" className="text-center">Aucune donnée disponible</td>
-                          </tr>
-                        )}
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
-                          <td><strong>{parseFloat(memoizedReport.scope3Data?.businessTravelEmissions || 0).toLocaleString()} tCO₂</strong></td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-6">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconTruck className="me-2" size={20} />
-                    Transport & Distribution
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-green text-white">
-                      {parseFloat(memoizedReport.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  <div className="table-responsive">
-                    <table className="table table-vcenter card-table table-striped">
-                      <thead>
-                        <tr>
-                          <th>But</th>
-                          <th>Mode</th>
-                          <th>Poids (kg)</th>
-                          <th>Distance (km)</th>
-                          <th>Émissions de CO₂ (tCO₂)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {memoizedReport.scope3Data?.transport?.map((transport, index) => (
-                          <tr key={transport._id || index}>
-                            <td>{transport.purpose}</td>
-                            <td>
-                              <span className="badge bg-indigo-lt">{transport.mode} - {transport.type}</span>
-                            </td>
-                            <td>{parseFloat(transport.poids).toLocaleString()}</td>
-                            <td>{parseFloat(transport.distance).toLocaleString()}</td>
-                            <td>
-                              <strong>{parseFloat(transport.emissions).toLocaleString()}</strong>
-                            </td>
-                          </tr>
-                        )) || (
-                          <tr>
-                            <td colSpan="5" className="text-center">Aucune donnée disponible</td>
-                          </tr>
-                        )}
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
-                          <td><strong>{parseFloat(memoizedReport.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂</strong></td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-6 mt-3">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconTrash className="me-2" size={20} />
-                    Gestion des déchets
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-green text-white">
-                      {parseFloat(memoizedReport.scope3Data?.dechetEmissions || 0).toLocaleString()} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  {getWasteTypes().length > 0 ? (
-                    <div className="table-responsive">
-                      <table className="table table-vcenter card-table table-striped">
-                        <thead>
-                          <tr>
-                            <th>Nom</th>
-                            <th>Type</th>
-                            <th>Méthode</th>
-                            <th>Poids (kg)</th>
-                            <th>Émissions de CO₂ (tCO₂)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {memoizedReport.scope3Data?.dechet?.map((waste, index) => (
-                            <tr key={waste._id || index}>
-                              <td>{waste.name}</td>
-                              <td>
-                                <span className="badge bg-lime-lt">{waste.type}</span>
-                              </td>
-                              <td>{waste.methode}</td>
-                              <td>{parseFloat(waste.poids).toLocaleString()}</td>
-                              <td>
-                                <strong>{parseFloat(waste.emissions).toLocaleString()}</strong>
-                              </td>
-                            </tr>
-                          )) || (
-                            <tr>
-                              <td colSpan="5" className="text-center">Aucune donnée disponible</td>
-                            </tr>
-                          )}
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
-                            <td><strong>{parseFloat(memoizedReport.scope3Data?.dechetEmissions || 0).toLocaleString()} tCO₂</strong></td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="alert alert-info">Aucune donnée sur la gestion des déchets disponible.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-6 mt-3">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <IconBuildingFactory className="me-2" size={20} />
-                    Biens d'équipement
-                  </h3>
-                  <div className="card-actions">
-                    <span className="badge bg-green text-white">
-                      {parseFloat(memoizedReport.scope3Data?.capitalGoodEmissions || 0).toLocaleString()} tCO₂
-                    </span>
-                  </div>
-                </div>
-                <div className="card-body">
-                  {memoizedReport.scope3Data?.capitalGoods?.length > 0 ? (
-                    <div className="table-responsive">
-                      <table className="table table-vcenter card-table table-striped">
-                        <thead>
-                          <tr>
-                            <th>Nom</th>
-                            <th>Type</th>
-                            <th>Quantité</th>
-                            <th>Émissions de CO₂ (tCO₂)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {memoizedReport.scope3Data.capitalGoods.map((good, index) => (
-                            <tr key={good._id || index}>
-                              <td>{good.name}</td>
-                              <td>
-                                <span className="badge bg-orange-lt">{good.type}</span>
-                              </td>
-                              <td>{parseFloat(good.quantity).toLocaleString()}</td>
-                              <td>
-                                <strong>{parseFloat(good.emissions).toLocaleString()}</strong>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colSpan="3" className="text-end"><strong>Émissions Totales :</strong></td>
-                            <td><strong>{parseFloat(memoizedReport.scope3Data?.capitalGoodEmissions || 0).toLocaleString()} tCO₂</strong></td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="alert alert-info">Aucune donnée sur les biens d'équipement disponible.</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {activeTab === "overview" && <OverviewTab {...commonProps} />}
+      {activeTab === "scope1" && <Scope1Tab {...commonProps} />}
+      {activeTab === "scope2" && <Scope2Tab {...commonProps} />}
+      {activeTab === "scope3" && <Scope3Tab {...commonProps} />}
+      {activeTab === "recommendations" && <RecommendationsTab {...commonProps} />}
     </div>
   );
 };
