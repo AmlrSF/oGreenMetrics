@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -231,15 +232,15 @@ const processEmissionsData = (data) => {
 
 const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
   return (
-    <div className="card card-sm">
-      <div className="card-body">
+    <div className="card card-sm shadow-sm">
+      <div className="card-body p-4">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar me-3" style={{ backgroundColor: `${color}20` }}>
+          <div className="avatar avatar-sm me-3" style={{ backgroundColor: `${color}20` }}>
             <Icon className="icon" style={{ color }} />
           </div>
-          <h3 className="card-title mb-0">{title}</h3>
+          <h3 className="card-title mb-0 fw-bold">{title}</h3>
         </div>
-        <div className="d-flex align-items-center mb-3">
+        <div className="d-flex align-items-center">
           <div className="h2 mb-0 me-2">{Number(value).toFixed(2)} tCO₂e</div>
           <IconTrendingUp className="icon-sm text-green" />
         </div>
@@ -248,35 +249,19 @@ const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
   );
 };
 
-const GoalProgressCard = ({ goal, emissions }) => {
-  const totalGoal = parseFloat(goal.totalGoal || 0);
-  const currentEmissions = parseFloat(emissions.total || 0);
-  const progress = totalGoal > 0 ? Math.min(100, Math.max(0, ((currentEmissions - totalGoal) / currentEmissions) * 100)) : 0;
-
+const GoalProgressCard = () => { 
   return (
-    <div className="card card-sm">
-      <div className="card-body">
+    <div className="card card-sm shadow-sm">
+      <div className="card-body p-4">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar me-3" style={{ backgroundColor: "#206bc420" }}>
+          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#206bc420" }}>
             <IconTarget className="icon" style={{ color: "#206bc4" }} />
           </div>
-          <h3 className="card-title mb-0">{goal.name}</h3>
+          <h3 className="card-title mb-0 fw-bold">Réduisez vos émissions</h3>
         </div>
-        <div className="progress mb-2">
-          <div
-            className="progress-bar bg-primary"
-            style={{ width: `${progress}%` }}
-            role="progressbar"
-            aria-valuenow={progress}
-            aria-valuemin="0"
-            aria-valuemax="100"
-          >
-            {progress.toFixed(1)}%
-          </div>
-        </div>
-        <div className="text-muted">
-          Objectif: {totalGoal.toFixed(2)} tCO₂e | Actuel: {currentEmissions.toFixed(2)} tCO₂e
-        </div>
+        <Link href="/Dashboard/User/goals" className="text-primary fw-medium">
+          Définir un objectif maintenant
+        </Link>
       </div>
     </div>
   );
@@ -290,16 +275,16 @@ const CriticalPointsCard = ({ emissions }) => {
   ].filter(Boolean);
 
   return (
-    <div className="card card-sm">
-      <div className="card-body">
+    <div className="card card-sm shadow-sm">
+      <div className="card-body p-4">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar me-3" style={{ backgroundColor: "#d6393920" }}>
+          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#d6393920" }}>
             <IconAlertTriangle className="icon" style={{ color: "#d63939" }} />
           </div>
-          <h3 className="card-title mb-0">Points Critiques</h3>
+          <h3 className="card-title mb-0 fw-bold">Points Critiques</h3>
         </div>
         {criticalPoints.length > 0 ? (
-          <ul className="list-unstyled">
+          <ul className="list-unstyled mb-0">
             {criticalPoints.map((point, index) => (
               <li key={index} className="text-danger mb-2">
                 • {point}
@@ -316,13 +301,13 @@ const CriticalPointsCard = ({ emissions }) => {
 
 const CompanyInfoCard = ({ company, owner }) => {
   return (
-    <div className="card card-sm">
-      <div className="card-body">
+    <div className="card card-sm shadow-sm">
+      <div className="card-body p-4">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar me-3" style={{ backgroundColor: "#206bc420" }}>
+          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#206bc420" }}>
             <IconInfoCircle className="icon" style={{ color: "#206bc4" }} />
           </div>
-          <h3 className="card-title mb-0">{company.nom_entreprise}</h3>
+          <h3 className="card-title mb-0 fw-bold">{company.nom_entreprise}</h3>
         </div>
         <div className="text-muted mb-2">
           <strong>Propriétaire:</strong> {owner.prenom} {owner.nom}
@@ -356,15 +341,15 @@ const RecommendationsCard = () => {
   ];
 
   return (
-    <div className="card card-sm">
-      <div className="card-body">
+    <div className="card card-sm shadow-sm">
+      <div className="card-body p-4">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar me-3" style={{ backgroundColor: "#42e18920" }}>
+          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#42e18920" }}>
             <IconInfoCircle className="icon" style={{ color: "#42e189" }} />
           </div>
-          <h3 className="card-title mb-0">Recommandations</h3>
+          <h3 className="card-title mb-0 fw-bold">Recommandations</h3>
         </div>
-        <ul className="list-unstyled">
+        <ul className="list-unstyled mb-0">
           {recommendations.map((rec, index) => (
             <li key={index} className="mb-2">
               • {rec}
@@ -397,35 +382,37 @@ const TopLeastEmissionsCard = ({ emissions }) => {
   const leastSources = sortedSources.slice(-3).reverse();
 
   return (
-    <div className="card card-sm">
-      <div className="card-body">
-        <div className="d-flex align-items-center mb-3">
-          <div className="avatar me-3" style={{ backgroundColor: "#206bc420" }}>
+    <div className="card card-sm shadow-sm">
+      <div className="card-body p-4">
+        <div className="d-flex align-items-center mb-4">
+          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#206bc420" }}>
             <IconChartBar className="icon" style={{ color: "#206bc4" }} />
           </div>
-          <h3 className="card-title mb-0">Sources d'Émissions</h3>
+          <h3 className="card-title mb-0 fw-bold">Sources d'Émissions</h3>
         </div>
-        <div className="mb-3">
-          <h4 className="mb-2">Top 3 Émetteurs</h4>
-          {topSources.map((source, index) => (
-            <div key={index} className="d-flex align-items-center mb-2">
-              <IconArrowUp className="icon-sm text-danger me-2" />
-              <span>
-                {source.source} ({source.scope}): {source.value.toFixed(2)} tCO₂e
-              </span>
-            </div>
-          ))}
-        </div>
-        <div>
-          <h4 className="mb-2">3 Moins Émetteurs</h4>
-          {leastSources.map((source, index) => (
-            <div key={index} className="d-flex align-items-center mb-2">
-              <IconArrowDown className="icon-sm text-green me-2" />
-              <span>
-                {source.source} ({source.scope}): {source.value.toFixed(2)} tCO₂e
-              </span>
-            </div>
-          ))}
+        <div className="row">
+          <div className="col-md-6 mb-4">
+            <h4 className="mb-3 fw-semibold">Top 3 Émetteurs</h4>
+            {topSources.map((source, index) => (
+              <div key={index} className="d-flex align-items-center mb-2">
+                <IconArrowUp className="icon-sm text-danger me-2" />
+                <span>
+                  {source.source} ({source.scope}): {source.value.toFixed(2)} tCO₂e
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="col-md-6">
+            <h4 className="mb-3 fw-semibold">3 Moins Émetteurs</h4>
+            {leastSources.map((source, index) => (
+              <div key={index} className="d-flex align-items-center mb-2">
+                <IconArrowDown className="icon-sm text-green me-2" />
+                <span>
+                  {source.source} ({source.scope}): {source.value.toFixed(2)} tCO₂e
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -488,7 +475,6 @@ const CompanyDash = () => {
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setGoals(data.data);
-        // Select the most recent goal for the progress card
         const recentGoal = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
         setSelectedGoal(recentGoal);
       }
@@ -523,9 +509,9 @@ const CompanyDash = () => {
         <div
           className="spinner-border text-primary"
           role="status"
-          style={{ width: "2rem", height: "2rem" }}
+          style={{ width: "3rem", height: "3rem" }}
         >
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">Chargement...</span>
         </div>
       </div>
     );
@@ -547,6 +533,7 @@ const CompanyDash = () => {
         ],
         backgroundColor: COLORS,
         borderWidth: 1,
+        borderColor: "#ffffff",
       },
     ],
   };
@@ -607,6 +594,8 @@ const CompanyDash = () => {
           processedEmissions.scope3.total,
         ],
         backgroundColor: COLORS,
+        borderWidth: 1,
+        borderColor: "#ffffff",
       },
     ],
   };
@@ -617,10 +606,21 @@ const CompanyDash = () => {
     plugins: {
       legend: {
         position: "top",
+        labels: {
+          font: { size: 12 },
+          padding: 20,
+        },
       },
       title: {
         display: true,
         text: "Émissions par Source",
+        font: { size: 16, weight: "bold" },
+        padding: { top: 10, bottom: 20 },
+      },
+      tooltip: {
+        backgroundColor: "rgba(0,0,0,0.8)",
+        titleFont: { size: 14 },
+        bodyFont: { size: 12 },
       },
     },
     scales: {
@@ -628,11 +628,13 @@ const CompanyDash = () => {
         title: {
           display: true,
           text: "Sources d'Émissions",
+          font: { size: 14 },
         },
         ticks: {
           autoSkip: false,
           maxRotation: 45,
           minRotation: 45,
+          font: { size: 12 },
         },
       },
       y: {
@@ -640,7 +642,9 @@ const CompanyDash = () => {
         title: {
           display: true,
           text: "Émissions (tCO₂e)",
+          font: { size: 14 },
         },
+        ticks: { font: { size: 12 } },
       },
     },
   };
@@ -651,6 +655,21 @@ const CompanyDash = () => {
     plugins: {
       legend: {
         position: "bottom",
+        labels: {
+          font: { size: 12 },
+          padding: 20,
+        },
+      },
+      title: {
+        display: true,
+        text: "Répartition des Émissions",
+        font: { size: 16, weight: "bold" },
+        padding: { top: 10, bottom: 20 },
+      },
+      tooltip: {
+        backgroundColor: "rgba(0,0,0,0.8)",
+        titleFont: { size: 14 },
+        bodyFont: { size: 12 },
       },
     },
   };
@@ -665,6 +684,13 @@ const CompanyDash = () => {
       title: {
         display: true,
         text: "Comparaison des Scopes",
+        font: { size: 16, weight: "bold" },
+        padding: { top: 10, bottom: 20 },
+      },
+      tooltip: {
+        backgroundColor: "rgba(0,0,0,0.8)",
+        titleFont: { size: 14 },
+        bodyFont: { size: 12 },
       },
     },
     scales: {
@@ -672,27 +698,32 @@ const CompanyDash = () => {
         title: {
           display: true,
           text: "Émissions (tCO₂e)",
+          font: { size: 14 },
         },
         beginAtZero: true,
+        ticks: { font: { size: 12 } },
+      },
+      x: {
+        ticks: { font: { size: 12 } },
       },
     },
   };
 
   return (
-    <div className="container-xl">
-      <div className="page-header d-print-none mb-4">
-        <div className="row align-items-center g-2">
-          <div className="col-sm mb-sm-0 mb-2 d-flex align-items-center justify-content-between">
-            <h2 className="page-title mb-0 d-flex align-items-center">
-              <IconChartBar className="d-none d-sm-block me-2" />
+    <div className="container-xl py-4">
+      <div className="page-header d-print-none mb-5">
+        <div className="row align-items-center g-3">
+          <div className="col-sm mb-sm-0 mb-3">
+            <h2 className="page-title mb-0 d-flex align-items-center gap-2">
+              <IconChartBar className="d-none d-sm-block" size={32} />
               Tableau de Bord des Émissions
             </h2>
           </div>
         </div>
       </div>
 
-      <div className="row row-cards mb-4">
-        <div className="col-md-4">
+      <div className="row row-cards mb-5 g-4">
+        <div className="col-lg-4 col-md-6">
           <EmissionCard
             title="Émissions Scope 1"
             icon={IconBuildingFactory}
@@ -702,7 +733,7 @@ const CompanyDash = () => {
             breakdown={processedEmissions.scope1.breakdown}
           />
         </div>
-        <div className="col-md-4">
+        <div className="col-lg-4 col-md-6">
           <EmissionCard
             title="Émissions Scope 2"
             icon={IconLamp}
@@ -712,7 +743,7 @@ const CompanyDash = () => {
             breakdown={processedEmissions.scope2.breakdown}
           />
         </div>
-        <div className="col-md-4">
+        <div className="col-lg-4 col-md-6">
           <EmissionCard
             title="Émissions Scope 3"
             icon={IconTruck}
@@ -724,9 +755,9 @@ const CompanyDash = () => {
         </div>
       </div>
 
-      <div className="row row-cards mb-4">
+      <div className="row row-cards mb-5 g-4">
         {selectedGoal && (
-          <div className="col-md-4">
+          <div className="col-lg-4 col-md-6">
             <GoalProgressCard
               goal={selectedGoal}
               emissions={{
@@ -738,40 +769,40 @@ const CompanyDash = () => {
             />
           </div>
         )}
-        <div className="col-md-4">
+        <div className="col-lg-4 col-md-6">
           <CriticalPointsCard emissions={processedEmissions} />
         </div>
-        <div className="col-md-4">
+        <div className="col-lg-4 col-md-6">
           <CompanyInfoCard company={company} owner={owner} />
         </div>
       </div>
 
-      <div className="row row-cards mb-4">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header">
-              <h3 className="flex items-center gap-1">
-                <IconChartBar className="icon me-2" />
+      <div className="row row-cards mb-5 g-4">
+        <div className="col-lg-6">
+          <div className="card shadow-sm">
+            <div className="card-header py-3">
+              <h3 className="card-title d-flex align-items-center gap-2">
+                <IconChartPie size={24} />
                 Répartition des Émissions
               </h3>
             </div>
-            <div className="card-body">
-              <div style={{ height: "18rem" }}>
+            <div className="card-body p-4">
+              <div style={{ height: "22rem" }}>
                 <Doughnut data={pieChartData} options={pieOptions} />
               </div>
             </div>
           </div>
         </div>
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header">
-              <h3 className="flex items-center gap-1">
-                <IconChartBar className="icon me-2" />
+        <div className="col-lg-6">
+          <div className="card shadow-sm">
+            <div className="card-header py-3">
+              <h3 className="card-title d-flex align-items-center gap-2">
+                <IconChartBar size={24} />
                 Comparaison des Scopes
               </h3>
             </div>
-            <div className="card-body">
-              <div style={{ height: "18rem" }}>
+            <div className="card-body p-4">
+              <div style={{ height: "22rem" }}>
                 <Bar data={scopeComparisonData} options={scopeComparisonOptions} />
               </div>
             </div>
@@ -779,29 +810,29 @@ const CompanyDash = () => {
         </div>
       </div>
 
-      <div className="row row-cards mb-4">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-header">
-              <h3 className="flex items-center gap-1">
-                <IconTrendingUp className="icon me-2" />
+      <div className="row row-cards mb-5 g-4">
+        <div className="col-lg-6">
+          <div className="card shadow-sm">
+            <div className="card-header py-3">
+              <h3 className="card-title d-flex align-items-center gap-2">
+                <IconTrendingUp size={24} />
                 Émissions par Source
               </h3>
             </div>
-            <div className="card-body">
-              <div style={{ height: "18rem" }}>
+            <div className="card-body p-4">
+              <div style={{ height: "22rem" }}>
                 <Bar data={stackedBarData} options={stackedBarOptions} />
               </div>
             </div>
           </div>
         </div>
-        <div className="col-md-6">
+        <div className="col-lg-6">
           <RecommendationsCard />
         </div>
       </div>
 
-      <div className="row row-cards">
-        <div className="col-md-12">
+      <div className="row row-cards g-4">
+        <div className="col-12">
           <TopLeastEmissionsCard emissions={processedEmissions} />
         </div>
       </div>

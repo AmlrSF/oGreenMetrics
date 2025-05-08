@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Eye, Trash2, Calculator } from "lucide-react";
+import { IconEye, IconTrash, IconCalculator } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
 const SitesPage = () => {
@@ -115,7 +115,7 @@ const SitesPage = () => {
           className="btn btn-primary ms-auto d-flex align-items-center gap-2"
        
         >
-          <Calculator size={18} />
+          <IconCalculator size={18} />
           Calculate New Site
         </button>
       </div>
@@ -215,13 +215,13 @@ const SitesPage = () => {
                             onClick={() => router.push(`/Dashboard/Regular/Sites/${site._id}`)}
                             className="btn btn-ghost-blue btn-icon"
                           >
-                            <Eye size={18} />
+                            <IconEye size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(site._id)}
                             className="btn btn-ghost-danger btn-icon"
                           >
-                            <Trash2  size={18} />
+                            <IconTrash  size={18} />
                           </button>
                         </div>
                       </td>

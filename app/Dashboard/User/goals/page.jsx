@@ -261,13 +261,7 @@ const GoalsPage = () => {
         scope2: false,
         scope3: false,
       });
-
       setShowAddModal(false);
-
-      setAlertMessage("Objectif ajouté avec succès!");
-      setShowSuccessAlert(true);
-      setTimeout(() => setShowSuccessAlert(false), 3000);
-
       fetchGoals(company._id);
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
@@ -335,12 +329,7 @@ const GoalsPage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error updating goal");
 
-      setShowEditModal(false);
-
-      setAlertMessage("Objectif mis à jour avec succès!");
-      setShowSuccessAlert(true);
-      setTimeout(() => setShowSuccessAlert(false), 3000);
-
+      setShowEditModal(false); 
       fetchGoals(company._id);
     } catch (err) {
       console.error("Update error:", err);
@@ -363,10 +352,7 @@ const GoalsPage = () => {
         const data = await res.json();
         throw new Error(data.message);
       }
-
-      setAlertMessage("Objectif supprimé avec succès!");
-      setShowSuccessAlert(true);
-      setTimeout(() => setShowSuccessAlert(false), 3000);
+ 
 
       fetchGoals(company._id);
     } catch (err) {
