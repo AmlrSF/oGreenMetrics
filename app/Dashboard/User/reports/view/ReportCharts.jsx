@@ -43,8 +43,11 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
         clearTimeout(initializeTimeoutRef.current);
       }
       Object.values(charts).forEach(chart => {
-        if (chart) {
+        if (chart && chart.canvas) {
           console.log("Destroying chart:", chart.canvas.id);
+          chart.destroy();
+        } else if (chart) {
+          console.log("Destroying chart without canvas");
           chart.destroy();
         }
       });

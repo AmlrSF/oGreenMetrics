@@ -4,34 +4,10 @@ import React from "react";
 import { IconBatteryCharging, IconSnowflake, IconFlame, IconInfoCircle } from "@tabler/icons-react";
 import ReportCharts from "./ReportCharts";
 
-const Scope2Tab = ({
-  report,
-  calculateTotalEmissions,
-  getScope1Details,
-  getScope2Details,
-  getScope3Details,
-  getFuelTypes,
-  getCoolingTypes,
-  getHeatingTypes,
-  getTransportModes,
-  getWasteTypes,
-  formatNumber,
-  activeTab
-}) => {
+const Scope2Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Details,getScope3Details,getFuelTypes,getCoolingTypes,getHeatingTypes,getTransportModes,getWasteTypes,formatNumber,activeTab}) => {
   return (
     <>
-      <ReportCharts
-        report={report}
-        activeTab={activeTab}
-        calculateTotalEmissions={calculateTotalEmissions}
-        getScope1Details={getScope1Details}
-        getScope2Details={getScope2Details}
-        getScope3Details={getScope3Details}
-        getFuelTypes={getFuelTypes}
-        getCoolingTypes={getCoolingTypes}
-        getHeatingTypes={getHeatingTypes}
-        getTransportModes={getTransportModes}
-        getWasteTypes={getWasteTypes}
+      <ReportCharts report={report} activeTab={activeTab} calculateTotalEmissions={calculateTotalEmissions} getScope1Details={getScope1Details} getScope2Details={getScope2Details} getScope3Details={getScope3Details} getFuelTypes={getFuelTypes} getCoolingTypes={getCoolingTypes} getHeatingTypes={getHeatingTypes} getTransportModes={getTransportModes} getWasteTypes={getWasteTypes}
       />
 
       <div className="row row-cards">

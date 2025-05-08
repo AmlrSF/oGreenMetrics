@@ -3,19 +3,7 @@
 import React from "react";
 import ReportCharts from "./ReportCharts";
 
-const OverviewTab = ({ 
-  report, 
-  calculateTotalEmissions, 
-  getScope1Details, 
-  getScope2Details, 
-  getScope3Details, 
-  getFuelTypes, 
-  getCoolingTypes, 
-  getHeatingTypes, 
-  getTransportModes, 
-  getWasteTypes, 
-  formatNumber,
-  activeTab
+const OverviewTab = ({  report,  calculateTotalEmissions,  getScope1Details,  getScope2Details,  getScope3Details,  getFuelTypes,  getCoolingTypes,  getHeatingTypes,  getTransportModes,  getWasteTypes,  formatNumber, activeTab
 }) => {
   return (
     <>
@@ -110,18 +98,7 @@ const OverviewTab = ({
       </div>
 
       {/* Charts section */}
-      <ReportCharts
-        report={report}
-        activeTab={activeTab}
-        calculateTotalEmissions={calculateTotalEmissions}
-        getScope1Details={getScope1Details}
-        getScope2Details={getScope2Details}
-        getScope3Details={getScope3Details}
-        getFuelTypes={getFuelTypes}
-        getCoolingTypes={getCoolingTypes}
-        getHeatingTypes={getHeatingTypes}
-        getTransportModes={getTransportModes}
-        getWasteTypes={getWasteTypes}
+      <ReportCharts report={report} activeTab={activeTab} calculateTotalEmissions={calculateTotalEmissions} getScope1Details={getScope1Details} getScope2Details={getScope2Details} getScope3Details={getScope3Details} getFuelTypes={getFuelTypes} getCoolingTypes={getCoolingTypes} getHeatingTypes={getHeatingTypes} getTransportModes={getTransportModes} getWasteTypes={getWasteTypes}
       />
     </>
   );
