@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconSearch, IconPencil, IconTrash, IconInfoCircle,IconArrowRight,IconArrowLeft  } from "@tabler/icons-react";
 
 const Scope2 = () => {
   const [activeTab, setActiveTab] = useState("electricity");
@@ -13,8 +13,11 @@ const Scope2 = () => {
   const [itemsPerPage] = useState(3);
   const [company, setCompany] = useState(null);
   const [error, setError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);  
-  const [deletingIds, setDeletingIds] = useState(new Set());  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingIds, setDeletingIds] = useState(new Set());
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [expandedItems, setExpandedItems] = useState(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [scope2Data, setScope2Data] = useState({
     electricity: { yearlyConsumption: 0, emissions: 0, country: null },
@@ -42,7 +45,7 @@ const Scope2 = () => {
           placeholder: "Pays",
           required: true,
           disabled: true,
-        }
+        },
       ],
     },
     heating: {
@@ -191,6 +194,7 @@ const Scope2 = () => {
       });
     } catch (error) {
       console.error("Error fetching Scope 2 data:", error);
+      setError(`Error: ${error.message}`);
     }
   };
 
@@ -198,6 +202,8 @@ const Scope2 = () => {
     e.preventDefault();
     setActiveTab(tabId);
     setCurrentPage(1);
+    setSearchTerm("");
+    setExpandedItems(new Set());
   };
 
   const toggleModal = (
@@ -213,7 +219,6 @@ const Scope2 = () => {
       setEditId(item._id);
       setEditRecordId(recordId);
     } else {
-      // For new electricity record, pre-populate the country
       if (isOpen && activeTab === "electricity" && company) {
         setFormData({ country: company.country });
       } else {
@@ -231,7 +236,7 @@ const Scope2 = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent multiple submissions
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     if (!company || !company._id) {
@@ -251,7 +256,7 @@ const Scope2 = () => {
 
     if (missingFields.length > 0) {
       alert(
-        `Please fill in these required fields: ${missingFields.join(", ")}`
+        `Veuillez remplir ces champs obligatoires : ${missingFields.join(", ")}`
       );
       setIsSubmitting(false);
       return;
@@ -262,12 +267,11 @@ const Scope2 = () => {
         ...formData,
         company_id: company._id,
       };
-      
-      // When in electricity tab, automatically use the company's country
+
       if (activeTab === "electricity") {
         requestData.country = company.country;
       }
-      
+
       let endpoint, method;
 
       if (activeTab === "electricity") {
@@ -286,7 +290,7 @@ const Scope2 = () => {
           : "http://localhost:4000/cooling";
         method = isEditMode ? "PUT" : "POST";
       }
-      
+
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -296,38 +300,29 @@ const Scope2 = () => {
         body: JSON.stringify(requestData),
         credentials: "include",
       });
-      
+
       const result = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          result.message || `HTTP error! status: ${response.status}`
+          result.message || `Erreur HTTP ! statut : ${response.status}`
         );
       }
 
       toggleModal(false);
       await fetchScope2Data();
     } catch (err) {
-      console.error("Submission error:", err);
-      alert(`Submission failed: ${err.message}`);
+      console.error("Erreur de soumission :", err);
+      alert(`Échec de la soumission : ${err.message}`);
     } finally {
-      setIsSubmitting(false); // Reset submitting state
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (recordId, itemId = null) => {
-    const id = itemId || recordId; // Use itemId for heating/cooling, recordId for electricity
-    if (deletingIds.has(id)) return; // Prevent multiple deletions
+    const id = itemId || recordId;
+    if (deletingIds.has(id)) return;
     setDeletingIds((prev) => new Set([...prev, id]));
-
-    if (!window.confirm("Are you sure you want to delete this item?")) {
-      setDeletingIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
-      return;
-    }
 
     try {
       let endpoint;
@@ -337,7 +332,7 @@ const Scope2 = () => {
           method: "DELETE",
           credentials: "include",
         });
-        if (!response.ok) throw new Error("Failed to delete");
+        if (!response.ok) throw new Error("Échec de la suppression");
         setScope2Data((prev) => ({
           ...prev,
           electricity: { yearlyConsumption: 0, emissions: 0, country: company.country },
@@ -349,7 +344,7 @@ const Scope2 = () => {
           credentials: "include",
         });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.message || "Failed to delete");
+        if (!response.ok) throw new Error(result.message || "Échec de la suppression");
         setScope2Data((prev) => ({ ...prev, heating: result.data }));
       } else if (activeTab === "cooling") {
         endpoint = `http://localhost:4000/cooling/${recordId}/cooler/${itemId}`;
@@ -358,46 +353,114 @@ const Scope2 = () => {
           credentials: "include",
         });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.message || "Failed to delete");
+        if (!response.ok) throw new Error(result.message || "Échec de la suppression");
         setScope2Data((prev) => ({ ...prev, cooling: result.data }));
       }
+      setConfirmDelete(null);
       fetchScope2Data();
     } catch (error) {
-      alert(`Failed to delete: ${error.message}`);
+      console.error("Erreur de suppression :", error.message);
+      setError(error.message);
     } finally {
       setDeletingIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(id);
         return newSet;
-      }); // Remove id from deletingIds
+      });
     }
   };
 
+  const toggleExpand = (itemId, field) => {
+    const key = `${itemId}-${field}`;
+    setExpandedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
+  const filteredItems = () => {
+    let items = activeTab === "heating" ? scope2Data.heating.heaters : scope2Data.cooling.coolers;
+
+    if (searchTerm) {
+      items = items.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return items;
+  };
+
   const renderTable = () => {
+    if (error) {
+      return (
+        <div className="p-4 text-center text-danger">
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        </div>
+      );
+    }
+
     const currentTab = tabs[activeTab];
     const data = scope2Data[activeTab];
 
     // Pagination logic
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     let currentItems = [];
     let totalItems = 0;
+    let totalPages = 1;
 
-    if (activeTab === "heating" && data.heaters?.length > 0) {
-      totalItems = data.heaters.length;
-      currentItems = data.heaters.slice(indexOfFirstItem, indexOfLastItem);
-    } else if (activeTab === "cooling" && data.coolers?.length > 0) {
-      totalItems = data.coolers.length;
-      currentItems = data.coolers.slice(indexOfFirstItem, indexOfLastItem);
+    if (activeTab === "heating" || activeTab === "cooling") {
+      const items = filteredItems();
+      totalItems = items.length;
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+      const indexOfLastItem = currentPage * itemsPerPage;
+      const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+      currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
     }
-
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
     return (
       <div className="table-container p-5">
-        <div className="d-flex justify-content-between mb-5">
-          <div className="scope-info">
-          
+        <style>
+          {`
+            .truncate-text {
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 300px;
+            }
+            .voir-plus {
+              cursor: pointer;
+              color: #206bc4;
+              font-size: 0.875rem;
+              margin-top: 0.25rem;
+              display: inline-block;
+            }
+            .voir-plus:hover {
+              text-decoration: underline;
+            }
+          `}
+        </style>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex gap-2">
+            <div className="input-group" style={{ width: "250px" }}>
+              <span className="input-group-text">
+                <IconSearch size={16} />
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Rechercher..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
           <button
             type="button"
@@ -407,9 +470,8 @@ const Scope2 = () => {
             <IconPlus className="mr-2" size={16} /> Ajouter
           </button>
         </div>
-        
-        <div className="table-responsive">   
-          <table className="table table-vcenter card-table">           
+        <div className="table-responsive">
+          <table className="table table-vcenter card-table">
             <thead>
               <tr>
                 {currentTab.headers.map((header, index) => (
@@ -420,180 +482,98 @@ const Scope2 = () => {
             <tbody>
               {activeTab === "electricity" && data.yearlyConsumption > 0 ? (
                 <tr>
-                  <td>{data.yearlyConsumption.toLocaleString()} kWh</td>
-                  <td>{data.country || company?.country || "N/A"}</td>
-                  <td>{data.emissions.toLocaleString()} kgCO2e</td>
+                  <td>
+                    <span className="badge bg-purple-lt">
+                      {data.yearlyConsumption.toLocaleString()} kWh
+                    </span>
+                  </td>
+                  <td className="text-secondary">{data.country || company?.country || "N/A"}</td>
+                  <td>
+                    <span className="badge bg-purple-lt">
+                      {data.emissions.toLocaleString()} kgCO2e
+                    </span>
+                  </td>
                   <td>
                     <div className="btn-list flex-nowrap">
                       <button
                         className="btn btn-ghost-primary btn-icon"
                         onClick={() => toggleModal(true, true, data, data._id)}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
+                        <IconPencil size={18} />
                       </button>
                       <button
                         className="btn btn-ghost-danger btn-icon"
-                        onClick={() => handleDelete(data._id)}
-                        disabled={deletingIds.has(data._id)} // Disable button if deleting
+                        onClick={() => setConfirmDelete({ _id: data._id, nom: "Consommation électrique" })}
+                        disabled={deletingIds.has(data._id)}
                       >
                         {deletingIds.has(data._id) ? (
                           <span className="spinner-border spinner-border-sm" />
                         ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M4 7l16 0" />
-                            <path d="M10 11l0 6" />
-                            <path d="M14 11l0 6" />
-                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                          </svg>
+                          <IconTrash size={18} />
                         )}
                       </button>
                     </div>
                   </td>
                 </tr>
-              ) : activeTab === "heating" && data.heaters?.length > 0 ? (
-                currentItems.map((heater, idx) => (
+              ) : (activeTab === "heating" || activeTab === "cooling") && currentItems.length > 0 ? (
+                currentItems.map((item, idx) => (
                   <tr key={idx}>
-                    <td>{heater.name}</td>
-                    <td>{heater.type}</td>
-                    <td>{heater.energy}</td>
                     <td>
-                      <div className="btn-list flex-nowrap">
-                        <button
-                          className="btn btn-ghost-primary btn-icon"
-                          onClick={() =>
-                            toggleModal(true, true, heater, data._id)
-                          }
+                      <div className="d-flex align-items-center">
+                        <span
+                          className="avatar avatar-md text-white me-2"
+                          style={{ backgroundColor: "#263589" }}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                          {item.name.charAt(0)}
+                        </span>
+                        <div>
+                          <div
+                            className={
+                              expandedItems.has(`${item._id}-name`)
+                                ? ""
+                                : "truncate-text"
+                            }
                           >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
-                        </button>
-                        <button
-                          className="btn btn-ghost-danger btn-icon"
-                          onClick={() => handleDelete(data._id, heater._id)}
-                          disabled={deletingIds.has(heater._id)} // Disable button if deleting
-                        >
-                          {deletingIds.has(heater._id) ? (
-                            <span className="spinner-border spinner-border-sm" />
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
+                            {item.name}
+                          </div>
+                          {item.name.length > 50 && (
+                            <span
+                              className="voir-plus"
+                              onClick={() => toggleExpand(item._id, "name")}
                             >
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                              <path d="M4 7l16 0" />
-                              <path d="M10 11l0 6" />
-                              <path d="M14 11l0 6" />
-                              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                            </svg>
+                              {expandedItems.has(`${item._id}-name`)
+                                ? "Voir moins"
+                                : "Voir plus"}
+                            </span>
                           )}
-                        </button>
+                        </div>
                       </div>
                     </td>
-                  </tr>
-                ))
-              ) : activeTab === "cooling" && data.coolers?.length > 0 ? (
-                currentItems.map((cooler, idx) => (
-                  <tr key={idx}>
-                    <td>{cooler.name}</td>
-                    <td>{cooler.type}</td>
-                    <td>{cooler.energy}</td>
+                    <td className="text-secondary">{item.type}</td>
+                    <td>
+                      <span className="badge bg-purple-lt">
+                        {item.energy.toLocaleString()} kWh
+                      </span>
+                    </td>
                     <td>
                       <div className="btn-list flex-nowrap">
                         <button
                           className="btn btn-ghost-primary btn-icon"
                           onClick={() =>
-                            toggleModal(true, true, cooler, data._id)
+                            toggleModal(true, true, item, data._id)
                           }
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
+                          <IconPencil size={18} />
                         </button>
                         <button
                           className="btn btn-ghost-danger btn-icon"
-                          onClick={() => handleDelete(data._id, cooler._id)}
-                          disabled={deletingIds.has(cooler._id)} // Disable button if deleting
+                          onClick={() => setConfirmDelete({ _id: item._id, nom: item.name, recordId: data._id })}
+                          disabled={deletingIds.has(item._id)}
                         >
-                          {deletingIds.has(cooler._id) ? (
+                          {deletingIds.has(item._id) ? (
                             <span className="spinner-border spinner-border-sm" />
                           ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
-                            >
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                              <path d="M4 7l16 0" />
-                              <path d="M10 11l0 6" />
-                              <path d="M14 11l0 6" />
-                              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                            </svg>
+                            <IconTrash size={18} />
                           )}
                         </button>
                       </div>
@@ -606,60 +586,47 @@ const Scope2 = () => {
                     colSpan={currentTab.headers.length}
                     className="text-center text-secondary"
                   >
-                    Aucune donnée disponible pour{" "}
-                    {currentTab.label.toLowerCase()}
+                    Aucune donnée disponible pour {currentTab.label.toLowerCase()}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        {(activeTab === "heating" || activeTab === "cooling") &&
-          totalItems > 0 && (
-            <nav className="d-flex justify-content-center mt-4">
-              <ul className="pagination">
-                <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    Précédent
-                  </button>
-                </li>
-                {[...Array(totalPages).keys()].map((page) => (
-                  <li
-                    key={page + 1}
-                    className={`page-item ${
-                      currentPage === page + 1 ? "active" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => setCurrentPage(page + 1)}
-                    >
-                      {page + 1}
-                    </button>
-                  </li>
-                ))}
-                <li
-                  className={`page-item ${
-                    currentPage === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    Suivant
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          )}
+        {(activeTab === "heating" || activeTab === "cooling") && totalItems > itemsPerPage && (
+          <nav className="d-flex justify-content-center mt-4">
+  <ul className="pagination">
+    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+      <button
+        className="page-link"
+        onClick={() => setCurrentPage(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        <IconArrowRight size={16} />
+      </button>
+    </li>
+    {[...Array(totalPages).keys()].map((page) => (
+      <li
+        key={page + 1}
+        className={`page-item ${currentPage === page + 1 ? "active" : ""}`}
+      >
+        <button className="page-link" onClick={() => setCurrentPage(page + 1)}>
+          {page + 1}
+        </button>
+      </li>
+    ))}
+    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+      <button
+        className="page-link"
+        onClick={() => setCurrentPage(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        <IconArrowLeft size={16} />
+      </button>
+    </li>
+  </ul>
+</nav>
+        )}
       </div>
     );
   };
@@ -667,7 +634,6 @@ const Scope2 = () => {
   const renderFormFields = () => {
     const currentTab = tabs[activeTab];
     return currentTab.fields.map((field, index) => {
-      // Special case for country field in electricity tab
       if (field.name === "country" && activeTab === "electricity") {
         return (
           <div className="mb-3" key={index}>
@@ -681,7 +647,7 @@ const Scope2 = () => {
               value={company?.country || ""}
               disabled={true}
             >
-              <option value={company?.country || ""}>{company?.country || "Loading..."}</option>
+              <option value={company?.country || ""}>{company?.country || "Chargement..."}</option>
             </select>
             <small className="form-text text-muted">
               Le pays est automatiquement défini selon votre profil de votre entreprise.
@@ -689,7 +655,7 @@ const Scope2 = () => {
           </div>
         );
       }
-      
+
       return (
         <div className="mb-3" key={index}>
           <label className="form-label">
@@ -761,18 +727,13 @@ const Scope2 = () => {
                   <div className="alert alert-info mt-3">
                     <div className="d-flex">
                       <div className="me-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>
-                          <path d="M12 9h.01"/>
-                          <path d="M11 12h1v4h1"/>
-                        </svg>
+                        <IconInfoCircle size={24} />
                       </div>
                       <div>
                         <h4 className="mb-1">Information sur le calcul d'émissions</h4>
                         <div>Pays utilisé pour le calcul: <strong>{company.country}</strong></div>
                         <div>Facteur d'émission: <strong>{company.countryEmissionFactor} kgCO2e/kWh</strong></div>
-                       </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -782,14 +743,14 @@ const Scope2 = () => {
                   type="button"
                   className="btn btn-link link-secondary"
                   onClick={() => toggleModal(false)}
-                  disabled={isSubmitting} // Disable cancel button during submission
+                  disabled={isSubmitting}
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary ms-auto"
-                  disabled={isSubmitting} // Disable submit button during submission
+                  disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <span>
@@ -843,6 +804,59 @@ const Scope2 = () => {
         <div className="card-body p-0">
           <div className="tab-content">{renderTable()}</div>
           {renderModal()}
+          {confirmDelete && (
+            <div
+              className="modal show"
+              tabIndex="-1"
+              style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+            >
+              <div className="modal-dialog modal-sm" role="document">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Confirmer la suppression</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setConfirmDelete(null)}
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <p>
+                      Êtes-vous sûr de vouloir supprimer{" "}
+                      <strong>{confirmDelete.nom}</strong>? Cette action est
+                      irréversible.
+                    </p>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-link link-secondary"
+                      onClick={() => setConfirmDelete(null)}
+                      disabled={deletingIds.has(confirmDelete._id)}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger ms-auto"
+                      onClick={() => handleDelete(confirmDelete.recordId || confirmDelete._id, confirmDelete._id)}
+                      disabled={deletingIds.has(confirmDelete._id)}
+                    >
+                      {deletingIds.has(confirmDelete._id) ? (
+                        <span>
+                          <span className="spinner-border spinner-border-sm me-2" />
+                          Suppression...
+                        </span>
+                      ) : (
+                        "Supprimer"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -850,3 +864,4 @@ const Scope2 = () => {
 };
 
 export default Scope2;
+ 

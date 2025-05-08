@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { IconPlus, IconSearch } from "@tabler/icons-react";
+import { IconPlus, IconSearch, IconPencil, IconTrash,IconArrowRight,IconArrowLeft } from "@tabler/icons-react";
 
 const Scope1 = () => {
   const [activeTab, setActiveTab] = useState("Combustion de carburant");
@@ -18,8 +18,9 @@ const Scope1 = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [modalMode, setModalMode] = useState("add");
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for form submission
-  const [deletingIds, setDeletingIds] = useState(new Set()); // New state for tracking deletions
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingIds, setDeletingIds] = useState(new Set());
+  const [expandedItems, setExpandedItems] = useState(new Set());
   const itemsPerPage = 3;
 
   useEffect(() => {
@@ -68,6 +69,7 @@ const Scope1 = () => {
     setActiveTab(tabId);
     setSearchTerm("");
     setFuelFilter("all");
+    setExpandedItems(new Set());
   };
 
   const toggleModal = (isOpen, mode = "add", item = null) => {
@@ -78,7 +80,7 @@ const Scope1 = () => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent multiple submissions
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     const formData = new FormData(e.target);
@@ -108,7 +110,7 @@ const Scope1 = () => {
         console.error("Error adding fuel combustion:", error);
         setError(error.message);
       } finally {
-        setIsSubmitting(false); // Reset submitting state
+        setIsSubmitting(false);
       }
     } else {
       newItem.ligneDeProduction = formData.get("ligneDeProduction");
@@ -129,14 +131,14 @@ const Scope1 = () => {
         console.error("Error adding production:", error);
         setError(error.message);
       } finally {
-        setIsSubmitting(false); // Reset submitting state
+        setIsSubmitting(false);
       }
     }
   };
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent multiple submissions
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     const formData = new FormData(e.target);
@@ -169,7 +171,7 @@ const Scope1 = () => {
         console.error("Error updating fuel combustion:", error);
         setError(error.message);
       } finally {
-        setIsSubmitting(false); // Reset submitting state
+        setIsSubmitting(false);
       }
     } else {
       updatedItem.ligneDeProduction = formData.get("ligneDeProduction");
@@ -192,13 +194,13 @@ const Scope1 = () => {
         console.error("Error updating production:", error);
         setError(error.message);
       } finally {
-        setIsSubmitting(false); // Reset submitting state
+        setIsSubmitting(false);
       }
     }
   };
 
   const handleDelete = async (id) => {
-    if (deletingIds.has(id)) return; // Prevent multiple deletions
+    if (deletingIds.has(id)) return;
     setDeletingIds((prev) => new Set([...prev, id]));
 
     const endpoint =
@@ -229,7 +231,7 @@ const Scope1 = () => {
         const newSet = new Set(prev);
         newSet.delete(id);
         return newSet;
-      }); // Remove id from deletingIds
+      });
     }
   };
 
@@ -261,6 +263,19 @@ const Scope1 = () => {
     return items.slice(startIndex, endIndex);
   };
 
+  const toggleExpand = (itemId, field) => {
+    const key = `${itemId}-${field}`;
+    setExpandedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
   const renderTable = () => {
     if (loading) {
       return <div className="p-4 text-center">Chargement des données...</div>;
@@ -281,6 +296,28 @@ const Scope1 = () => {
 
     return (
       <div className="table-container p-5">
+        <style>
+          {`
+            .truncate-text {
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 300px;
+            }
+            .voir-plus {
+              cursor: pointer;
+              color: #206bc4;
+              font-size: 0.875rem;
+              margin-top: 0.25rem;
+              display: inline-block;
+            }
+            .voir-plus:hover {
+              text-decoration: underline;
+            }
+          `}
+        </style>
         <div className="table-responsive">
           <table className="table table-vcenter card-table">
             <thead>
@@ -315,18 +352,80 @@ const Scope1 = () => {
                         >
                           {item.nom.charAt(0)}
                         </span>
-                        <div className="font-weight-medium">{item.nom}</div>
+                        <div>
+                          <div
+                            className={
+                              expandedItems.has(`${item._id}-nom`)
+                                ? ""
+                                : "truncate-text"
+                            }
+                          >
+                            {item.nom}
+                          </div>
+                          {item.nom.length > 50 && (
+                            <span
+                              className="voir-plus"
+                              onClick={() => toggleExpand(item._id, "nom")}
+                            >
+                              {expandedItems.has(`${item._id}-nom`)
+                                ? "Voir moins"
+                                : "Voir plus"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     {activeTab === "Combustion de carburant" ? (
                       <>
-                        <td>{item.modele}</td>
+                        <td>
+                          <div
+                            className={
+                              expandedItems.has(`${item._id}-modele`)
+                                ? ""
+                                : "truncate-text"
+                            }
+                          >
+                            {item.modele}
+                          </div>
+                          {item.modele.length > 50 && (
+                            <span
+                              className="voir-plus"
+                              onClick={() => toggleExpand(item._id, "modele")}
+                            >
+                              {expandedItems.has(`${item._id}-modele`)
+                                ? "Voir moins"
+                                : "Voir plus"}
+                            </span>
+                          )}
+                        </td>
                         <td className="text-secondary">
                           {item.typeDeCarburant}
                         </td>
                       </>
                     ) : (
-                      <td className="text-secondary">{item.ligneDeProduction}</td>
+                      <td className="text-secondary">
+                        <div
+                          className={
+                            expandedItems.has(`${item._id}-ligneDeProduction`)
+                              ? ""
+                              : "truncate-text"
+                            }
+                        >
+                          {item.ligneDeProduction}
+                        </div>
+                        {item.ligneDeProduction.length > 50 && (
+                          <span
+                            className="voir-plus"
+                            onClick={() =>
+                              toggleExpand(item._id, "ligneDeProduction")
+                            }
+                          >
+                            {expandedItems.has(`${item._id}-ligneDeProduction`)
+                              ? "Voir moins"
+                              : "Voir plus"}
+                          </span>
+                        )}
+                      </td>
                     )}
                     <td>
                       <span className="badge bg-purple-lt">
@@ -339,48 +438,17 @@ const Scope1 = () => {
                           className="btn btn-ghost-primary btn-icon"
                           onClick={() => toggleModal(true, "edit", item)}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
+                          <IconPencil size={18} />
                         </button>
                         <button
                           className="btn btn-ghost-danger btn-icon"
                           onClick={() => setConfirmDelete(item)}
-                          disabled={deletingIds.has(item._id)} // Disable button if deleting
+                          disabled={deletingIds.has(item._id)}
                         >
                           {deletingIds.has(item._id) ? (
                             <span className="spinner-border spinner-border-sm" />
                           ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="icon icon-tabler icons-tabler-outline icon-tabler-trash"
-                            >
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                              <path d="M4 7l16 0" />
-                              <path d="M10 11l0 6" />
-                              <path d="M14 11l0 6" />
-                              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                            </svg>
+                            <IconTrash size={18} />
                           )}
                         </button>
                       </div>
@@ -405,50 +473,37 @@ const Scope1 = () => {
 
         {items.length > itemsPerPage && (
           <nav className="d-flex justify-content-center mt-4">
-            <ul className="pagination">
-              <li
-                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Précédent
-                </button>
-              </li>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <li
-                    key={page}
-                    className={`page-item ${
-                      currentPage === page ? "active" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
-                  </li>
-                )
-              )}
-              <li
-                className={`page-item ${
-                  currentPage === totalPages ? "disabled" : ""
-                }`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Suivant
-                </button>
-              </li>
-            </ul>
-          </nav>
+  <ul className="pagination">
+    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+      <button
+        className="page-link"
+        onClick={() => setCurrentPage(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        <IconArrowLeft size={16} />
+      </button>
+    </li>
+    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      <li
+        key={page}
+        className={`page-item ${currentPage === page ? "active" : ""}`}
+      >
+        <button className="page-link" onClick={() => setCurrentPage(page)}>
+          {page}
+        </button>
+      </li>
+    ))}
+    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+      <button
+        className="page-link"
+        onClick={() => setCurrentPage(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        <IconArrowRight size={16} />
+      </button>
+    </li>
+  </ul>
+</nav>
         )}
       </div>
     );
@@ -641,14 +696,14 @@ const Scope1 = () => {
                     type="button"
                     className="btn btn-link link-secondary"
                     onClick={() => toggleModal(false)}
-                    disabled={isSubmitting} // Disable cancel button during submission
+                    disabled={isSubmitting}
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
                     className="btn btn-primary ms-auto"
-                    disabled={isSubmitting} // Disable submit button during submission
+                    disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <span>
@@ -695,7 +750,7 @@ const Scope1 = () => {
                   type="button"
                   className="btn btn-link link-secondary"
                   onClick={() => setConfirmDelete(null)}
-                  disabled={deletingIds.has(confirmDelete._id)} // Disable cancel button during deletion
+                  disabled={deletingIds.has(confirmDelete._id)}
                 >
                   Annuler
                 </button>
@@ -703,7 +758,7 @@ const Scope1 = () => {
                   type="button"
                   className="btn btn-danger ms-auto"
                   onClick={() => handleDelete(confirmDelete._id)}
-                  disabled={deletingIds.has(confirmDelete._id)} // Disable delete button during deletion
+                  disabled={deletingIds.has(confirmDelete._id)}
                 >
                   {deletingIds.has(confirmDelete._id) ? (
                     <span>
