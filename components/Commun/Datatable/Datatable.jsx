@@ -147,7 +147,9 @@ const DataTable = ({
           <thead>
             <tr>
               {dataHeader?.map((header, index) => (
-                <th key={index}>{header}</th>
+                <th key={index}>
+                  {header}               
+                </th>
               ))}
             </tr>
           </thead>
@@ -183,12 +185,15 @@ const DataTable = ({
                               header === "Emissions" ? "badge bg-purple-lt" : ""
                             }
                           >
-                            {header.toLowerCase() === "emissions"
+                            {
+                            header.toLowerCase() === "emissions"
                               ? `${cellValue} ${tab.unit1}/${tab.unit2}`
-                              : cellValue}
+                              : cellValue
+                            }
                           </span>
                         </td>
                       );
+
                     })}
                     <td>
                       <div className="btn-list">
@@ -197,18 +202,17 @@ const DataTable = ({
                           onClick={() => onDelete(row._id)}
                           disabled={deletingIds.has(row._id)}
                         >
-                        
                           {deletingIds.has(row._id) ? (
                             <span className="spinner-border spinner-border-sm" />
                           ) : (
-                           <IconTrash  size={18}/>
+                            <IconTrash size={18} />
                           )}
                         </button>
                         <button
                           className="btn btn-ghost-success btn-icon"
                           onClick={() => onUpdate(row._id)}
                         >
-                          <IconEdit size={18}  />
+                          <IconEdit size={18} />
                         </button>
                       </div>
                     </td>
@@ -251,12 +255,7 @@ const DataTable = ({
             </button>
           </li>
           <li className="page-item active">
-            <span
-              className="page-link bg-primary"
-              
-            >
-              {currentPage}
-            </span>
+            <span className="page-link bg-primary">{currentPage}</span>
           </li>
           <li
             className={`page-item ${

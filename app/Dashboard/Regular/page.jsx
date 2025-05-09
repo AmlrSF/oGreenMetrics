@@ -1,11 +1,27 @@
+"use client";
 
-"use client"
+import React, { useState, useEffect } from "react";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+} from "chart.js";
+import { Doughnut, Line } from "react-chartjs-2";
 
-import React, { useState, useEffect } from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
-import { Doughnut, Line } from 'react-chartjs-2';
-
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement
+);
 
 const Dashboard = () => {
   const [sites, setSites] = useState([]);
@@ -43,11 +59,16 @@ const Dashboard = () => {
   };
 
   const calculateTotalEmissions = () => {
-    return sites.reduce((acc, site) => acc + site.statistics.co2.grid.grams, 0).toFixed(2);
+    return sites
+      .reduce((acc, site) => acc + site.statistics.co2.grid.grams, 0)
+      .toFixed(2);
   };
 
   const calculateAverageCleanerThan = () => {
-    return (sites.reduce((acc, site) => acc + site.cleanerThan, 0) / sites.length * 100).toFixed(0);
+    return (
+      (sites.reduce((acc, site) => acc + site.cleanerThan, 0) / sites.length) *
+      100
+    ).toFixed(0);
   };
 
   const ratingDistribution = () => {
@@ -58,35 +79,54 @@ const Dashboard = () => {
 
     return {
       labels: Object.keys(distribution),
-      datasets: [{
-        data: Object.values(distribution),
-        backgroundColor: [
-          '#28a745',
-          '#17a2b8',
-          '#ffc107',
-          '#dc3545',
-          '#6c757d'
-        ],
-      }]
+      datasets: [
+        {
+          data: Object.values(distribution),
+          backgroundColor: [
+            "#28a745",
+            "#17a2b8",
+            "#ffc107",
+            "#dc3545",
+            "#6c757d",
+          ],
+        },
+      ],
     };
   };
 
-  if (loading) return <div className="text-center mt-5"><div className="spinner-border"></div></div>;
+  if (loading)
+    return (
+      <div className="text-center mt-5">
+        <div className="spinner-border"></div>
+      </div>
+    );
   if (error) return <div className="alert alert-danger m-3">{error}</div>;
 
   return (
     <div className="container-fluid p-4">
       <div className="row">
         <div className="col-lg-12 mb-4">
-          <h1 className="text-primary">
-        
-            Dashboard Overview
-          </h1>
+          <h1 className="text-primary">Dashboard Overview</h1>
         </div>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-primary shadow h-100 py-2">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill,minmax(450px, 1fr))",
+        }}
+        className="gap-2"
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill,minmax(250px, 1fr))",
+          }}
+          className="gap-2"
+        >
+          {/* Stats Cards */}
+
+          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-primary shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -103,10 +143,8 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-success shadow h-100 py-2">
+          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-success shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -123,10 +161,8 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-info shadow h-100 py-2">
+          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-info shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -143,10 +179,8 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-warning shadow h-100 py-2">
+          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-warning shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -154,7 +188,7 @@ const Dashboard = () => {
                     Green Hosting
                   </h2>
                   <p className="fs-2 mb-0 font-weight-bold text-gray-800">
-                    {sites.filter(site => site.green).length} sites
+                    {sites.filter((site) => site.green).length} sites
                   </p>
                 </div>
                 <div className="col-auto">
@@ -164,57 +198,68 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Charts Row */}
-      <div className="row">
-        <div className="col-xl-6">
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h2 className="m-0 font-weight-bold text-primary">
-                 Distribution</h2>
-            </div>
-            <div className="card-body">
-              <div className="chart-pie d-flex justify-content-center align-content-center pt-4">
-                <Doughnut style={{width:"250px",height:"250px"}} data={ratingDistribution()} />
-              </div>
+        <div style={{backgroundColor:"#fff"}} className="card bg-white  shadow ">
+          <div className="card-header py-3">
+            <h2 className="m-0 font-weight-bold text-primary">Rating Distribution</h2>
+          </div>
+          <div
+            className="card-body w-100 flex-1 d-flex justify-content-center 
+          align-content-center"
+          style={{  height: "250px" }}
+          >
+            <div 
+              className="chart-pie w-100 flex-1 d-flex justify-content-center 
+          align-content-center "
+            >
+              <Doughnut
+                style={{ width: "250px", height: "250px" }}
+                data={ratingDistribution()}
+              />
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="col-xl-6">
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h2 className="m-0 font-weight-bold text-primary">Recent Sites</h2>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>URL</th>
-                      <th>Rating</th>
-                      <th>Emissions</th>
+      {/* Charts Row */}
+      <div className="mt-2">
+        <div style={{backgroundColor:"#fff"}} className="card bg-white  shadow">
+          <div className="card-header py-3">
+            <h2 className="m-0 font-weight-bold text-primary">Recent Sites</h2>
+          </div>
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>URL</th>
+                    <th>Rating</th>
+                    <th>Emissions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sites.slice(0, 5).map((site) => (
+                    <tr key={site._id}>
+                      <td>{site.url}</td>
+                      <td>
+                        <span
+                          className={`badge text-white bg-${
+                            site.rating === "A"
+                              ? "success"
+                              : site.rating === "B"
+                              ? "info"
+                              : site.rating === "C"
+                              ? "warning"
+                              : "danger"
+                          }`}
+                        >
+                          {site.rating}
+                        </span>
+                      </td>
+                      <td>{site.statistics.co2.grid.grams.toFixed(3)} g</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {sites.slice(0, 5).map(site => (
-                      <tr key={site._id}>
-                        <td>{site.url}</td>
-                        <td>
-                          <span className={`badge text-white bg-${site.rating === 'A' ? 'success' : 
-                            site.rating === 'B' ? 'info' :
-                            site.rating === 'C' ? 'warning' :
-                            'danger'}`}>
-                            {site.rating}
-                          </span>
-                        </td>
-                        <td>{site.statistics.co2.grid.grams.toFixed(3)} g</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
