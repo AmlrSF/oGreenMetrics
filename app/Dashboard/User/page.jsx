@@ -2,47 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  Filler,
-  BarElement,
-} from "chart.js";
-import {
-  IconTrendingUp,
-  IconChartBar,
-  IconChartPie,
-  IconTruck,
-  IconLamp,
-  IconBuildingFactory,
-  IconTarget,
-  IconAlertTriangle,
-  IconInfoCircle,
-  IconArrowUp,
-  IconArrowDown,
-} from "@tabler/icons-react";
+import {Chart as ChartJS,CategoryScale,LinearScale,PointElement,LineElement,Title,Tooltip,Legend,ArcElement,Filler,BarElement,} from "chart.js";
+import {IconTrendingUp,IconChartBar,IconChartPie,IconTruck,IconLamp,IconBuildingFactory,IconTarget,IconAlertTriangle,IconInfoCircle,IconArrowUp,IconArrowDown,IconBuilding,IconUser,IconMap,IconCalendar,IconId,IconBulb,} from "@tabler/icons-react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { toast } from "react-hot-toast";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  BarElement,
-  Legend,
-  ArcElement,
-  Filler
-);
+ChartJS.register(CategoryScale,LinearScale,PointElement,LineElement,Title,Tooltip,BarElement,Legend,ArcElement,Filler);
 
 const COLORS = ["#206bc4", "#42e189", "#d618d6"];
 
@@ -232,17 +197,21 @@ const processEmissionsData = (data) => {
 
 const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
   return (
-    <div className="card card-sm shadow-sm">
-      <div className="card-body p-4">
+    <div className="card card-sm h-100">
+      <div className="card-body d-flex flex-column">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar avatar-sm me-3" style={{ backgroundColor: `${color}20` }}>
+          <div className="avatar avatar-md me-3" style={{ backgroundColor: `${color}20` }}>
             <Icon className="icon" style={{ color }} />
           </div>
           <h3 className="card-title mb-0 fw-bold">{title}</h3>
         </div>
-        <div className="d-flex align-items-center">
-          <div className="h2 mb-0 me-2">{Number(value).toFixed(2)} tCO₂e</div>
-          <IconTrendingUp className="icon-sm text-green" />
+        <div className="d-flex align-items-center mt-auto">
+          <div className="h1 mb-0 me-2">{Number(value).toFixed(2)}</div>
+          <div className="text-muted fs-3">tCO₂e</div>
+        </div>
+        <div className="d-flex align-items-center mt-2">
+          <IconTrendingUp className="icon-sm text-green me-1" />
+          <span className="text-muted fs-5">Émissions directes</span>
         </div>
       </div>
     </div>
@@ -251,17 +220,22 @@ const EmissionCard = ({ title, icon: Icon, value, color, data, breakdown }) => {
 
 const GoalProgressCard = () => { 
   return (
-    <div className="card card-sm shadow-sm">
-      <div className="card-body p-4">
+    <div className="card card-sm h-100">
+      <div className="card-body d-flex flex-column">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#206bc420" }}>
+          <div className="avatar avatar-md me-3" style={{ backgroundColor: "#206bc420" }}>
             <IconTarget className="icon" style={{ color: "#206bc4" }} />
           </div>
           <h3 className="card-title mb-0 fw-bold">Réduisez vos émissions</h3>
         </div>
-        <Link href="/Dashboard/User/goals" className="text-primary fw-medium">
-          Définir un objectif maintenant
-        </Link>
+        <div className="text-muted mb-4">
+          Fixez des objectifs mesurables pour réduire votre empreinte carbone et suivez votre progression.
+        </div>
+        <div className="mt-auto">
+          <Link href="/Dashboard/User/goals" className="btn btn-primary w-100">
+            Définir un objectif maintenant
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -275,25 +249,32 @@ const CriticalPointsCard = ({ emissions }) => {
   ].filter(Boolean);
 
   return (
-    <div className="card card-sm shadow-sm">
-      <div className="card-body p-4">
+    <div className="card card-sm h-100">
+      <div className="card-body d-flex flex-column">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#d6393920" }}>
+          <div className="avatar avatar-md me-3" style={{ backgroundColor: "#d6393920" }}>
             <IconAlertTriangle className="icon" style={{ color: "#d63939" }} />
           </div>
           <h3 className="card-title mb-0 fw-bold">Points Critiques</h3>
         </div>
         {criticalPoints.length > 0 ? (
-          <ul className="list-unstyled mb-0">
+          <div className="mt-2">
             {criticalPoints.map((point, index) => (
-              <li key={index} className="text-danger mb-2">
-                • {point}
-              </li>
+              <div key={index} className="alert alert-danger d-flex align-items-center mb-2 py-2">
+                <IconAlertTriangle className="me-2" size={18} />
+                <div>{point}</div>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
-          <div className="text-muted">Aucun point critique détecté.</div>
+          <div className="alert alert-success d-flex align-items-center mt-2">
+            <IconInfoCircle className="me-2" size={18} />
+            <div>Aucun point critique détecté.</div>
+          </div>
         )}
+        <div className="text-muted mt-auto fs-5">
+          <strong>Dernier contrôle:</strong> {new Date().toLocaleDateString('fr-FR')}
+        </div>
       </div>
     </div>
   );
@@ -301,30 +282,75 @@ const CriticalPointsCard = ({ emissions }) => {
 
 const CompanyInfoCard = ({ company, owner }) => {
   return (
-    <div className="card card-sm shadow-sm">
-      <div className="card-body p-4">
-        <div className="d-flex align-items-center mb-3">
-          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#206bc420" }}>
-            <IconInfoCircle className="icon" style={{ color: "#206bc4" }} />
+    <div className="card card-sm h-100">
+      <div className="card-stamp">
+        <div className="card-stamp-icon bg-primary">
+          <IconBuilding />
+        </div>
+      </div>
+      <div className="card-body d-flex flex-column">
+        <h2 className="card-title mb-4 fw-bold">{company.nom_entreprise}</h2>
+        
+        <div className="datagrid mb-3">
+          <div className="datagrid-item">
+            <div className="datagrid-title d-flex align-items-center">
+              <IconUser className="me-2" size={18} />
+              Propriétaire
+            </div>
+            <div className="datagrid-content">
+              {owner.prenom} {owner.nom}
+            </div>
           </div>
-          <h3 className="card-title mb-0 fw-bold">{company.nom_entreprise}</h3>
+          
+          <div className="datagrid-item">
+            <div className="datagrid-title d-flex align-items-center">
+              <IconId className="me-2" size={18} />
+              Matricule Fiscale
+            </div>
+            <div className="datagrid-content">
+              {company.matricule_fiscale || "Non disponible"}
+            </div>
+          </div>
+          
+          <div className="datagrid-item">
+            <div className="datagrid-title d-flex align-items-center">
+              <IconBuildingFactory className="me-2" size={18} />
+              Secteur
+            </div>
+            <div className="datagrid-content">
+              {company.industrie}
+            </div>
+          </div>
+          
+          <div className="datagrid-item">
+            <div className="datagrid-title d-flex align-items-center">
+              <IconMap className="me-2" size={18} />
+              Localisation
+            </div>
+            <div className="datagrid-content">
+              {company.adresse}, {company.country}
+            </div>
+          </div>
+          
+          <div className="datagrid-item">
+            <div className="datagrid-title d-flex align-items-center">
+              <IconCalendar className="me-2" size={18} />
+              Fondation
+            </div>
+            <div className="datagrid-content">
+              {new Date(company.date_fondation).toLocaleDateString("fr-FR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
+          </div>
         </div>
-        <div className="text-muted mb-2">
-          <strong>Propriétaire:</strong> {owner.prenom} {owner.nom}
-        </div>
-        <div className="text-muted mb-2">
-          <strong>Secteur:</strong> {company.industrie}
-        </div>
-        <div className="text-muted mb-2">
-          <strong>Localisation:</strong> {company.adresse}, {company.country}
-        </div>
-        <div className="text-muted">
-          <strong>Fondation:</strong>{" "}
-          {new Date(company.date_fondation).toLocaleDateString("fr-FR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
+        
+        <div className="mt-auto">
+          <Link href="/Dashboard/User/profile" className="btn btn-outline-primary btn-sm">
+            Détails de l'entreprise
+          </Link>
         </div>
       </div>
     </div>
@@ -333,29 +359,50 @@ const CompanyInfoCard = ({ company, owner }) => {
 
 const RecommendationsCard = () => {
   const recommendations = [
-    "Adoptez des sources d'énergie renouvelables pour réduire les émissions de Scope 2.",
-    "Optimisez la logistique et privilégiez des transports à faible émission pour Scope 3.",
-    "Mettez en place un programme de recyclage pour réduire les déchets (Scope 3).",
-    "Investissez dans des équipements éco-énergétiques pour diminuer les émissions de Scope 1.",
-    "Formez les employés à des pratiques éco-responsables pour réduire l'empreinte carbone.",
+    { title: "Énergie Renouvelable",
+      text: "Adoptez des sources d'énergie renouvelables pour réduire les émissions de Scope 2."
+    },
+    {  title: "Optimisation Logistique",
+      text: "Privilégiez des transports à faible émission pour Scope 3."
+    },
+    {  title: "Programme de Recyclage",
+      text: "Mettez en place un programme de recyclage pour réduire les déchets (Scope 3)."
+    },
+    { title: "Équipements Éco-énergétiques",
+      text: "Investissez dans des équipements éco-énergétiques pour diminuer les émissions de Scope 1."
+    },
+    { title: "Formation Éco-responsable",
+      text: "Formez les employés à des pratiques éco-responsables pour réduire l'empreinte carbone."
+    },
   ];
 
   return (
-    <div className="card card-sm shadow-sm">
-      <div className="card-body p-4">
-        <div className="d-flex align-items-center mb-3">
-          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#42e18920" }}>
-            <IconInfoCircle className="icon" style={{ color: "#42e189" }} />
+    <div className="card card-sm h-100">
+      <div className="card-body d-flex flex-column">
+        <div className="d-flex align-items-center mb-4">
+          <div className="avatar avatar-md me-3" style={{ backgroundColor: "#42e18920" }}>
+            <IconBulb className="icon" style={{ color: "#42e189" }} />
           </div>
           <h3 className="card-title mb-0 fw-bold">Recommandations</h3>
         </div>
-        <ul className="list-unstyled mb-0">
+        
+        <div className="list-group list-group-flush">
           {recommendations.map((rec, index) => (
-            <li key={index} className="mb-2">
-              • {rec}
-            </li>
+            <div key={index} className="list-group-item border-0 px-0">
+              <div className="row align-items-center">
+                <div className="col-auto">
+                  <span className="avatar avatar-sm bg-primary-lt">
+                    {index + 1}
+                  </span>
+                </div>
+                <div className="col">
+                  <div className="fw-bold">{rec.title}</div>
+                  <div className="text-muted">{rec.text}</div>
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
@@ -382,36 +429,58 @@ const TopLeastEmissionsCard = ({ emissions }) => {
   const leastSources = sortedSources.slice(-3).reverse();
 
   return (
-    <div className="card card-sm shadow-sm">
-      <div className="card-body p-4">
+    <div className="card card-sm h-100">
+      <div className="card-body d-flex flex-column">
         <div className="d-flex align-items-center mb-4">
-          <div className="avatar avatar-sm me-3" style={{ backgroundColor: "#206bc420" }}>
+          <div className="avatar avatar-md me-3" style={{ backgroundColor: "#206bc420" }}>
             <IconChartBar className="icon" style={{ color: "#206bc4" }} />
           </div>
           <h3 className="card-title mb-0 fw-bold">Sources d'Émissions</h3>
         </div>
-        <div className="row">
-          <div className="col-md-6 mb-4">
-            <h4 className="mb-3 fw-semibold">Top 3 Émetteurs</h4>
-            {topSources.map((source, index) => (
-              <div key={index} className="d-flex align-items-center mb-2">
-                <IconArrowUp className="icon-sm text-danger me-2" />
-                <span>
-                  {source.source} ({source.scope}): {source.value.toFixed(2)} tCO₂e
-                </span>
+        
+        <div className="row g-3">
+          <div className="col-6">
+            <div className="card card-sm bg-primary-lt h-100">
+              <div className="card-body p-3">
+                <h4 className="mb-3 fw-medium">Top 3 Émetteurs</h4>
+                {topSources.map((source, index) => (
+                  <div key={index} className="d-flex align-items-center mb-2 bg-white rounded p-2">
+                    <div className="avatar avatar-xs me-2 bg-danger">
+                      <IconArrowUp className="icon-xs text-white" />
+                    </div>
+                    <div>
+                      <div className="fw-medium">{source.source}</div>
+                      <div className="d-flex align-items-center text-muted">
+                        <span className="badge bg-primary-lt me-1">{source.scope}</span>
+                        <span>{source.value.toFixed(2)} tCO₂e</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-          <div className="col-md-6">
-            <h4 className="mb-3 fw-semibold">3 Moins Émetteurs</h4>
-            {leastSources.map((source, index) => (
-              <div key={index} className="d-flex align-items-center mb-2">
-                <IconArrowDown className="icon-sm text-green me-2" />
-                <span>
-                  {source.source} ({source.scope}): {source.value.toFixed(2)} tCO₂e
-                </span>
+          
+          <div className="col-6">
+            <div className="card card-sm bg-success-lt h-100">
+              <div className="card-body p-3">
+                <h4 className="mb-3 fw-medium">3 Moins Émetteurs</h4>
+                {leastSources.map((source, index) => (
+                  <div key={index} className="d-flex align-items-center mb-2 bg-white rounded p-2">
+                    <div className="avatar avatar-xs me-2 bg-success">
+                      <IconArrowDown className="icon-xs text-white" />
+                    </div>
+                    <div>
+                      <div className="fw-medium">{source.source}</div>
+                      <div className="d-flex align-items-center text-muted">
+                        <span className="badge bg-success-lt me-1">{source.scope}</span>
+                        <span>{source.value.toFixed(2)} tCO₂e</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
@@ -505,13 +574,19 @@ const CompanyDash = () => {
 
   if (loading || !processedEmissions || !company || !owner) {
     return (
-      <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <div
-          className="spinner-border text-primary"
-          role="status"
-          style={{ width: "3rem", height: "3rem" }}
-        >
-          <span className="visually-hidden">Chargement...</span>
+      <div className="page page-center">
+        <div className="container-slim">
+          <div className="empty">
+            <div className="empty-img">
+              <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
+                <span className="visually-hidden">Chargement...</span>
+              </div>
+            </div>
+            <p className="empty-title">Chargement des données</p>
+            <p className="empty-subtitle text-muted">
+              Veuillez patienter pendant que nous récupérons vos données d'émissions
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -710,130 +785,182 @@ const CompanyDash = () => {
   };
 
   return (
-    <div className="container-xl py-4">
-      <div className="page-header d-print-none mb-5">
-        <div className="row align-items-center g-3">
-          <div className="col-sm mb-sm-0 mb-3">
-            <h2 className="page-title mb-0 d-flex align-items-center gap-2">
-              <IconChartBar className="d-none d-sm-block" size={32} />
-              Tableau de Bord des Émissions
-            </h2>
-          </div>
-        </div>
-      </div>
-
-      <div className="row row-cards mb-5 g-4">
-        <div className="col-lg-4 col-md-6">
-          <EmissionCard
-            title="Émissions Scope 1"
-            icon={IconBuildingFactory}
-            value={processedEmissions.scope1.total}
-            color={COLORS[0]}
-            data={processedEmissions.scope1.data}
-            breakdown={processedEmissions.scope1.breakdown}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6">
-          <EmissionCard
-            title="Émissions Scope 2"
-            icon={IconLamp}
-            value={processedEmissions.scope2.total}
-            color={COLORS[1]}
-            data={processedEmissions.scope2.data}
-            breakdown={processedEmissions.scope2.breakdown}
-          />
-        </div>
-        <div className="col-lg-4 col-md-6">
-          <EmissionCard
-            title="Émissions Scope 3"
-            icon={IconTruck}
-            value={processedEmissions.scope3.total}
-            color={COLORS[2]}
-            data={processedEmissions.scope3.data}
-            breakdown={processedEmissions.scope3.breakdown}
-          />
-        </div>
-      </div>
-
-      <div className="row row-cards mb-5 g-4">
-        {selectedGoal && (
-          <div className="col-lg-4 col-md-6">
-            <GoalProgressCard
-              goal={selectedGoal}
-              emissions={{
-                scope1: processedEmissions.scope1.total,
-                scope2: processedEmissions.scope2.total,
-                scope3: processedEmissions.scope3.total,
-                total: totalEmissions,
-              }}
-            />
-          </div>
-        )}
-        <div className="col-lg-4 col-md-6">
-          <CriticalPointsCard emissions={processedEmissions} />
-        </div>
-        <div className="col-lg-4 col-md-6">
-          <CompanyInfoCard company={company} owner={owner} />
-        </div>
-      </div>
-
-      <div className="row row-cards mb-5 g-4">
-        <div className="col-lg-6">
-          <div className="card shadow-sm">
-            <div className="card-header py-3">
-              <h3 className="card-title d-flex align-items-center gap-2">
-                <IconChartPie size={24} />
-                Répartition des Émissions
-              </h3>
-            </div>
-            <div className="card-body p-4">
-              <div style={{ height: "22rem" }}>
-                <Doughnut data={pieChartData} options={pieOptions} />
+    <div className="page">
+      <div className="page-wrapper">
+        <div className="container-xl py-4">
+          <div className="page-header d-print-none mb-4">
+            <div className="container-xl">
+              <div className="row align-items-center">
+                <div className="col">
+                  <div className="page-pretitle text-muted">Vue d'ensemble</div>
+                  <h2 className="page-title d-flex align-items-center">
+                    <IconChartBar className="me-2" />
+                    Tableau de Bord des Émissions
+                  </h2>
+                </div>
+                <div className="col-auto ms-auto">
+                  <div className="btn-list">
+                    <Link href="/Dashboard/User/reports" className="btn btn-outline-primary d-none d-sm-inline-block">
+                      <IconChartPie className="icon" />
+                      Voir les rapports
+                    </Link>
+                    <Link href="/Dashboard/User/scope1" className="btn btn-primary d-none d-sm-inline-block">
+                      <IconBuildingFactory className="icon" />
+                      Gérer les émissions directes !!
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="col-lg-6">
-          <div className="card shadow-sm">
-            <div className="card-header py-3">
-              <h3 className="card-title d-flex align-items-center gap-2">
-                <IconChartBar size={24} />
-                Comparaison des Scopes
-              </h3>
+
+          {/* Company Info */}
+          <div className="row row-cards mb-4 g-3">
+            <div className="col-12">
+              <CompanyInfoCard company={company} owner={owner} />
             </div>
-            <div className="card-body p-4">
-              <div style={{ height: "22rem" }}>
-                <Bar data={scopeComparisonData} options={scopeComparisonOptions} />
+          </div>
+
+          {/* Total Emissions, Scope 1, Scope 2, Scope 3 */}
+          <div className="row row-cards mb-4 g-3">
+            <div className="col-lg-3 col-md-6">
+              <div className="card card-sm">
+                <div className="card-body">
+                  <div className="d-flex align-items-center">
+                    <div className="avatar avatar-lg bg-primary-lt me-3">
+                      <IconChartPie className="text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-weight-medium">Émissions Totales</div>
+                      <div className="h1 mb-0">{Number(totalEmissions).toFixed(2)} tCO₂e</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-3 col-md-6">
+              <EmissionCard
+                title="Émissions Scope 1"
+                icon={IconBuildingFactory}
+                value={processedEmissions.scope1.total}
+                color={COLORS[0]}
+                data={processedEmissions.scope1.data}
+                breakdown={processedEmissions.scope1.breakdown}
+              />
+            </div>
+            <div className="col-lg-3 col-md-6">
+              <EmissionCard
+                title="Émissions Scope 2"
+                icon={IconLamp}
+                value={processedEmissions.scope2.total}
+                color={COLORS[1]}
+                data={processedEmissions.scope2.data}
+                breakdown={processedEmissions.scope2.breakdown}
+              />
+            </div>
+            <div className="col-lg-3 col-md-6">
+              <EmissionCard
+                title="Émissions Scope 3"
+                icon={IconTruck}
+                value={processedEmissions.scope3.total}
+                color={COLORS[2]}
+                data={processedEmissions.scope3.data}
+                breakdown={processedEmissions.scope3.breakdown}
+              />
+            </div>
+          </div>
+
+          {/* Comparaison des Scopes and Répartition des Émissions */}
+          <div className="row row-cards mb-4 g-3">
+            <div className="col-lg-6">
+              <div className="card h-100">
+                <div className="card-header">
+                  <h3 className="card-title d-flex align-items-center">
+                    <IconChartBar className="me-2" />
+                    Comparaison des Scopes
+                  </h3>
+                </div>
+                <div className="card-body">
+                  <div style={{ height: "22rem" }}>
+                    <Bar data={scopeComparisonData} options={scopeComparisonOptions} />
+                  </div>
+                </div>
+                <div className="card-footer">
+                  <div className="text-muted">
+                    Les émissions de Scope 3 représentent {((processedEmissions.scope3.total / totalEmissions) * 100).toFixed(1)}% de vos émissions totales
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-6">
+              <div className="card h-100">
+                <div className="card-header">
+                  <h3 className="card-title d-flex align-items-center">
+                    <IconChartPie className="me-2" />
+                    Répartition des Émissions
+                  </h3>
+                </div>
+                <div className="card-body">
+                  <div style={{ height: "22rem" }}>
+                    <Doughnut data={pieChartData} options={pieOptions} />
+                  </div>
+                </div>
+                <div className="card-footer">
+                  <div className="d-flex justify-content-between">
+                    <div className="d-flex align-items-center">
+                      <span className="badge bg-primary-lt me-2">Scope 1</span>
+                      <span>{Number(processedEmissions.scope1.total).toFixed(2)} tCO₂e</span>
+                    </div>
+                    <div className="d-flex align-items-center">
+                      <span className="badge bg-success-lt me-2">Scope 2</span>
+                      <span>{Number(processedEmissions.scope2.total).toFixed(2)} tCO₂e</span>
+                    </div>
+                    <div className="d-flex align-items-center">
+                      <span className="badge bg-purple-lt me-2">Scope 3</span>
+                      <span>{Number(processedEmissions.scope3.total).toFixed(2)} tCO₂e</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="row row-cards mb-5 g-4">
-        <div className="col-lg-6">
-          <div className="card shadow-sm">
-            <div className="card-header py-3">
-              <h3 className="card-title d-flex align-items-center gap-2">
-                <IconTrendingUp size={24} />
-                Émissions par Source
-              </h3>
+ 
+          <div className="row row-cards mb-4 g-3">
+            <div className="col-lg-6">
+              <CriticalPointsCard emissions={processedEmissions} />
             </div>
-            <div className="card-body p-4">
-              <div style={{ height: "22rem" }}>
-                <Bar data={stackedBarData} options={stackedBarOptions} />
-              </div>
+            <div className="col-lg-6">
+              <GoalProgressCard />
             </div>
           </div>
-        </div>
-        <div className="col-lg-6">
-          <RecommendationsCard />
-        </div>
-      </div>
 
-      <div className="row row-cards g-4">
-        <div className="col-12">
-          <TopLeastEmissionsCard emissions={processedEmissions} />
+          <div className="row row-cards mb-4 g-3">
+            <div className="col-lg-6">
+              <div className="card h-100">
+                <div className="card-header">
+                  <h3 className="card-title d-flex align-items-center">
+                    <IconTrendingUp className="me-2" />
+                    Émissions par Source
+                  </h3>
+                </div>
+                <div className="card-body">
+                  <div style={{ height: "22rem" }}>
+                    <Bar data={stackedBarData} options={stackedBarOptions} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-6">
+              <RecommendationsCard />
+            </div>
+          </div>
+
+          {/* Sources d'Émissions */}
+          <div className="row row-cards mb-4 g-3">
+            <div className="col-12">
+              <TopLeastEmissionsCard emissions={processedEmissions} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
