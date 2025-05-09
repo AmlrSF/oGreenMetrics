@@ -12,8 +12,22 @@ const Navbar = ({ user, isAdmin }) => {
   
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  
   const handleNavigation = () => {
-    router.push(`/Dashboard/${isAdmin ? "Admin" : "User"}/profile`);
+    switch (user?.role) {
+      case "Admin":
+        router.push("/Dashboard/Admin/profile");
+        break;
+      case "entreprise":
+        router.push("/Dashboard/User/profile");
+        break;
+      case "régulier":
+        router.push("/Dashboard/Regular/profile");
+        break;
+      default:
+        console.warn("Unknown role:", user?.role);
+        router.push("/"); 
+    }
   };
 
   const handleMarkAsRead = (id) => {
@@ -26,7 +40,7 @@ const Navbar = ({ user, isAdmin }) => {
   };
 
   return (
-    <nav className="navbar py-2 navbar-expand-lg" style={{ backgroundColor: "#8ebe21" }}>
+    <nav className="position-sticky sticky-top navbar  py-2 navbar-expand-lg" style={{ backgroundColor: "#8ebe21" }}>
       <div className="container-xl d-flex justify-content-end px-4">
         <div className="d-flex align-items-center gap-3">
           {/* Notification bell */}
@@ -98,8 +112,8 @@ const Navbar = ({ user, isAdmin }) => {
             <div
               className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
               style={{
-                width: "25px",
-                height: "25px",
+                width: "30px",
+                height: "30px",
                 backgroundColor: "#fff",
                 overflow: "hidden",
               }}
@@ -109,6 +123,9 @@ const Navbar = ({ user, isAdmin }) => {
                   src={user?.photo_de_profil}
                   alt={`${user?.prenom} ${user?.nom}`}
                   className="rounded-circle"
+                  style={{
+                    width: "25px",
+                    height: "25px",}}
                 />
               ) : (
                 <span style={{ color: "#8ebe21" }}>{getInitials(user?.prenom, user?.nom)}</span>

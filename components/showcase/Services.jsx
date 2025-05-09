@@ -21,7 +21,7 @@ const Services = () => {
   ]
   
   return (
-    <section className="bg-prime py-5">
+    <section id='services' className="bg-prime py-5">
       <div className="container">
         <h2 className="text-center font-bold text-white
          text-4xl mb-1">Nos services</h2>

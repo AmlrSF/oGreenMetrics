@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 const About = () => {
   return (
-    <section className="container min-h-screen my-5 py-5">
+    <section id="about" className="container min-h-screen my-5 py-5">
       <h2 className="text-center text-4xl font-bold mb-10">À propos de nous</h2>
       
       <div className="row align-items-center justify-content-between ">

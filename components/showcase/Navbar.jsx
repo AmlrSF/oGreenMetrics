@@ -10,10 +10,10 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
-    { href: "/", label: "Accueil" },
-    { href: "/services", label: "Services" },
-    { href: "/about", label: "À propos" },
-    { href: "/contact", label: "Contact" },
+    { href: "#home", label: "Accueil" },
+    { href: "#services", label: "Services" },
+    { href: "#about", label: "À propos" },
+    { href: "#contact", label: "Contact" },
   ];
 
   const menuVariants = {
@@ -36,7 +36,9 @@ const Navbar = () => {
   };
 
   return (
-    <div className="position-relative bg-white shadow sticky-top">
+    <div className="position-relative mb-5 bg-white
+     shadow
+     ">
       <nav className="container">
         <div className="d-flex justify-content-between align-items-center">
           <Link href="/" className="position-relative z-index-5">
