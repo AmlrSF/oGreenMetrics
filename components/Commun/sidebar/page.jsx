@@ -123,7 +123,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
         }}
       >
         <div
-          className="d-flex align-items-center p-2 mb-5 "
+          className="d-flex align-items-center mt-1 p-2 mb-5 "
           style={{
             justifyContent: isCollapsed ? "center" : "space-between",
             backgroundColor: colors.primary,
@@ -280,7 +280,7 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
                      style={{color: isLinkActive(item.href) ? colors.primary : colors.white}} />
                     
                     {!isCollapsed && (
-                      <span className="fs-6 font-medium"
+                      <span className="fs-4 font-medium"
                        style={{color: isLinkActive(item.href) ? colors.primary : colors.white,}}>{item.label}</span>
                     )}
                   </Link>

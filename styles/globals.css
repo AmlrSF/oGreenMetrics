@@ -32,8 +32,24 @@ a:hover {
 
 .container-card {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 10px;
+}
+
+.pdf_container {
+  display: none; /* Hide while generating PDF */
+}
+
+@media print {
+  .pdf_container {
+    display: block;
+  }
+  
+  .pdf_container > h2 {
+    margin: 20px 0;
+    padding: 10px 0;
+    border-bottom: 2px solid #000;
+  }
 }
 
 .navlinks a::after {

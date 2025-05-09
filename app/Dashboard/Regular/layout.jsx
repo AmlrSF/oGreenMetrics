@@ -12,7 +12,7 @@ const DashboardLayout = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const rolesNeedsToBeverified = ["régulier", "entreprise"];
   const [isLoading, setIsLoading] = useState(true);
-  const { push } = useRouter();
+  const { push, back } = useRouter();
 
   
   useEffect(() => {
@@ -37,9 +37,14 @@ const DashboardLayout = ({ children }) => {
 
         const data = await response.json();
 
-        if (data?.user && rolesNeedsToBeverified.includes(data.user.role)) {
-          setUser(data.user);
-          setIsLoading(false);
+        if (data?.user) {
+          if(data?.user?.role === 'régulier'){
+            setUser(data.user);
+            setIsLoading(false);
+          }else{
+            back();
+          }
+         
         } else {
           push("/login");
         }

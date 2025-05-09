@@ -2,8 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {IconSearch,IconLeaf,IconGlobe,IconAlertCircle,IconCopy,IconCheck,	IconBatteryCharging,IconPlus,IconMinus,} from "@tabler/icons-react";
-
+import {
+  IconSearch,
+  IconLeaf,
+  IconGlobe,
+  IconAlertCircle,
+  IconCopy,
+  IconCheck,
+  IconBatteryCharging,
+  IconPlus,
+  IconMinus,
+  IconCode,
+} from "@tabler/icons-react";
 
 function WebsiteCalculator() {
   const [url, setUrl] = useState("");
@@ -15,7 +25,8 @@ function WebsiteCalculator() {
   const [showSave, setShowSave] = useState(true);
   const [visits, setVisits] = useState(10000);
   const [counter, setCounter] = useState(1);
-
+  const [copied, setCopied] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState("dark");
   const increment = () => {
     if (counter < 10000) {
       setCounter(counter * 10);
@@ -39,6 +50,34 @@ function WebsiteCalculator() {
     }
     return () => clearInterval(interval);
   }, [result]);
+
+  const getBadgeCode = () => {
+    const darkBadge = `<a href="http://localhost:3000/Dashboard/Regular/calculator">
+    <div style="background:#1b1b1d;display:inline-flex;align-items:center;padding:8px 16px;border-radius:9999px;gap:8px">
+      <span style="color:#00e5ff">${formatCO2(
+        result?.statistics?.co2?.grid?.grams
+      )} of CO₂/view</span>
+      <span style="color:white;font-weight:600">Website Carbon</span>
+    </div>
+  </a>`;
+
+    const lightBadge = `<a href="http://localhost:3000/Dashboard/Regular/calculator">
+    <div style="background:white;display:inline-flex;align-items:center;padding:8px 16px;border-radius:9999px;gap:8px;border:1px solid #e5e7eb">
+      <span style="color:#0066ff">${formatCO2(
+        result?.statistics?.co2?.grid?.grams
+      )} of CO₂/view</span>
+      <span style="color:#1b1b1d;font-weight:600">Website Carbon</span>
+    </div>
+  </a>`;
+
+    return selectedTheme === "dark" ? darkBadge : lightBadge;
+  };
+
+  const copyBadgeCode = () => {
+    navigator.clipboard.writeText(getBadgeCode());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const calculateCarbon = async (e) => {
     e.preventDefault();
@@ -296,8 +335,11 @@ function WebsiteCalculator() {
                 >
                   <div className="card shadow" style={{ borderRadius: 20 }}>
                     <div className="card-body p-4">
-                      <div className="d-flex align-items-center mb-4">
-                        <IconGlobe className="icon me-2 text-primary" size={30} />
+                      <div className="d-flex align-items-center ">
+                        <IconGlobe
+                          className="icon me-2 text-primary"
+                          size={30}
+                        />
                         <span
                           className="fw-bold fs-4 px-3 py-1"
                           style={{
@@ -305,28 +347,31 @@ function WebsiteCalculator() {
                             borderRadius: 8,
                           }}
                         >
-                          {formatCO2(result?.statistics?.co2?.grid?.grams )}
+                          {formatCO2(result?.statistics?.co2?.grid?.grams)}
                         </span>
-                        <span className="ms-2 fs-5">
+                        <span className="ms-2 mb-0 fs-5">
                           of CO₂ is produced every time someone visits this web
                           page.
                         </span>
                       </div>
-
-                      <div className="bg-light rounded p-4">
-                        <div className="d-flex align-items-center justify-content-center gap-4 mb-4">
+                      {/* 
+                      <div className="  rounded p-4">
+                        <div className="d-flex 
+                        align-items-center justify-content-center 
+                        gap-4 mb-4">
                           <button
                             onClick={decrement}
-                            className="btn btn-primary rounded-circle fw-bold"
-                            style={{ width: 48, height: 48 }}
+                            className="bg-primary rounded-2 border-0 f d-flex justify-content-center align-items-center 
+                             fw-bold"
+                            style={{ width: 35, height: 35 }}
                             disabled={counter === 1}
                           >
-                            <IconMinus height={40} width={40} />
+                            <IconMinus className="text-white" size={18} />
                           </button>
 
                           <div
-                            className="bg-white px-4 py-2 rounded shadow-sm text-center"
-                            style={{ minWidth: 150 }}
+                            className="bg-secondary px-4 py-2 rounded shadow-sm text-center"
+                            style={{ minWidth: 150, }}
                           >
                             <div className="text-muted small mb-1">
                               Number of Users
@@ -338,11 +383,12 @@ function WebsiteCalculator() {
 
                           <button
                             onClick={increment}
-                            className="btn btn-primary text-xl rounded-circle fw-bold"
-                            style={{ width: 48, height: 48 }}
+                        className="bg-primary rounded-2 border-0 f d-flex justify-content-center align-items-center 
+                             fw-bold"
+                            style={{ width: 40, height: 40 }}
                             disabled={counter === 10000}
                           >
-                            <IconPlus height={40} width={40} />
+                            <IconPlus className="text-white" size={30} />
                           </button>
                         </div>
 
@@ -354,7 +400,7 @@ function WebsiteCalculator() {
                             {formatCO2(counter * result?.statistics?.co2?.grid?.grams )}
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </motion.div>
@@ -378,6 +424,97 @@ function WebsiteCalculator() {
                           <span className="badge bg-green-lt text-green fs-5">
                             sustainable energy
                           </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="mb-4"
+                >
+                  <div className="card shadow" style={{ borderRadius: 20 }}>
+                    <div className="card-body p-4">
+                      <h3 className="mb-4 fw-bold">
+                        Add this badge to your website
+                      </h3>
+
+                      <div className="mb-4">
+                        <div className="d-flex gap-3 mb-3">
+                          <button
+                            className={`btn ${
+                              selectedTheme === "dark"
+                                ? "btn-dark"
+                                : "btn-outline-dark"
+                            }`}
+                            onClick={() => setSelectedTheme("dark")}
+                          >
+                            Dark theme
+                          </button>
+                          <button
+                            className={`btn ${
+                              selectedTheme === "light"
+                                ? "btn-dark"
+                                : "btn-outline-dark"
+                            }`}
+                            onClick={() => setSelectedTheme("light")}
+                          >
+                            Light theme
+                          </button>
+                        </div>
+
+                        <div className="p-4 bg-light rounded-3 mb-3">
+                          <div className="">
+                            {selectedTheme === "dark" ? (
+                              <div className="bg-dark d-inline-flex align-items-center px-4 py-2 rounded-pill gap-2">
+                                <span className="text-cyan">
+                                  {formatCO2(
+                                    result?.statistics?.co2?.grid?.grams
+                                  )}{" "}
+                                  of CO₂/view
+                                </span>
+                                <span className="text-white fw-semibold">
+                                  Website Carbon
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="bg-white d-inline-flex align-items-center px-4 py-2 rounded-pill gap-2 border">
+                                <span className="text-primary">
+                                  {formatCO2(
+                                    result?.statistics?.co2?.grid?.grams
+                                  )}{" "}
+                                  of CO₂/view
+                                </span>
+                                <span className="text-dark fw-semibold">
+                                  Website Carbon
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-primary d-flex align-items-center gap-2"
+                            onClick={copyBadgeCode}
+                          >
+                            {copied ? (
+                              <IconCheck size={18} />
+                            ) : (
+                              <IconCode size={18} />
+                            )}
+                            {copied ? "Copied!" : "Copy badge code"}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="alert alert-info mb-0 d-flex align-items-center gap-2">
+                        <IconAlertCircle size={20} />
+                        <span>
+                          Add this code to your website's footer or any other
+                          location where you want to display the badge.
                         </span>
                       </div>
                     </div>

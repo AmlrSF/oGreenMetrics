@@ -822,8 +822,8 @@ const CompanyDash = () => {
           </div>
 
           {/* Total Emissions, Scope 1, Scope 2, Scope 3 */}
-          <div className="row row-cards mb-4 g-3">
-            <div className="col-lg-3 col-md-6">
+          <div className="row row-cards mb-4 g-3" style={{display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(250px,1fr))", gap:"10px"}} >
+          
               <div className="card card-sm">
                 <div className="card-body">
                   <div className="d-flex align-items-center">
@@ -836,9 +836,9 @@ const CompanyDash = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              
             </div>
-            <div className="col-lg-3 col-md-6">
+            <div >
               <EmissionCard
                 title="Émissions Scope 1"
                 icon={IconBuildingFactory}
@@ -848,7 +848,7 @@ const CompanyDash = () => {
                 breakdown={processedEmissions.scope1.breakdown}
               />
             </div>
-            <div className="col-lg-3 col-md-6">
+            <div >
               <EmissionCard
                 title="Émissions Scope 2"
                 icon={IconLamp}
@@ -858,7 +858,7 @@ const CompanyDash = () => {
                 breakdown={processedEmissions.scope2.breakdown}
               />
             </div>
-            <div className="col-lg-3 col-md-6">
+            <div >
               <EmissionCard
                 title="Émissions Scope 3"
                 icon={IconTruck}
