@@ -16,7 +16,9 @@ const Reporting = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [company, setCompany] = useState(null);
-  const [formData, setFormData] = useState({name: "",description: "",scope1: false,scope2: false,scope3: false,Year: "",includeCharts: "yes",detailLevel: "summary",includeRecomondations: "yes",});
+  const [formData, setFormData] = useState({name: "",description: "",
+    scope1: false,scope2: false,scope3: false,Year: "",
+    includeCharts: "yes",detailLevel: "summary",includeRecomondations: "yes",});
 
   const router = useRouter();
 
@@ -104,24 +106,24 @@ const Reporting = () => {
 
     console.log(form);
 
-    try {
-      const response = await fetch("http://localhost:4000/createReport", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+    // try {
+    //   const response = await fetch("http://localhost:4000/createReport", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(form),
+    //   });
 
-      const data = await response.json();
-      console.log(data);
-      if (data.success) {
-        setModalOpen(false);
-        fetchReports(company._id);
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    //   const data = await response.json();
+    //   console.log(data);
+    //   if (data.success) {
+    //     setModalOpen(false);
+    //     fetchReports(company._id);
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
 
   const fetchReports = async (id) => {
@@ -271,7 +273,7 @@ const Reporting = () => {
                       <span className="form-selectgroup-label">Oui</span>
                     </label>
                     <label className="form-selectgroup-item">
-                      <input type="radio" name="includeRecomondations" value="no" className="form-selectgroup-input" checked={formData.includeRecomondations === "No"} onChange={handleInputChange}
+                      <input type="radio" name="includeRecomondations" value="no" className="form-selectgroup-input" checked={formData.includeRecomondations === "no"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">No</span>
                     </label>
@@ -425,7 +427,8 @@ const Reporting = () => {
                               <span className="badge mx-auto flex justify-center items-center bg-pink-lt">
                                 <div className="flex items-center w-full justify-center">
                                   <IconFile size={14} className="me-1" />
-                                  {data.includeRecomondations ? "Yes" : "No"}
+                                 
+                                  {data.includeRecomondations === "yes" ? "Yes" : "No"}
                                 </div>
                               </span>
                             </div>
