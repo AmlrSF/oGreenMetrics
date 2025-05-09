@@ -142,7 +142,7 @@ const Page = () => {
                     <label className="form-label">
                       Mot de passe
                       <span className="form-label-description">
-                        <a href="/PasswordForgotten">Mot de passe oublié ?</a>
+                        <a href="/PasswordForgotten" className="primarytxtcolor">Mot de passe oublié ?</a>
                       </span>
                     </label>
                     <div className="input-group input-group-flat">
@@ -220,7 +220,7 @@ const Page = () => {
 
                 <div className="text-center text-muted mt-3">
                   Vous n'avez pas de compte ?{" "}
-                  <a href="/register" className="text-primary">
+                  <a href="/register" className="primarytxtcolor">
                     Inscrivez-vous maintenant
                   </a>
                 </div>

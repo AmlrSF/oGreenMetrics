@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconSearch, IconPencil, IconTrash, IconInfoCircle,IconArrowRight,IconArrowLeft  } from "@tabler/icons-react";
 
 const Scope2 = () => {
   const [activeTab, setActiveTab] = useState("electricity");
@@ -13,6 +13,11 @@ const Scope2 = () => {
   const [itemsPerPage] = useState(3);
   const [company, setCompany] = useState(null);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingIds, setDeletingIds] = useState(new Set());
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [expandedItems, setExpandedItems] = useState(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [scope2Data, setScope2Data] = useState({
     electricity: { yearlyConsumption: 0, emissions: 0, country: null },
@@ -24,7 +29,7 @@ const Scope2 = () => {
     electricity: {
       id: "electricity",
       label: "Consommation d'électricité",
-      headers: ["Consommation électrique (kWh)", "Action"],
+      headers: ["Consommation électrique (kWh)", "Pays", "Émissions (kgCO2e)", "Action"],
       fields: [
         {
           name: "yearlyConsumption",
@@ -37,38 +42,9 @@ const Scope2 = () => {
           name: "country",
           label: "Pays",
           type: "select",
-          placeholder: "Sélectionner un pays",
+          placeholder: "Pays",
           required: true,
-          options: [
-            "Sweden",
-            "Lithuania",
-            "France",
-            "Austria",
-            "Latvia",
-            "Finland",
-            "Slovakia",
-            "Denmark",
-            "Belgium",
-            "Croatia",
-            "Luxembourg",
-            "Slovenia",
-            "Italy",
-            "Hungary",
-            "Spain",
-            "United Kingdom",
-            "Romania",
-            "Portugal",
-            "Ireland",
-            "Germany",
-            "Bulgaria",
-            "Netherlands",
-            "Czechia",
-            "Greece",
-            "Malta",
-            "Cyprus",
-            "Poland",
-            "Estonia",
-          ].map((country) => ({ value: country, label: country })),
+          disabled: true,
         },
       ],
     },
@@ -137,6 +113,7 @@ const Scope2 = () => {
       ],
     },
   };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -210,13 +187,14 @@ const Scope2 = () => {
         electricity: electricityRes.data || {
           yearlyConsumption: 0,
           emissions: 0,
-          country: null,
+          country: company.country,
         },
         heating: heatingRes.data || { heaters: [], totalEmissions: 0 },
         cooling: coolingRes.data || { coolers: [], totalEmissions: 0 },
       });
     } catch (error) {
       console.error("Error fetching Scope 2 data:", error);
+      setError(`Error: ${error.message}`);
     }
   };
 
@@ -224,6 +202,8 @@ const Scope2 = () => {
     e.preventDefault();
     setActiveTab(tabId);
     setCurrentPage(1);
+    setSearchTerm("");
+    setExpandedItems(new Set());
   };
 
   const toggleModal = (
@@ -239,7 +219,11 @@ const Scope2 = () => {
       setEditId(item._id);
       setEditRecordId(recordId);
     } else {
-      setFormData({});
+      if (isOpen && activeTab === "electricity" && company) {
+        setFormData({ country: company.country });
+      } else {
+        setFormData({});
+      }
       setEditId(null);
       setEditRecordId(null);
     }
@@ -252,6 +236,8 @@ const Scope2 = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     if (!company || !company._id) {
       const errorMsg =
@@ -259,26 +245,33 @@ const Scope2 = () => {
       console.error(errorMsg, company);
       setError(errorMsg);
       alert(errorMsg);
+      setIsSubmitting(false);
       return;
     }
 
     const currentTabConfig = tabs[activeTab];
     const missingFields = currentTabConfig.fields
-      .filter((field) => field.required && !formData[field.name])
+      .filter((field) => field.required && !formData[field.name] && !field.disabled)
       .map((field) => field.label);
 
     if (missingFields.length > 0) {
       alert(
-        `Please fill in these required fields: ${missingFields.join(", ")}`
+        `Veuillez remplir ces champs obligatoires : ${missingFields.join(", ")}`
       );
+      setIsSubmitting(false);
       return;
     }
 
     try {
-      const requestData = {
+      let requestData = {
         ...formData,
         company_id: company._id,
       };
+
+      if (activeTab === "electricity") {
+        requestData.country = company.country;
+      }
+
       let endpoint, method;
 
       if (activeTab === "electricity") {
@@ -297,6 +290,7 @@ const Scope2 = () => {
           : "http://localhost:4000/cooling";
         method = isEditMode ? "PUT" : "POST";
       }
+
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -306,76 +300,176 @@ const Scope2 = () => {
         body: JSON.stringify(requestData),
         credentials: "include",
       });
+
       const result = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          result.message || `HTTP error! status: ${response.status}`
+          result.message || `Erreur HTTP ! statut : ${response.status}`
         );
       }
 
       toggleModal(false);
       await fetchScope2Data();
     } catch (err) {
-      console.error("Submission error:", err);
-      alert(`Submission failed: ${err.message}`);
+      console.error("Erreur de soumission :", err);
+      alert(`Échec de la soumission : ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (recordId, itemId) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
+  const handleDelete = async (recordId, itemId = null) => {
+    const id = itemId || recordId;
+    if (deletingIds.has(id)) return;
+    setDeletingIds((prev) => new Set([...prev, id]));
 
     try {
       let endpoint;
       if (activeTab === "electricity") {
         endpoint = `http://localhost:4000/energy-consumption/${recordId}`;
-        const response = await fetch(endpoint, { method: "DELETE" });
-        if (!response.ok) throw new Error("Failed to delete");
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Échec de la suppression");
         setScope2Data((prev) => ({
           ...prev,
-          electricity: { yearlyConsumption: 0, emissions: 0, country: null },
+          electricity: { yearlyConsumption: 0, emissions: 0, country: company.country },
         }));
       } else if (activeTab === "heating") {
         endpoint = `http://localhost:4000/heating/${recordId}/heater/${itemId}`;
-        const response = await fetch(endpoint, { method: "DELETE" });
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          credentials: "include",
+        });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.message || "Failed to delete");
+        if (!response.ok) throw new Error(result.message || "Échec de la suppression");
         setScope2Data((prev) => ({ ...prev, heating: result.data }));
       } else if (activeTab === "cooling") {
         endpoint = `http://localhost:4000/cooling/${recordId}/cooler/${itemId}`;
-        const response = await fetch(endpoint, { method: "DELETE" });
+        const response = await fetch(endpoint, {
+          method: "DELETE",
+          credentials: "include",
+        });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.message || "Failed to delete");
+        if (!response.ok) throw new Error(result.message || "Échec de la suppression");
         setScope2Data((prev) => ({ ...prev, cooling: result.data }));
       }
+      setConfirmDelete(null);
       fetchScope2Data();
     } catch (error) {
-      alert(`Failed to delete: ${error.message}`);
+      console.error("Erreur de suppression :", error.message);
+      setError(error.message);
+    } finally {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
     }
   };
 
+  const toggleExpand = (itemId, field) => {
+    const key = `${itemId}-${field}`;
+    setExpandedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
+  };
+
+  const filteredItems = () => {
+    let items = activeTab === "heating" ? scope2Data.heating.heaters : scope2Data.cooling.coolers;
+
+    if (searchTerm) {
+      items = items.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return items;
+  };
+
   const renderTable = () => {
+    if (error) {
+      return (
+        <div className="p-4 text-center text-danger">
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        </div>
+      );
+    }
+
     const currentTab = tabs[activeTab];
     const data = scope2Data[activeTab];
 
     // Pagination logic
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     let currentItems = [];
     let totalItems = 0;
+    let totalPages = 1;
 
-    if (activeTab === "heating" && data.heaters?.length > 0) {
-      totalItems = data.heaters.length;
-      currentItems = data.heaters.slice(indexOfFirstItem, indexOfLastItem);
-    } else if (activeTab === "cooling" && data.coolers?.length > 0) {
-      totalItems = data.coolers.length;
-      currentItems = data.coolers.slice(indexOfFirstItem, indexOfLastItem);
+    if (activeTab === "heating" || activeTab === "cooling") {
+      const items = filteredItems();
+      totalItems = items.length;
+      totalPages = Math.ceil(totalItems / itemsPerPage);
+      const indexOfLastItem = currentPage * itemsPerPage;
+      const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+      currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
     }
-
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
     return (
       <div className="table-container p-5">
+        <style>
+          {`
+            .truncate-text {
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 300px;
+            }
+            .voir-plus {
+              cursor: pointer;
+              color: #206bc4;
+              font-size: 0.875rem;
+              margin-top: 0.25rem;
+              display: inline-block;
+            }
+            .voir-plus:hover {
+              text-decoration: underline;
+            }
+          `}
+        </style>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex gap-2">
+            <div className="input-group" style={{ width: "250px" }}>
+              <span className="input-group-text">
+                <IconSearch size={16} />
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Rechercher..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => toggleModal(true)}
+          >
+            <IconPlus className="mr-2" size={16} /> Ajouter
+          </button>
+        </div>
         <div className="table-responsive">
           <table className="table table-vcenter card-table">
             <thead>
@@ -388,158 +482,99 @@ const Scope2 = () => {
             <tbody>
               {activeTab === "electricity" && data.yearlyConsumption > 0 ? (
                 <tr>
-                  <td>{data.yearlyConsumption}</td>
+                  <td>
+                    <span className="badge bg-purple-lt">
+                      {data.yearlyConsumption.toLocaleString()} kWh
+                    </span>
+                  </td>
+                  <td className="text-secondary">{data.country || company?.country || "N/A"}</td>
+                  <td>
+                    <span className="badge bg-purple-lt">
+                      {data.emissions.toLocaleString()} kgCO2e
+                    </span>
+                  </td>
                   <td>
                     <div className="btn-list flex-nowrap">
                       <button
                         className="btn btn-ghost-primary btn-icon"
                         onClick={() => toggleModal(true, true, data, data._id)}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>{" "}
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
+                        <IconPencil size={18} />
                       </button>
                       <button
                         className="btn btn-ghost-danger btn-icon"
-                        onClick={() => handleDelete(data._id)}
+                        onClick={() => setConfirmDelete({ _id: data._id, nom: "Consommation électrique" })}
+                        disabled={deletingIds.has(data._id)}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M3 6h18"></path>{" "}
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>{" "}
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>{" "}
-                          <line x1="10" y1="11" x2="10" y2="17"></line>{" "}
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
+                        {deletingIds.has(data._id) ? (
+                          <span className="spinner-border spinner-border-sm" />
+                        ) : (
+                          <IconTrash size={18} />
+                        )}
                       </button>
                     </div>
                   </td>
                 </tr>
-              ) : activeTab === "heating" && data.heaters?.length > 0 ? (
-                currentItems.map((heater, idx) => (
+              ) : (activeTab === "heating" || activeTab === "cooling") && currentItems.length > 0 ? (
+                currentItems.map((item, idx) => (
                   <tr key={idx}>
-                    <td>{heater.name}</td>
-                    <td>{heater.type}</td>
-                    <td>{heater.energy}</td>
                     <td>
-                      <div className="btn-list flex-nowrap">
-                        <button
-                          className="btn btn-ghost-primary btn-icon"
-                          onClick={() =>
-                            toggleModal(true, true, heater, data._id)
-                          }
+                      <div className="d-flex align-items-center">
+                        <span
+                          className="avatar avatar-md text-white me-2"
+                          style={{ backgroundColor: "#263589" }}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                          {item.name.charAt(0)}
+                        </span>
+                        <div>
+                          <div
+                            className={
+                              expandedItems.has(`${item._id}-name`)
+                                ? ""
+                                : "truncate-text"
+                            }
                           >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>{" "}
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
-                        </button>
-                        <button
-                          className="btn btn-ghost-danger btn-icon"
-                          onClick={() => handleDelete(data._id, heater._id)}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M3 6h18"></path>{" "}
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>{" "}
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>{" "}
-                            <line x1="10" y1="11" x2="10" y2="17"></line>{" "}
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
+                            {item.name}
+                          </div>
+                          {item.name.length > 50 && (
+                            <span
+                              className="voir-plus"
+                              onClick={() => toggleExpand(item._id, "name")}
+                            >
+                              {expandedItems.has(`${item._id}-name`)
+                                ? "Voir moins"
+                                : "Voir plus"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
-                  </tr>
-                ))
-              ) : activeTab === "cooling" && data.coolers?.length > 0 ? (
-                currentItems.map((cooler, idx) => (
-                  <tr key={idx}>
-                    <td>{cooler.name}</td>
-                    <td>{cooler.type}</td>
-                    <td>{cooler.energy}</td>
+                    <td className="text-secondary">{item.type}</td>
+                    <td>
+                      <span className="badge bg-purple-lt">
+                        {item.energy.toLocaleString()} kWh
+                      </span>
+                    </td>
                     <td>
                       <div className="btn-list flex-nowrap">
                         <button
                           className="btn btn-ghost-primary btn-icon"
                           onClick={() =>
-                            toggleModal(true, true, cooler, data._id)
+                            toggleModal(true, true, item, data._id)
                           }
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>{" "}
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
+                          <IconPencil size={18} />
                         </button>
                         <button
                           className="btn btn-ghost-danger btn-icon"
-                          onClick={() => handleDelete(data._id, cooler._id)}
+                          onClick={() => setConfirmDelete({ _id: item._id, nom: item.name, recordId: data._id })}
+                          disabled={deletingIds.has(item._id)}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M3 6h18"></path>{" "}
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>{" "}
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>{" "}
-                            <line x1="10" y1="11" x2="10" y2="17"></line>{" "}
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
+                          {deletingIds.has(item._id) ? (
+                            <span className="spinner-border spinner-border-sm" />
+                          ) : (
+                            <IconTrash size={18} />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -551,112 +586,117 @@ const Scope2 = () => {
                     colSpan={currentTab.headers.length}
                     className="text-center text-secondary"
                   >
-                    Aucune donnée disponible pour{" "}
-                    {currentTab.label.toLowerCase()}
+                    Aucune donnée disponible pour {currentTab.label.toLowerCase()}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        {(activeTab === "heating" || activeTab === "cooling") &&
-          totalItems > 0 && (
-            <nav className="d-flex justify-content-center mt-4">
-              <ul className="pagination">
-                <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    Précédent
-                  </button>
-                </li>
-                {[...Array(totalPages).keys()].map((page) => (
-                  <li
-                    key={page + 1}
-                    className={`page-item ${
-                      currentPage === page + 1 ? "active" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => setCurrentPage(page + 1)}
-                    >
-                      {page + 1}
-                    </button>
-                  </li>
-                ))}
-                <li
-                  className={`page-item ${
-                    currentPage === totalPages ? "disabled" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    Suivant
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          )}
-        <div className="d-flex justify-content-end mt-4">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => toggleModal(true)}
-          >
-            <IconPlus className="mr-2" size={16} /> Ajouter
-          </button>
-        </div>
+        {(activeTab === "heating" || activeTab === "cooling") && totalItems > itemsPerPage && (
+          <nav className="d-flex justify-content-center mt-4">
+  <ul className="pagination">
+    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+      <button
+        className="page-link"
+        onClick={() => setCurrentPage(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        <IconArrowRight size={16} />
+      </button>
+    </li>
+    {[...Array(totalPages).keys()].map((page) => (
+      <li
+        key={page + 1}
+        className={`page-item ${currentPage === page + 1 ? "active" : ""}`}
+      >
+        <button className="page-link" onClick={() => setCurrentPage(page + 1)}>
+          {page + 1}
+        </button>
+      </li>
+    ))}
+    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+      <button
+        className="page-link"
+        onClick={() => setCurrentPage(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        <IconArrowLeft size={16} />
+      </button>
+    </li>
+  </ul>
+</nav>
+        )}
       </div>
     );
   };
 
   const renderFormFields = () => {
     const currentTab = tabs[activeTab];
-    return currentTab.fields.map((field, index) => (
-      <div className="mb-3" key={index}>
-        <label className="form-label">
-          {field.label}
-          {field.required && <span className="text-danger">*</span>}
-        </label>
-        {field.type === "select" ? (
-          <select
-            className="form-select"
-            name={field.name}
-            onChange={handleInputChange}
-            value={formData[field.name] || ""}
-            required={field.required}
-          >
-            <option value="" disabled>
-              {field.placeholder}
-            </option>
-            {field.options.map((option, idx) => (
-              <option key={idx} value={option.value}>
-                {option.label}
+    return currentTab.fields.map((field, index) => {
+      if (field.name === "country" && activeTab === "electricity") {
+        return (
+          <div className="mb-3" key={index}>
+            <label className="form-label">
+              {field.label}
+              {field.required && <span className="text-danger">*</span>}
+            </label>
+            <select
+              className="form-select"
+              name={field.name}
+              value={company?.country || ""}
+              disabled={true}
+            >
+              <option value={company?.country || ""}>{company?.country || "Chargement..."}</option>
+            </select>
+            <small className="form-text text-muted">
+              Le pays est automatiquement défini selon votre profil de votre entreprise.
+            </small>
+          </div>
+        );
+      }
+
+      return (
+        <div className="mb-3" key={index}>
+          <label className="form-label">
+            {field.label}
+            {field.required && <span className="text-danger">*</span>}
+          </label>
+          {field.type === "select" ? (
+            <select
+              className="form-select"
+              name={field.name}
+              onChange={handleInputChange}
+              value={formData[field.name] || ""}
+              required={field.required}
+              disabled={field.disabled}
+            >
+              <option value="" disabled>
+                {field.placeholder}
               </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type={field.type}
-            className="form-control"
-            name={field.name}
-            placeholder={field.placeholder}
-            onChange={handleInputChange}
-            value={formData[field.name] || ""}
-            required={field.required}
-          />
-        )}
-      </div>
-    ));
+              {field.options && field.options.map((option, idx) => (
+                <option key={idx} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type={field.type}
+              className="form-control"
+              name={field.name}
+              placeholder={field.placeholder}
+              onChange={handleInputChange}
+              value={formData[field.name] || ""}
+              required={field.required}
+              disabled={field.disabled}
+            />
+          )}
+        </div>
+      );
+    });
   };
+
   const renderModal = () => {
     if (!isModalOpen) return null;
     const currentTab = tabs[activeTab];
@@ -681,18 +721,45 @@ const Scope2 = () => {
               ></button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="modal-body">{renderFormFields()}</div>
+              <div className="modal-body">
+                {renderFormFields()}
+                {activeTab === "electricity" && company && (
+                  <div className="alert alert-info mt-3">
+                    <div className="d-flex">
+                      <div className="me-3">
+                        <IconInfoCircle size={24} />
+                      </div>
+                      <div>
+                        <h4 className="mb-1">Information sur le calcul d'émissions</h4>
+                        <div>Pays utilisé pour le calcul: <strong>{company.country}</strong></div>
+                        <div>Facteur d'émission: <strong>{company.countryEmissionFactor} kgCO2e/kWh</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-link link-secondary"
                   onClick={() => toggleModal(false)}
+                  disabled={isSubmitting}
                 >
-                  {" "}
                   Annuler
                 </button>
-                <button type="submit" className="btn btn-primary ms-auto">
-                  {isEditMode ? "Modifier" : "Ajouter"}
+                <button
+                  type="submit"
+                  className="btn btn-primary ms-auto"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      En cours...
+                    </span>
+                  ) : (
+                    isEditMode ? "Modifier" : "Ajouter"
+                  )}
                 </button>
               </div>
             </form>
@@ -701,11 +768,11 @@ const Scope2 = () => {
       </div>
     );
   };
+
   return (
     <div className="container-xl">
       <div
-        className="py-2 mb-4 d-flex 
-  border-b justify-content-start align-items-center"
+        className="py-2 mb-4 d-flex border-b justify-content-start align-items-center"
       >
         <div>
           <h3 className="text-[30px] font-bold" style={{ color: "#263589" }}>
@@ -737,9 +804,64 @@ const Scope2 = () => {
         <div className="card-body p-0">
           <div className="tab-content">{renderTable()}</div>
           {renderModal()}
+          {confirmDelete && (
+            <div
+              className="modal show"
+              tabIndex="-1"
+              style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+            >
+              <div className="modal-dialog modal-sm" role="document">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Confirmer la suppression</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setConfirmDelete(null)}
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <p>
+                      Êtes-vous sûr de vouloir supprimer{" "}
+                      <strong>{confirmDelete.nom}</strong>? Cette action est
+                      irréversible.
+                    </p>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-link link-secondary"
+                      onClick={() => setConfirmDelete(null)}
+                      disabled={deletingIds.has(confirmDelete._id)}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger ms-auto"
+                      onClick={() => handleDelete(confirmDelete.recordId || confirmDelete._id, confirmDelete._id)}
+                      disabled={deletingIds.has(confirmDelete._id)}
+                    >
+                      {deletingIds.has(confirmDelete._id) ? (
+                        <span>
+                          <span className="spinner-border spinner-border-sm me-2" />
+                          Suppression...
+                        </span>
+                      ) : (
+                        "Supprimer"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
+
 export default Scope2;
+ 

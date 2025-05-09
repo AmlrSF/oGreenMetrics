@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
-
-import { IconEdit, IconSearch, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconTrash,IconSearch } from "@tabler/icons-react";
 
 const DataTable = ({
   headers,

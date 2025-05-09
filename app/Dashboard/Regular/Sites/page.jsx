@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-   import { useRouter } from "next/navigation";
-import { IconCalculator, IconEye, IconTrash } from "@tabler/icons-react";
+import { IconEye, IconTrash, IconCalculator } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 
 const SitesPage = () => {
   const [sites, setSites] = useState([]);
@@ -43,8 +43,6 @@ const SitesPage = () => {
         (item) => item?.userId === authData?.user._id
       );
       setSites(userSites);
-      console.log(userSites);
-      
     } catch (err) {
       setError("Failed to fetch sites. Please try again later.");
       console.error("Error:", err);

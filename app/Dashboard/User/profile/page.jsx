@@ -29,6 +29,7 @@ const UserProfilePage = () => {
   });
   const [originalData, setOriginalData] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   
   const industries = ["Agriculture", "Automobile", "Banking"];
   const locations = ["Tunis", "Kairouan", "Bizerte", "Monastir", "Ben Arous", "Mahdia", "Kébili"];
@@ -121,6 +122,7 @@ const UserProfilePage = () => {
       ...prev,
       password: { ...prev.password, [name]: value }
     }));
+    setPasswordError('');
   };
 
   const handleCancel = () => {
@@ -135,12 +137,12 @@ const UserProfilePage = () => {
     const { currentPassword, newPassword, confirmPassword } = formData.password;
     
     if (!currentPassword || !newPassword || !confirmPassword) {
-      alert('Please fill in all password fields');
+      setPasswordError('Please fill in all password fields');
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      alert('New passwords do not match');
+      setPasswordError('New passwords do not match');
       return;
     }
 
@@ -158,9 +160,10 @@ const UserProfilePage = () => {
         })
       });
 
+      const responseData = await passwordResponse.json();
+
       if (!passwordResponse.ok) {
-        const errorData = await passwordResponse.json();
-        throw new Error(errorData.message || 'Failed to update password');
+        throw new Error(responseData.message || 'Failed to update password');
       }
 
       setFormData(prev => ({
@@ -170,7 +173,7 @@ const UserProfilePage = () => {
       setShowPasswordModal(false);
       alert('Password updated successfully!');
     } catch (error) {
-      alert(`Error updating password: ${error.message}`);
+      setPasswordError(`Error: ${error.message}`);
     }
   };
 
@@ -186,12 +189,12 @@ const UserProfilePage = () => {
       });
 
       if (!personalResponse.ok) {
-        alert('Failed to update personal information');
-        return;
+        const errorData = await personalResponse.json();
+        throw new Error(errorData.message || 'Failed to update personal information');
       }
       
       const updatedUserData = await personalResponse.json();
-      setUser(updatedUserData.data);
+      setUser(updatedUserData);
 
       if (company) {
         const companyResponse = await fetch(`http://localhost:4000/updatecompany/${company._id}`, {
@@ -202,8 +205,8 @@ const UserProfilePage = () => {
         });
         
         if (!companyResponse.ok) {
-          alert('Failed to update company information');
-          return;
+          const errorData = await companyResponse.json();
+          throw new Error(errorData.message || 'Failed to update company information');
         }
         
         const updatedCompanyData = await companyResponse.json();
@@ -218,7 +221,7 @@ const UserProfilePage = () => {
       alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('An error occurred while updating profile');
+      alert(`Error updating profile: ${error.message}`);
     }
   };
 
@@ -361,8 +364,7 @@ const UserProfilePage = () => {
         </div>
 
         {/* Company Section */}
-         {/* Company Account Section */}
-         {company && (
+        {company && (
           <div className="card mb-4">
             <div className="card-body">
               <div className="hr-text mb-4">Company Information</div>
@@ -528,6 +530,7 @@ const UserProfilePage = () => {
               <h5 className="modal-title">Reset Password</h5>
               <button type="button" className="btn-close" onClick={() => {
                 setShowPasswordModal(false);
+                setPasswordError('');
                 setFormData(prev => ({
                   ...prev,
                   password: { currentPassword: '', newPassword: '', confirmPassword: '' }
@@ -536,6 +539,11 @@ const UserProfilePage = () => {
             </div>
             <form onSubmit={handlePasswordSubmit}>
               <div className="modal-body">
+                {passwordError && (
+                  <div className="alert alert-danger" role="alert">
+                    {passwordError}
+                  </div>
+                )}
                 <div className="mb-3">
                   <label className="form-label">Current Password</label>
                   <input 
@@ -579,6 +587,7 @@ const UserProfilePage = () => {
                   className="btn btn-secondary" 
                   onClick={() => {
                     setShowPasswordModal(false);
+                    setPasswordError('');
                     setFormData(prev => ({
                       ...prev,
                       password: { currentPassword: '', newPassword: '', confirmPassword: '' }
