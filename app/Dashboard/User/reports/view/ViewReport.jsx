@@ -318,12 +318,6 @@ const ViewReport = ({ id }) => {
         // Give charts more time to render properly - crucial for correct capture
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Get the complete report container including charts
-        const reportContainer = document.getElementById('report-container');
-        if (!reportContainer) {
-          console.error('Report container not found');
-          continue;
-        }
         
         // Create a new page for each tab (after cover page)
         pdf.addPage();
