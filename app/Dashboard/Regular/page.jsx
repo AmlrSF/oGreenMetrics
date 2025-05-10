@@ -126,7 +126,8 @@ const Dashboard = () => {
         >
           {/* Stats Cards */}
 
-          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-primary shadow h-100 py-2">
+          <div  className="card
+             border-left-primary shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -144,7 +145,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-success shadow h-100 py-2">
+          <div  className="card   border-left-success shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -162,7 +163,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-info shadow h-100 py-2">
+          <div  className="card   border-left-info shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -180,7 +181,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div style={{backgroundColor:"#fff"}} className="card bg-white  border-left-warning shadow h-100 py-2">
+          <div  className="card   border-left-warning shadow h-100 py-2">
             <div className="card-body">
               <div className="row no-gutters align-items-center">
                 <div className="col mr-2">
@@ -198,7 +199,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div style={{backgroundColor:"#fff"}} className="card bg-white  shadow ">
+        <div  className="card   shadow ">
           <div className="card-header py-3">
             <h2 className="m-0 font-weight-bold text-primary">Rating Distribution</h2>
           </div>
@@ -222,7 +223,7 @@ const Dashboard = () => {
 
       {/* Charts Row */}
       <div className="mt-2">
-        <div style={{backgroundColor:"#fff"}} className="card bg-white  shadow">
+        <div  className="card   shadow">
           <div className="card-header py-3">
             <h2 className="m-0 font-weight-bold text-primary">Recent Sites</h2>
           </div>

@@ -158,13 +158,13 @@ function WebsiteCalculator() {
   // Helper function for CO2 formatting
   const formatCO2 = (grams) => {
     if (grams >= 1000000) {
-      return `${(grams / 1000000).toFixed(2)} tonnes`;
+      return `${(grams / 1000000)?.toFixed(2)} tonnes`;
     } else if (grams >= 1000) {
-      return `${(grams / 1000).toFixed(2)} kg`;
+      return `${(grams / 1000)?.toFixed(2)} kg`;
     } else if (grams < 1) {
-      return `${(grams * 1000).toFixed(2)} mg`;
+      return `${(grams * 1000)?.toFixed(2)} mg`;
     } else {
-      return `${grams.toFixed(2)} g`;
+      return `${grams?.toFixed(2)} g`;
     }
   };
 
@@ -279,7 +279,7 @@ function WebsiteCalculator() {
                       <div className="mb-1">
                         This is cleaner than{" "}
                         <span className="badge bg-cyan-lt text-cyan me-1">
-                          {((result?.cleanerThan || 0) * 100).toFixed(0)}%
+                          {((result?.cleanerThan || 0) * 100)?.toFixed(0)}%
                         </span>
                         of all web pages globally.
                       </div>

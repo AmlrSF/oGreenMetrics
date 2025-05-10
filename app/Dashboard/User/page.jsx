@@ -531,6 +531,8 @@ const CompanyDash = () => {
         method: "GET",
       });
       const data = await response.json();
+      console.log(data);
+      
       setEmissionData(data?.data);
     } catch (error) {
       console.error("Failed to fetch reports:", error);
@@ -822,7 +824,8 @@ const CompanyDash = () => {
           </div>
 
           {/* Total Emissions, Scope 1, Scope 2, Scope 3 */}
-          <div className="row row-cards mb-4 g-3" style={{display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(250px,1fr))", gap:"10px"}} >
+          <div className="row row-cards mb-4 w-100 g-3" 
+          style={{display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(250px,1fr))", gap:"10px"}} >
           
               <div className="card card-sm">
                 <div className="card-body">
