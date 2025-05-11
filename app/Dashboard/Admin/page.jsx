@@ -17,6 +17,7 @@ import {
   IconChevronRight,
   IconArrowUp,
   IconArrowDown,
+  IconUserX,
 } from "@tabler/icons-react";
 import { getInitials } from "@/lib/Utils";
 import {
@@ -41,15 +42,18 @@ const CompanyDash = () => {
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentCompanies, setRecentCompanies] = useState([]);
   const [recentRoles, setRecentRoles] = useState([]);
-  const [sites, setsites] = useState([]);
+  const [sites, setSites] = useState([]);
   const router = useRouter();
   const [isBest, setIsBest] = useState(true);
   const [companies, setCompanies] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
   const scrollRef = React.useRef(null);
-
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [companiesEmissions, setCompaniesEmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [RolesUser, setRolesUser] = useState([]);
 
   const scroll = (direction) => {
     const container = scrollRef.current;
@@ -77,23 +81,18 @@ const CompanyDash = () => {
   };
 
   const sortedSites = sites
-    ?.sort(
-      (a, b) =>
-        isBest
-          ? a.statistics.co2.grid.grams - b.statistics.co2.grid.grams 
-          : b.statistics.co2.grid.grams - a.statistics.co2.grid.grams 
+    ?.sort((a, b) =>
+      isBest
+        ? a.statistics.co2.grid.grams - b.statistics.co2.grid.grams
+        : b.statistics.co2.grid.grams - a.statistics.co2.grid.grams
     )
     .slice(0, 10);
 
-
-    
-  const sortedCompanies = companiesEmissions
-  ?.sort(
-    (a, b) =>
-      isBest
-        ? a.totalEmissions - b.totalEmissions 
-        : b.totalEmissions - a.totalEmissions 
-  )
+  const sortedCompanies = companiesEmissions?.sort((a, b) =>
+    isBest
+      ? a.totalEmissions - b.totalEmissions
+      : b.totalEmissions - a.totalEmissions
+  );
 
   const handleToggle = () => {
     setIsBest((prevState) => !prevState);
@@ -130,52 +129,83 @@ const CompanyDash = () => {
     },
   ];
 
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/companies");
+      const companiesData = response.data.data;
+      setCompanyCount(companiesData.length);
+      setCompanies(companiesData);
+      setRecentCompanies(companiesData.slice(0, 5));
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/users");
+      const users = response.data;
+
+      const admins = users.filter(
+        (item) => item?.AdminRoles || item?.role === "Admin"
+      ).length;
+
+      const nonAdmins = users.filter((item) => item?.role === "régulier" || item?.role === "entreprise").length;
+
+      console.log(nonAdmins);
+      
+
+      setAdminCount(admins);
+      setUserCount(nonAdmins);
+
+      setRecentUsers(
+        users
+          .filter((item) => item?.role === "régulier" || item?.role === "entreprise")
+          .slice(0, 5)
+      );
+
+      console.log(users);
+      
+      setRolesUser(users.filter((item) => item?.AdminRoles).slice(0, 5));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const fetchReports = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/reports");
+      setReportCount(response.data.data.length);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+    }
+  };
+
+  const fetchSites = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/site");
+      setSites(response?.data?.data);
+    } catch (error) {
+      console.error("Error fetching sites:", error);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/roles");
+      setRecentRoles(response?.data?.data.slice(0, 5));
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
+  
   useEffect(() => {
-    axios
-      .get("http://localhost:4000/companies")
-      .then((response) => {
-        const companiesData = response.data.data;
-        setCompanyCount(companiesData.length);
-        setCompanies(companiesData);
-        setRecentCompanies(companiesData.slice(0, 5));
-      })
-      .catch((error) => console.error("Error fetching companies:", error));
-
-    axios
-      .get("http://localhost:4000/users")
-      .then((response) => {
-        const users = response.data;
-        const admins = users.filter(
-          (item) => item?.AdminRoles || item?.role === "Admin"
-        ).length;
-        const nonAdmins = users.filter(
-          (item) => item?.roles !== "Admin"
-        ).length;
-
-        setAdminCount(admins);
-        setUserCount(nonAdmins - admins);
-        setRecentUsers(users.slice(0, 5));
-      })
-      .catch((error) => console.error("Error fetching users:", error));
-
-    axios
-      .get("http://localhost:4000/reports")
-      .then((response) => setReportCount(response.data.data.length))
-      .catch((error) => console.error("Error fetching reports:", error));
-
-    axios
-      .get("http://localhost:4000/site")
-      .then((response) => {
-        setsites(response?.data?.data);
-      })
-      .catch((error) => console.error("Error fetching sites:", error));
-
-    axios
-      .get("http://localhost:4000/roles")
-      .then((response) => {
-        setRecentRoles(response?.data?.data.slice(0, 5));
-      })
-      .catch((error) => console.error("Error fetching roles:", error));
+    fetchCompanies();
+    fetchUsers();
+    fetchReports();
+    fetchSites();
+    fetchRoles();
   }, []);
 
   const calculateTotalEmissions = (data) => {
@@ -278,8 +308,108 @@ const CompanyDash = () => {
     router.push(`/Dashboard/Admin/companies/${companyId}`);
   };
 
+  const handleApproveUser = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/users/${selectedUser._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isVerified: !selectedUser.isVerified,
+          }),
+        }
+      );
+      await response.json();
+      setModalOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.log("Failed to update user status");
+    }
+  };
+
+  const openModal = (type, user) => {
+    setModalType(type);
+    setSelectedUser(user);
+    setModalOpen(true);
+  };
+
   return (
     <div className="page-body">
+      {modalOpen && selectedUser && (
+        <div className="modal modal-blur fade show d-block">
+          <div
+            style={{ zIndex: 1050 }}
+            className="modal-dialog modal-dialog-centered modal-sm"
+          >
+            <div className="modal-content">
+              <div className="modal-body">
+                <div className="text-center py-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="icon icon-tabler text-warn mb-2 icons-tabler-filled icon-tabler-alert-hexagon"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M10.425 1.414a3.33 3.33 0 0 1 3.026 -.097l.19 .097l6.775 3.995l.096 .063l.092 .077l.107 .075a3.224 3.224 0 0 1 1.266 2.188l.018 .202l.005 .204v7.284c0 1.106 -.57 2.129 -1.454 2.693l-.17 .1l-6.803 4.302c-.918 .504 -2.019 .535 -3.004 .068l-.196 -.1l-6.695 -4.237a3.225 3.225 0 0 1 -1.671 -2.619l-.007 -.207v-7.285c0 -1.106 .57 -2.128 1.476 -2.705l6.95 -4.098zm1.585 13.586l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-.01 -8a1 1 0 0 0 -.993 .883l-.007 .117v4l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-4l-.007 -.117a1 1 0 0 0 -.993 -.883z" />
+                  </svg>
+                  <h3>Êtes-vous sûr ?</h3>
+                  <div className="text-muted">
+                    {modalType === "approve"
+                      ? selectedUser.isVerified
+                        ? "Voulez-vous désapprouver cet utilisateur ?"
+                        : "Voulez-vous approuver cet utilisateur ?"
+                      : "Voulez-vous supprimer cet utilisateur ?"}
+                  </div>
+                  <div className="text-muted mt-2">
+                    <strong>
+                      {selectedUser.prenom} {selectedUser.nom}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <div className="w-100">
+                  <div className="row">
+                    <div className="col">
+                      <button
+                        className="btn w-100"
+                        onClick={() => setModalOpen(false)}
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                    <div className="col">
+                      <button
+                        className={`btn w-100 ${
+                          modalType === "approve"
+                            ? selectedUser.isVerified
+                              ? "btn-danger"
+                              : "btn-success"
+                            : "btn-danger"
+                        }`}
+                        onClick={handleApproveUser}
+                      >
+                        {selectedUser.isVerified ? "Désapprouver" : "Approuver"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="modal-backdrop fade show"
+            style={{ zIndex: 1040 }}
+            onClick={() => setModalOpen(false)}
+          ></div>
+        </div>
+      )}
       <div className="container-xl ">
         <div className="page-header mb-2">
           <div className="row align-items-center">
@@ -450,6 +580,7 @@ const CompanyDash = () => {
                     <th>Role</th>
 
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -492,6 +623,20 @@ const CompanyDash = () => {
                         >
                           {user.isVerified ? "Verified" : "Unverified"}
                         </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => openModal("approve", user)}
+                          className={`btn btn-ghost-${
+                            user.isVerified ? "danger" : "success"
+                          } btn-icon`}
+                        >
+                          {user.isVerified ? (
+                            <IconUserX size={18} />
+                          ) : (
+                            <IconUserCheck size={18} />
+                          )}
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -578,6 +723,87 @@ const CompanyDash = () => {
                         <span className="text-muted">
                           {role.description || "Aucune description"}
                         </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header d-flex align-content-center justify-content-between">
+              <h3 className="card-title">
+                <IconUserCheck className="icon me-2" />
+                Modérateurs  Récents
+              </h3>
+              <a href="/Dashboard/Admin/Users-management" className="btn  btn-primary">
+                Gérez les Modérateurs 
+              </a>
+            </div>
+            <div className="table-responsive">
+              <table className="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Role</th>
+
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {RolesUser.map((user, index) => (
+                    <tr key={index}>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          <span
+                            className="avatar border-1 border-gray-950 avatar-md text-white me-2"
+                            style={{ backgroundColor: "#263589" }}
+                          >
+                            {user.photo_de_profil ? (
+                              <img
+                                className="w-full h-full rounded-sm object-fit-cover"
+                                src={user.photo_de_profil}
+                                alt={`${user.prenom} ${user.nom}`}
+                              />
+                            ) : (
+                              getInitials(user.prenom, user.nom)
+                            )}
+                          </span>
+                          {`${user.prenom} ${user.nom}`}
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          className={`badge `}
+                        >
+                          {user?.AdminRoles?.name}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span
+                          className={`badge ${
+                            user.isVerified ? "bg-success-lt" : "bg-danger-lt"
+                          }`}
+                        >
+                          {user.isVerified ? "Verified" : "Unverified"}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => openModal("approve", user)}
+                          className={`btn btn-ghost-${
+                            user.isVerified ? "danger" : "success"
+                          } btn-icon`}
+                        >
+                          {user.isVerified ? (
+                            <IconUserX size={18} />
+                          ) : (
+                            <IconUserCheck size={18} />
+                          )}
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -790,7 +1016,7 @@ const CompanyDash = () => {
 
                         return (
                           <tr
-                            key={company._id}
+                            key={index}
                             className={index === 0 ? "bg-yellow-50" : ""}
                           >
                             <td style={{ color, fontWeight: "bold" }}>

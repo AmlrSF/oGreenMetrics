@@ -347,9 +347,7 @@ const Page = () => {
                           <td className="text-secondary">{user.email}</td>
                           <td>
                             <span className="badge bg-purple-lt">
-                              {user.role === "entreprise"
-                                ? "Enterprise"
-                                : "Regular"}
+                              {user.role}
                             </span>
                           </td>
                           <td>
