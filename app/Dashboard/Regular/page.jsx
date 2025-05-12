@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -43,11 +42,11 @@ const Dashboard = () => {
   };
 
   const calculateTotalEmissions = () => {
-    return sites.reduce((acc, site) => acc + site.statistics.co2.grid.grams, 0).toFixed(2);
+    return sites.reduce((acc, site) => acc + site.statistics.co2.grid.grams, 0)?.toFixed(2);
   };
 
   const calculateAverageCleanerThan = () => {
-    return (sites.reduce((acc, site) => acc + site.cleanerThan, 0) / sites.length * 100).toFixed(0);
+    return (sites.reduce((acc, site) => acc + site.cleanerThan, 0) / sites.length * 100)?.toFixed(0);
   };
 
   const ratingDistribution = () => {
@@ -61,159 +60,229 @@ const Dashboard = () => {
       datasets: [{
         data: Object.values(distribution),
         backgroundColor: [
-          '#28a745',
-          '#17a2b8',
-          '#ffc107',
-          '#dc3545',
-          '#6c757d'
+          '#2fb344', // success
+          '#4299e1', // info
+          '#f59f00', // warning
+          '#e53e3e', // danger
+          '#667382'  // secondary
         ],
+        borderWidth: 0,
       }]
     };
   };
 
-  if (loading) return <div className="text-center mt-5"><div className="spinner-border"></div></div>;
-  if (error) return <div className="alert alert-danger m-3">{error}</div>;
+  if (loading) return (
+    <div className="container-narrow d-flex justify-content-center align-items-center vh-100">
+      <div className="spinner-border text-primary" role="status"></div>
+      <span className="ms-2">Loading dashboard data...</span>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="container-narrow my-3">
+      <div className="alert alert-danger" role="alert">
+        <h4 className="alert-title">Error</h4>
+        <div className="text-muted">{error}</div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="container-fluid p-4">
-      <div className="row">
-        <div className="col-lg-12 mb-4">
-          <h1 className="text-primary">
-        
-            Dashboard Overview
-          </h1>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-primary shadow h-100 py-2">
-            <div className="card-body">
-              <div className="row no-gutters align-items-center">
-                <div className="col mr-2">
-                  <h2 className=" text-primary text-uppercase mb-1">
-                    Total Sites
-                  </h2>
-                  <p className=" mb-0 fs-2 font-weight-bold text-gray-800">
-                    {sites.length}
-                  </p>
-                </div>
-                <div className="col-auto">
-                  <i className="fas fa-globe fa-2x text-gray-300"></i>
-                </div>
+    <div className="page">
+      <div className="page-wrapper">
+        <div className="page-header d-print-none">
+          <div className="container-xl">
+            <div className="row align-items-center">
+              <div className="col">
+                <h2 className="page-title">Dashboard Overview</h2>
+                <div className="text-muted mt-1">Monitor your website performance metrics</div>
               </div>
+             
             </div>
           </div>
         </div>
 
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-success shadow h-100 py-2">
-            <div className="card-body">
-              <div className="row no-gutters align-items-center">
-                <div className="col mr-2">
-                  <h2 className="text-xs font-weight-bold text-success text-uppercase mb-1">
-                    Total Emissions (g CO2)
-                  </h2>
-                  <p className="fs-2 mb-0 font-weight-bold text-gray-800">
-                    {calculateTotalEmissions()}
-                  </p>
+        <div className="page-body">
+          <div className="container-xl">
+            {/* Stats Cards */}
+            <div className="row row-deck row-cards mb-4">
+              <div className="col-sm-6 col-lg-3">
+                <div className="card">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="subheader">Total Sites</div>
+                      <div className="ms-auto avatar bg-primary-lt">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-world" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                          <path d="M3.6 9h16.8"></path>
+                          <path d="M3.6 15h16.8"></path>
+                          <path d="M11.5 3a17 17 0 0 0 0 18"></path>
+                          <path d="M12.5 3a17 17 0 0 1 0 18"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="h1 mb-0">{sites.length}</div>
+                    <div className="d-flex mt-1">
+                      <div className="text-muted">Websites monitored</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="col-auto">
-                  <i className="fas fa-leaf fa-2x text-gray-300"></i>
+              </div>
+
+              <div className="col-sm-6 col-lg-3">
+                <div className="card">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="subheader">Total Emissions (g CO2)</div>
+                      <div className="ms-auto avatar bg-green-lt">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-leaf" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                          <path d="M5 21c.5 -4.5 2.5 -8 7 -10"></path>
+                          <path d="M9 18c6.218 0 10.5 -3.288 11 -12v-2h-4.014c-9 0 -11.986 4 -12 9c0 1 0 3 2 5h3z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="h1 mb-0">{calculateTotalEmissions()}</div>
+                    <div className="d-flex mt-1">
+                      <div className="text-muted">Carbon footprint</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-sm-6 col-lg-3">
+                <div className="card">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="subheader">Average Cleaner Than</div>
+                      <div className="ms-auto avatar bg-azure-lt">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-chart-bar" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                          <path d="M3 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
+                          <path d="M9 8m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
+                          <path d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="h1 mb-0">{calculateAverageCleanerThan()}%</div>
+                    <div className="d-flex mt-1">
+                      <div className="text-muted">Industry comparison</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-sm-6 col-lg-3">
+                <div className="card">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="subheader">Green Hosting</div>
+                      <div className="ms-auto avatar bg-yellow-lt">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-solar-panel" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                          <path d="M4.28 14h15.44a1 1 0 0 0 .97 -1.243l-1.5 -6a1 1 0 0 0 -.97 -.757h-12.44a1 1 0 0 0 -.97 .757l-1.5 6a1 1 0 0 0 .97 1.243z"></path>
+                          <path d="M4 10h16"></path>
+                          <path d="M10 6l-1 8"></path>
+                          <path d="M14 6l1 8"></path>
+                          <path d="M12 14v4"></path>
+                          <path d="M7 18h10"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="h1 mb-0">{sites.filter(site => site.green).length}</div>
+                    <div className="d-flex mt-1">
+                      <div className="text-muted">Eco-friendly sites</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-info shadow h-100 py-2">
-            <div className="card-body">
-              <div className="row no-gutters align-items-center">
-                <div className="col mr-2">
-                  <h2 className="text-xs font-weight-bold text-info text-uppercase mb-1">
-                    Average Cleaner Than
-                  </h2>
-                  <p className="fs-2 mb-0 font-weight-bold text-gray-800">
-                    {calculateAverageCleanerThan()}%
-                  </p>
-                </div>
-                <div className="col-auto">
-                  <i className="fas fa-percentage fa-2x text-gray-300"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-xl-3 col-md-6 mb-4">
-          <div className="card border-left-warning shadow h-100 py-2">
-            <div className="card-body">
-              <div className="row no-gutters align-items-center">
-                <div className="col mr-2">
-                  <h2 className="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                    Green Hosting
-                  </h2>
-                  <p className="fs-2 mb-0 font-weight-bold text-gray-800">
-                    {sites.filter(site => site.green).length} sites
-                  </p>
-                </div>
-                <div className="col-auto">
-                  <i className="fas fa-solar-panel fa-2x text-gray-300"></i>
+            {/* Charts Row */}
+            <div className="row row-deck row-cards">
+              <div className="col-lg-6">
+                <div className="card">
+                  <div className="card-header">
+                    <h3 className="card-title">Rating Distribution</h3>
+                  </div>
+                  <div className="card-body">
+                    <div className="d-flex justify-content-center">
+                      <div style={{ height: "250px", width: "250px" }}>
+                        <Doughnut 
+                          data={ratingDistribution()} 
+                          options={{
+                            plugins: {
+                              legend: {
+                                position: 'bottom',
+                                labels: {
+                                  usePointStyle: true,
+                                  padding: 20
+                                }
+                              }
+                            },
+                            cutout: '70%',
+                            responsive: true,
+                            maintainAspectRatio: false
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Charts Row */}
-      <div className="row">
-        <div className="col-xl-6">
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h2 className="m-0 font-weight-bold text-primary">
-                 Distribution</h2>
-            </div>
-            <div className="card-body">
-              <div className="chart-pie d-flex justify-content-center align-content-center pt-4">
-                <Doughnut style={{width:"250px",height:"250px"}} data={ratingDistribution()} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-xl-6">
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h2 className="m-0 font-weight-bold text-primary">Recent Sites</h2>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>URL</th>
-                      <th>Rating</th>
-                      <th>Emissions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sites.slice(0, 5).map(site => (
-                      <tr key={site._id}>
-                        <td>{site.url}</td>
-                        <td>
-                          <span className={`badge text-white bg-${site.rating === 'A' ? 'success' : 
-                            site.rating === 'B' ? 'info' :
-                            site.rating === 'C' ? 'warning' :
-                            'danger'}`}>
-                            {site.rating}
-                          </span>
-                        </td>
-                        <td>{site.statistics.co2.grid.grams.toFixed(3)} g</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="col-lg-6">
+                <div className="card">
+                  <div className="card-header">
+                    <h3 className="card-title">Recent Sites</h3>
+                    <div className="card-actions">
+                      <a href="/Dashboard/Regular/Sites" className="btn btn-outline-primary btn-sm">
+                        View all
+                      </a>
+                    </div>
+                  </div>
+                  <div className="table-responsive">
+                    <table className="table table-vcenter card-table">
+                      <thead>
+                        <tr>
+                          <th>URL</th>
+                          <th>Rating</th>
+                          <th>Emissions</th>
+                          <th className="w-1"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sites.slice(0, 5).map(site => (
+                          <tr key={site._id}>
+                            <td className="text-nowrap">{site.url}</td>
+                            <td>
+                              <span className={`badge ${
+                                site.rating === 'A' ? 'bg-success' : 
+                                site.rating === 'B' ? 'bg-info' :
+                                site.rating === 'C' ? 'bg-warning' :
+                                'bg-danger'
+                              }`}>
+                                {site.rating}
+                              </span>
+                            </td>
+                            <td>{site.statistics.co2.grid.grams?.toFixed(3)} g</td>
+                            <td>
+                              <a href="#" className="btn btn-icon btn-ghost-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-external-link" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                  <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"></path>
+                                  <path d="M11 13l9 -9"></path>
+                                  <path d="M15 4h5v5"></path>
+                                </svg>
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

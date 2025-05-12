@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { IconBriefcase, IconTruck, IconTrash, IconBuildingFactory } from "@tabler/icons-react";
+import { IconBriefcase, IconTruck, IconTrash, IconBuildingFactory, IconShoppingCart } from "@tabler/icons-react";
 import ReportCharts from "./ReportCharts";
 
-const Scope3Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Details,getScope3Details,getFuelTypes,getCoolingTypes,getHeatingTypes,getTransportModes,getWasteTypes,formatNumber,activeTab
+const Scope3Tab = ({report, calculateTotalEmissions, getScope1Details, getScope2Details, getScope3Details, getFuelTypes, getCoolingTypes, getHeatingTypes, getTransportModes, getWasteTypes, formatNumber, activeTab
 }) => {
   return (
     <>
@@ -72,12 +72,12 @@ const Scope3Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Det
           <div className="card">
             <div className="card-header">
               <h3 className="card-title">
-                <IconTruck className="me-2" size={20} />
-                Transport & Distribution
+                <IconShoppingCart className="me-2" size={20} />
+                Biens achetés
               </h3>
               <div className="card-actions">
                 <span className="badge bg-green text-white">
-                  {parseFloat(report.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂
+                  {parseFloat(report.scope3Data?.purchasedGoodEmissions || 0).toLocaleString()} tCO₂
                 </span>
               </div>
             </div>
@@ -86,24 +86,24 @@ const Scope3Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Det
                 <table className="table table-vcenter card-table table-striped">
                   <thead>
                     <tr>
-                      <th>But</th>
-                      <th>Mode</th>
-                      <th>Poids (kg)</th>
-                      <th>Distance (km)</th>
+                      <th>Titre</th>
+                      <th>Type</th>
+                      <th>Sous-type</th>
+                      <th>Quantité</th>
                       <th>Émissions de CO₂ (tCO₂)</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {report.scope3Data?.transport?.map((transport, index) => (
-                      <tr key={transport._id || index}>
-                        <td>{transport.purpose}</td>
+                    {report.scope3Data?.purchasedGood?.map((good, index) => (
+                      <tr key={good._id || index}>
+                        <td>{good.titre}</td>
                         <td>
-                          <span className="badge bg-indigo-lt">{transport.mode} - {transport.type}</span>
+                          <span className="badge bg-indigo-lt">{good.type}</span>
                         </td>
-                        <td>{parseFloat(transport.poids).toLocaleString()}</td>
-                        <td>{parseFloat(transport.distance).toLocaleString()}</td>
+                        <td>{good.sousType}</td>
+                        <td>{parseFloat(good.quantite).toLocaleString()}</td>
                         <td>
-                          <strong>{parseFloat(transport.emissions).toLocaleString()}</strong>
+                          <strong>{parseFloat(good.emissions).toLocaleString()}</strong>
                         </td>
                       </tr>
                     )) || (
@@ -115,7 +115,7 @@ const Scope3Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Det
                   <tfoot>
                     <tr>
                       <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
-                      <td><strong>{parseFloat(report.scope3Data?.transportEmissions || 0).toLocaleString()} tCO₂</strong></td>
+                      <td><strong>{parseFloat(report.scope3Data?.purchasedGoodEmissions || 0).toLocaleString()} tCO₂</strong></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -138,7 +138,7 @@ const Scope3Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Det
               </div>
             </div>
             <div className="card-body">
-              {getWasteTypes().length > 0 ? (
+              {report.scope3Data?.dechet?.length > 0 ? (
                 <div className="table-responsive">
                   <table className="table table-vcenter card-table table-striped">
                     <thead>
@@ -198,25 +198,27 @@ const Scope3Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Det
               </div>
             </div>
             <div className="card-body">
-              {report.scope3Data?.capitalGoods?.length > 0 ? (
+              {report.scope3Data?.capitalGood?.length > 0 ? (
                 <div className="table-responsive">
                   <table className="table table-vcenter card-table table-striped">
                     <thead>
                       <tr>
                         <th>Nom</th>
-                        <th>Type</th>
-                        <th>Quantité</th>
+                        <th>Catégorie</th>
+                        <th>Coût</th>
+                        <th>Durée de vie (années)</th>
                         <th>Émissions de CO₂ (tCO₂)</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {report.scope3Data.capitalGoods.map((good, index) => (
+                      {report.scope3Data.capitalGood.map((good, index) => (
                         <tr key={good._id || index}>
                           <td>{good.name}</td>
                           <td>
-                            <span className="badge bg-orange-lt">{good.type}</span>
+                            <span className="badge bg-orange-lt">{good.category}</span>
                           </td>
-                          <td>{parseFloat(good.quantity).toLocaleString()}</td>
+                          <td>{parseFloat(good.cost).toLocaleString()}</td>
+                          <td>{good.lifetime}</td>
                           <td>
                             <strong>{parseFloat(good.emissions).toLocaleString()}</strong>
                           </td>
@@ -225,7 +227,7 @@ const Scope3Tab = ({report,calculateTotalEmissions,getScope1Details,getScope2Det
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colSpan="3" className="text-end"><strong>Émissions Totales :</strong></td>
+                        <td colSpan="4" className="text-end"><strong>Émissions Totales :</strong></td>
                         <td><strong>{parseFloat(report.scope3Data?.capitalGoodEmissions || 0).toLocaleString()} tCO₂</strong></td>
                       </tr>
                     </tfoot>
