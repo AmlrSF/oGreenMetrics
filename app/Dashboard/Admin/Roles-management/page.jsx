@@ -21,7 +21,7 @@ const Page = () => {
   });
 
   const [deletingIds, setDeletingIds] = useState(new Set());
-
+  const [expandedRoleId, setExpandedRoleId] = useState(null);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(roles?.length / itemsPerPage);
 
@@ -149,8 +149,10 @@ const Page = () => {
 
   return (
     <div className="container-xl h-full">
-      <div className="py-4  d-flex d-flex justify-content-between
-       align-items-center">
+      <div
+        className="py-4  d-flex d-flex justify-content-between
+       align-items-center"
+      >
         <div className="d-flex flex-column justify-content-start">
           <h3
             className="fw-bold mb-1"
@@ -168,7 +170,7 @@ const Page = () => {
         ) : (
           <button
             className="btn btn-primary"
-
+            onClick={() => setIsModalOpen(true)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -211,7 +213,29 @@ const Page = () => {
                   .map((role, index) => (
                     <tr key={role._id || index}>
                       <td>{role.name}</td>
-                      <td>{role.description}</td>
+                      <td>
+                        {role.description.length > 30 ? (
+                          <>
+                            {expandedRoleId === role._id
+                              ? role.description
+                              : `${role.description.slice(0, 30)}... `}
+                            <button
+                              className="btn btn-link p-0"
+                              onClick={() =>
+                                setExpandedRoleId(
+                                  expandedRoleId === role._id ? null : role._id
+                                )
+                              }
+                            >
+                              {expandedRoleId === role._id
+                                ? "Read less"
+                                : "Read more"}
+                            </button>
+                          </>
+                        ) : (
+                          role.description
+                        )}
+                      </td>
                       <td className="gap-2 d-flex justify-content-start align-items-center">
                         <div>
                           {role.userManagement != "00"
@@ -313,9 +337,7 @@ const Page = () => {
                             {deletingIds.has(role._id) ? (
                               <span className="spinner-border spinner-border-sm" />
                             ) : (
-                                       
-                              <IconTrash  size={18} />
-                                  
+                              <IconTrash size={18} />
                             )}
                           </button>
                         </td>
@@ -423,7 +445,9 @@ const Page = () => {
               <form onSubmit={handleAddRole}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Nom du rôle <span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Nom du rôle <span className="text-red fs-2">*</span>
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -437,7 +461,9 @@ const Page = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Description<span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Description<span className="text-red fs-2">*</span>
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -451,7 +477,9 @@ const Page = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Permissions<span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Permissions<span className="text-red fs-2">*</span>
+                    </label>
                     <div className="border p-3 rounded">
                       {/* Gestion des utilisateurs */}
                       <div className="mb-2">

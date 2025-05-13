@@ -250,6 +250,7 @@ const Page = () => {
                     <th>Entreprise</th>
                     <th>Email de contact</th>
                     <th>Industrie</th>
+                    <th>pays</th>
                     <th>Date d'inscription</th>
                     {userAccess == "10" ? (
                       <></>
@@ -296,6 +297,11 @@ const Page = () => {
                               {company.industrie}
                             </span>
                           </td>
+                          <td>
+                            <span className="badge bg-yellow-lt">
+                              {company.country}
+                            </span>
+                          </td>
                           <td className="text-secondary">
                             {formatDate(company.createdAt)}
                           </td>
@@ -312,12 +318,12 @@ const Page = () => {
                                 >
                                   <IconEye size={18}  />
                                 </button>
-                                <button
+                                {/* <button
                                   onClick={() => openModal(company)}
                                   className="btn btn-ghost-danger btn-icon"
                                 >
                                   <IconTrash  size={18} />
-                                </button>
+                                </button> */}
                               </div>
                             </td>
                           )}

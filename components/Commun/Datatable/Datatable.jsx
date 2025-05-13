@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@/lib/Utils";
-import { IconEdit, IconTrash,IconSearch } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconSearch } from "@tabler/icons-react";
 
 const DataTable = ({
   headers,
@@ -18,7 +18,7 @@ const DataTable = ({
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
+  const [expandedRoleId, setExpandedRoleId] = useState(null);
   //console.log(data);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -175,6 +175,9 @@ const DataTable = ({
                         cellValue = formatDate(cellValue);
                       }
 
+                      const shouldTruncate =
+                        tab?.isCollapsing?.includes(header);
+
                       return (
                         <td className="text-secondary" key={colIndex}>
                           <span
@@ -182,9 +185,31 @@ const DataTable = ({
                               header === "Emissions" ? "badge bg-purple-lt" : ""
                             }
                           >
-                            {header.toLowerCase() === "emissions"
-                              ? `${cellValue} ${tab.unit1}/${tab.unit2}`
-                              : cellValue}
+                            {header.toLowerCase() === "emissions" ? (
+                              `${cellValue} ${tab.unit1}/${tab.unit2}`
+                            ) : shouldTruncate && cellValue?.length > 20 ? (
+                              <>
+                                {expandedRoleId === `${row._id}-${header}`
+                                  ? cellValue
+                                  : `${cellValue.slice(0, 15)}... `}
+                                <button
+                                  className="btn btn-link p-0"
+                                  onClick={() =>
+                                    setExpandedRoleId(
+                                      expandedRoleId === `${row._id}-${header}`
+                                        ? null
+                                        : `${row._id}-${header}`
+                                    )
+                                  }
+                                >
+                                  {expandedRoleId === `${row._id}-${header}`
+                                    ? "Voir moins"
+                                    : "Voir plus"}
+                                </button>
+                              </>
+                            ) : (
+                              cellValue
+                            )}
                           </span>
                         </td>
                       );
@@ -196,18 +221,17 @@ const DataTable = ({
                           onClick={() => onDelete(row._id)}
                           disabled={deletingIds.has(row._id)}
                         >
-                        
                           {deletingIds.has(row._id) ? (
                             <span className="spinner-border spinner-border-sm" />
                           ) : (
-                           <IconTrash  size={18}/>
+                            <IconTrash size={18} />
                           )}
                         </button>
                         <button
                           className="btn btn-ghost-success btn-icon"
                           onClick={() => onUpdate(row._id)}
                         >
-                          <IconEdit size={18}  />
+                          <IconEdit size={18} />
                         </button>
                       </div>
                     </td>
@@ -250,12 +274,7 @@ const DataTable = ({
             </button>
           </li>
           <li className="page-item active">
-            <span
-              className="page-link bg-primary"
-              
-            >
-              {currentPage}
-            </span>
+            <span className="page-link bg-primary">{currentPage}</span>
           </li>
           <li
             className={`page-item ${

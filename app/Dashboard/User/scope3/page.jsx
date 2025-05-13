@@ -90,6 +90,8 @@ const Scope3 = () => {
         );
         const data = await response.json();
   
+        console.log(data);
+
         if (response.ok) {
           setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
         }
