@@ -1,18 +1,52 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
-import { IconBell } from "@tabler/icons-react"; 
 import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
-import { useNotifications } from "@/components/Commun/context/NotificationContext";
+import { IconBell, IconX } from "@tabler/icons-react";
+import { toast } from "react-hot-toast";
 
 const Navbar = ({ user, isAdmin }) => {
   const router = useRouter();
+  const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { notifications, markAsRead, markAllRead } = useNotifications();
-  
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  
+  const fetchNotifications = async (userId) => {
+    try {
+      const res = await fetch(`http://localhost:4000/notifications/${userId}`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(data.data);
+      } else {
+        toast.error(data.message || "Échec de la récupération des notifications");
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      toast.error("Échec de la récupération des notifications");
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      const res = await fetch(`http://localhost:4000/notifications/${notificationId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(notifications.filter((n) => n._id !== notificationId));
+        toast.success("Notification supprimée");
+      } else {
+        toast.error(data.message || "Échec de la suppression de la notification");
+      }
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      toast.error("Échec de la suppression de la notification");
+    }
+  };
+
   const handleNavigation = () => {
     switch (user?.role) {
       case "Admin":
@@ -26,79 +60,85 @@ const Navbar = ({ user, isAdmin }) => {
         break;
       default:
         console.warn("Unknown role:", user?.role);
-        router.push("/"); 
+        router.push("/");
     }
   };
 
-  const handleMarkAsRead = (id) => {
-    markAsRead(id);
-  };
+  useEffect(() => {
+    if (user?._id) {
+      fetchNotifications(user._id);
+      // Poll for new notifications every 5 minutes
+      const intervalId = setInterval(() => {
+        fetchNotifications(user._id);
+      }, 5 * 60 * 1000);
+      return () => clearInterval(intervalId);
+    }
+  }, [user]);
 
-  const handleMarkAllRead = () => {
-    markAllRead();
-    setShowNotifications(false);  
-  };
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <nav className="position-sticky sticky-top navbar  py-2 navbar-expand-lg" style={{ backgroundColor: "#8ebe21" }}>
+    <nav
+      className="position-sticky sticky-top navbar py-2 navbar-expand-lg"
+      style={{ backgroundColor: "#8ebe21" }}
+    >
       <div className="container-xl d-flex justify-content-end px-4">
         <div className="d-flex align-items-center gap-3">
-          {/* Notification bell */}
+          {/* Notifications */}
           <div className="position-relative">
-            <button
-              className="btn position-relative"
-              style={{ border: "none", background: "none" }}
+            <div
+              className="d-flex align-items-center border rounded-pill p-1"
+              style={{ cursor: "pointer", backgroundColor: "#ffffff30" }}
               onClick={() => setShowNotifications(!showNotifications)}
             >
-              <IconBell size={20} className="text-white" />
+              <div
+                className="rounded-circle d-flex align-items-center justify-content-center text-white"
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <IconBell size={18} style={{ color: "#8ebe21" }} />
+              </div>
               {unreadCount > 0 && (
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  {unreadCount > 9 ? "9+" : unreadCount}
+                <span className="badge bg-danger position-absolute top-0 end-0">
+                  {unreadCount}
                 </span>
               )}
-            </button>
-
-            {/* Notification dropdown */}
+              <span className="d-none d-sm-inline-block text-white fw-medium ms-2 pe-2">
+                Notifications
+              </span>
+            </div>
             {showNotifications && (
               <div
-                className="position-absolute end-0 mt-2 shadow-lg rounded-3 bg-white"
-                style={{ width: "320px", zIndex: 1000, maxHeight: "400px", overflowY: "auto" }}
+                className="position-absolute end-0 mt-2 p-3 bg-white border rounded shadow"
+                style={{ width: "300px", zIndex: 1000 }}
               >
-                <div className="p-2 border-bottom d-flex justify-content-between align-items-center">
-                  <h6 className="m-0">Notifications</h6>
-                  {unreadCount > 0 && (
-                    <button
-                      className="btn btn-sm btn-link text-decoration-none"
-                      onClick={handleMarkAllRead}
+                <h6 className="mb-3">Notifications</h6>
+                {notifications.length === 0 ? (
+                  <p className="text-muted">Aucune notification</p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      className="d-flex align-items-start mb-2 p-2 border-bottom"
                     >
-                      Tout marquer comme lu
-                    </button>
-                  )}
-                </div>
-                <div>
-                  {notifications.length === 0 ? (
-                    <div className="p-3 text-center text-muted">Aucune notification</div>
-                  ) : (
-                    notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-3 border-bottom notification-item ${
-                          !notification.read ? "bg-light" : ""
-                        }`}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => handleMarkAsRead(notification.id)}>
-                        <div className="d-flex">
-                          </div>
-                          <div>
-                            <div className="fw-semibold">{notification.title}</div>
-                            <div className="text-muted small">{notification.message}</div>
-                            <div className="text-muted small mt-1">{notification.time}</div>
-                          </div>
-                        </div>
-                 
-                    ))
-                  )}
-                </div>
+                      <div className="flex-grow-1">
+                        <p className="mb-1">{notification.message}</p>
+                        <small className="text-muted">
+                          {new Date(notification.createdAt).toLocaleDateString("fr-FR")}
+                        </small>
+                      </div>
+                      <button
+                        className="btn btn-sm btn-icon btn-ghost-secondary"
+                        onClick={() => handleDeleteNotification(notification._id)}
+                      >
+                        <IconX size={16} />
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>
@@ -125,7 +165,8 @@ const Navbar = ({ user, isAdmin }) => {
                   className="rounded-circle"
                   style={{
                     width: "25px",
-                    height: "25px",}}
+                    height: "25px",
+                  }}
                 />
               ) : (
                 <span style={{ color: "#8ebe21" }}>{getInitials(user?.prenom, user?.nom)}</span>

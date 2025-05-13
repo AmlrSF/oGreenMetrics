@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { IconCheck, IconPlus, IconPencil, IconTrash, IconChevronLeft, IconChevronRight,IconBuildingFactory,IconBolt,IconTruck,IconWorld,IconTarget,IconInfoCircle,IconEdit } from '@tabler/icons-react';
-import { useNotifications } from "@/components/Commun/context/NotificationContext";
+import { IconCheck, IconPlus, IconPencil, IconTrash, IconChevronLeft, IconChevronRight, IconBuildingFactory, IconBolt, IconTruck, IconWorld, IconTarget, IconInfoCircle, IconEdit } from '@tabler/icons-react';
 
 const GoalsPage = () => {
   const [company, setCompany] = useState(null);
+  const [user, setUser] = useState(null); // Added to store user data
   const [loading, setLoading] = useState(true);
   const [currentEmissions, setCurrentEmissions] = useState({
     scope1: 0,
@@ -15,6 +15,7 @@ const GoalsPage = () => {
     total: 0,
   });
   const [goalsList, setGoalsList] = useState([]);
+  const [notifications, setNotifications] = useState([]); // Added for notifications
   const [newGoal, setNewGoal] = useState({
     name: "Objectif de Réduction Carbone",
     year: new Date().getFullYear(),
@@ -41,7 +42,6 @@ const GoalsPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
-  const { addNotification } = useNotifications(); // Use the notification context
 
   const sumEmissions = (arr) => {
     if (!arr || !Array.isArray(arr)) return 0;
@@ -101,7 +101,9 @@ const GoalsPage = () => {
 
   const fetchAndCalculateEmissions = async (companyId) => {
     try {
-      const reportRes = await fetch(`http://localhost:4000/report/full/${companyId}`);
+      const reportRes = await fetch(`http://localhost:4000/report/full/${companyId}`, {
+        credentials: "include",
+      });
       const reportJson = await reportRes.json();
       const reportData = reportJson.data;
 
@@ -133,6 +135,23 @@ const GoalsPage = () => {
       console.error("Error calculating emissions:", error);
       toast.error("Échec du calcul des émissions actuelles");
       return { scope1: 0, scope2: 0, scope3: 0, total: 0 };
+    }
+  };
+
+  const fetchNotifications = async (userId) => {
+    try {
+      const res = await fetch(`http://localhost:4000/notifications/${userId}`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(data.data);
+      } else {
+        toast.error(data.message || "Échec de la récupération des notifications");
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      toast.error("Échec de la récupération des notifications");
     }
   };
 
@@ -263,6 +282,7 @@ const GoalsPage = () => {
       });
       setShowAddModal(false);
       fetchGoals(company._id);
+      if (user?._id) fetchNotifications(user._id); // Refresh notifications
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
     }
@@ -329,8 +349,9 @@ const GoalsPage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error updating goal");
 
-      setShowEditModal(false); 
+      setShowEditModal(false);
       fetchGoals(company._id);
+      if (user?._id) fetchNotifications(user._id); // Refresh notifications
     } catch (err) {
       console.error("Update error:", err);
       toast.error(`Erreur: ${err.message}`);
@@ -352,55 +373,48 @@ const GoalsPage = () => {
         const data = await res.json();
         throw new Error(data.message);
       }
- 
 
       fetchGoals(company._id);
+      if (user?._id) fetchNotifications(user._id); // Refresh notifications
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
     }
   };
 
-  const checkAchievedGoals = (goals, emissions) => {
-    const achievedGoals = [];
-    
-    goals.forEach((goal) => {
-      const isScope1Achieved = goal.scope1Goal === 0 || emissions.scope1 <= goal.scope1Goal;
-      const isScope2Achieved = goal.scope2Goal === 0 || emissions.scope2 <= goal.scope2Goal;
-      const isScope3Achieved = goal.scope3Goal === 0 || emissions.scope3 <= goal.scope3Goal;
-      
-      const allScopesAchieved = isScope1Achieved && isScope2Achieved && isScope3Achieved;
-      
-      if (allScopesAchieved && goal.status !== "achieved") {
-        achievedGoals.push({
-          ...goal,
-          newlyAchieved: true,
-        });
-        
-        // Update the goal status in the database
-        fetch(`http://localhost:4000/goals/${goal._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ ...goal, status: "achieved" }),
-        }).catch((error) => console.error("Error updating goal status:", error));
+  const checkAchievedGoals = async (companyId, emissions, userId) => {
+    try {
+      const res = await fetch(`http://localhost:4000/goals/check-attainment/${companyId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ currentEmissions: emissions, userId }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.message || "Failed to check goal attainment");
       }
-    });
-    
-    return achievedGoals;
+      fetchGoals(companyId); // Refresh goals to reflect updated statuses
+      if (userId) fetchNotifications(userId); // Refresh notifications
+    } catch (error) {
+      console.error("Error checking goal attainment:", error);
+      toast.error("Échec de la vérification des objectifs atteints");
+    }
   };
 
   const fetchGoals = async (companyId) => {
     try {
-      const res = await fetch(`http://localhost:4000/goals/all/${companyId}`);
+      const res = await fetch(`http://localhost:4000/goals/all/${companyId}`, {
+        credentials: "include",
+      });
       const data = await res.json();
-  
+
       if (data.success && Array.isArray(data.data)) {
-        // First update the statuses based on current emissions
+        // Update the statuses based on current emissions
         const updatedGoals = data.data.map((goal) => {
           const isScope1Achieved = goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
           const isScope2Achieved = goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
           const isScope3Achieved = goal.scope3Goal === 0 || currentEmissions.scope3 <= goal.scope3Goal;
-  
+
           let status = "pending";
           if (isScope1Achieved && isScope2Achieved && isScope3Achieved) {
             status = "achieved";
@@ -410,7 +424,7 @@ const GoalsPage = () => {
               goal.scope2Goal > 0 ? 1 : 0,
               goal.scope3Goal > 0 ? 1 : 0,
             ].reduce((a, b) => a + b, 0);
-  
+
             const scope1Progress =
               goal.scope1Goal > 0
                 ? Math.min(
@@ -447,39 +461,24 @@ const GoalsPage = () => {
                     )
                   )
                 : 0;
-  
+
             const totalProgress =
               totalScopes > 0 ? (scope1Progress + scope2Progress + scope3Progress) / totalScopes : 0;
-  
+
             status = totalProgress > 50 ? "in-progress" : "pending";
           }
-  
+
           return {
             ...goal,
             status,
           };
         });
-  
+
         setGoalsList(updatedGoals);
-        
-        // Then check which goals have newly been achieved
-        const achievedGoals = checkAchievedGoals(data.data, currentEmissions);
-        
-        // Send notifications for newly achieved goals
-        achievedGoals.forEach((goal) => {
-          if (goal.newlyAchieved) {
-            addNotification({
-              type: "achievement",
-              title: "Objectif atteint! 🎉",
-              message: `Vous avez atteint votre objectif de réduction d'émissions "${goal.name}"!`,
-              goalId: goal._id, // Add goal ID to prevent duplicate notifications
-              time: new Date().toLocaleString(),
-            });
-          }
-        });
       }
     } catch (error) {
       console.error("Error fetching goals:", error);
+      toast.error("Échec de la récupération des objectifs");
     }
   };
 
@@ -495,8 +494,11 @@ const GoalsPage = () => {
         const userId = authData?.user?._id;
         if (!userId) throw new Error("Non autorisé");
 
+        setUser(authData.user); // Store user data
+
         const compRes = await fetch(
-          `http://localhost:4000/GetCompanyByOwnerID/${userId}`
+          `http://localhost:4000/GetCompanyByOwnerID/${userId}`,
+          { credentials: "include" }
         );
         const compData = await compRes.json();
         setCompany(compData.data);
@@ -505,6 +507,10 @@ const GoalsPage = () => {
         setCurrentEmissions(emissions);
 
         await fetchGoals(compData.data._id);
+        await fetchNotifications(userId);
+
+        // Check goal attainment after fetching data
+        await checkAchievedGoals(compData.data._id, emissions, userId);
       } catch (err) {
         console.error(err);
         toast.error("Échec de la récupération des données");
@@ -516,15 +522,16 @@ const GoalsPage = () => {
     fetchData();
 
     const intervalId = setInterval(() => {
-      if (company?._id) {
+      if (company?._id && user?._id) {
         fetchAndCalculateEmissions(company._id)
           .then((emissions) => {
             setCurrentEmissions(emissions);
             fetchGoals(company._id);
+            checkAchievedGoals(company._id, emissions, user._id);
           })
           .catch((error) => console.error("Error in periodic check:", error));
       }
-    }, 30 * 60 * 1000);
+    }, 30 * 60 * 1000); // Check every 30 minutes
 
     return () => clearInterval(intervalId);
   }, [company]);
@@ -658,10 +665,17 @@ const GoalsPage = () => {
             <div className="col-auto ms-auto d-print-none">
               <div className="btn-list">
                 <button
-                  type="button" className="btn btn-primary d-none d-sm-inline-block" onClick={() => setShowAddModal(true)} >  Ajouter un nouvel objectif
+                  type="button"
+                  className="btn btn-primary d-none d-sm-inline-block"
+                  onClick={() => setShowAddModal(true)}
+                >
+                  Ajouter un nouvel objectif
                 </button>
                 <button
-                  type="button"  className="btn btn-primary d-sm-none btn-icon" onClick={() => setShowAddModal(true)}  >
+                  type="button"
+                  className="btn btn-primary d-sm-none btn-icon"
+                  onClick={() => setShowAddModal(true)}
+                >
                   <IconPlus />
                 </button>
               </div>
@@ -760,7 +774,8 @@ const GoalsPage = () => {
                             </span>
                           </div>
                           <div className="col">
-                            <div className="font-weight-medium">  Émissions Totales: {currentEmissions.total} tCO₂e
+                            <div className="font-weight-medium">
+                              Émissions Totales: {currentEmissions.total} tCO₂e
                             </div>
                             <div className="text-muted">Empreinte carbone globale</div>
                           </div>
@@ -788,7 +803,10 @@ const GoalsPage = () => {
                         Commencez par ajouter votre premier objectif de réduction d'émissions
                       </p>
                       <div className="empty-action">
-                        <button  className="btn btn-primary"  onClick={() => setShowAddModal(true)}  >
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => setShowAddModal(true)}
+                        >
                           <IconPlus className="icon" />
                           Ajouter un objectif
                         </button>
@@ -869,10 +887,16 @@ const GoalsPage = () => {
                                 <td className="text-muted">{formatDate(goal.createdAt)}</td>
                                 <td>
                                   <div className="btn-list flex-nowrap">
-                                    <button  className="btn btn-sm btn-icon btn-ghost-secondary"  onClick={() => handleEditGoal(goal)}  >
+                                    <button
+                                      className="btn btn-sm btn-icon btn-ghost-secondary"
+                                      onClick={() => handleEditGoal(goal)}
+                                    >
                                       <IconEdit size={18} />
                                     </button>
-                                    <button   className="btn btn-sm btn-icon btn-ghost-secondary text-danger"    onClick={() => handleDeleteGoal(goal._id)}  >
+                                    <button
+                                      className="btn btn-sm btn-icon btn-ghost-secondary text-danger"
+                                      onClick={() => handleDeleteGoal(goal._id)}
+                                    >
                                       <IconTrash size={18} />
                                     </button>
                                   </div>
@@ -894,7 +918,10 @@ const GoalsPage = () => {
                       </p>
                       <ul className="pagination m-0 ms-auto">
                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                          <button  className="page-link"  onClick={() => setCurrentPage(currentPage - 1)}  >
+                          <button
+                            className="page-link"
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                          >
                             <IconChevronLeft size={18} />
                           </button>
                         </li>
@@ -913,8 +940,13 @@ const GoalsPage = () => {
                           </li>
                         ))}
 
-                        <li  className={`page-item ${currentPage === totalPages ? "disabled" : ""}`} > 
-                        <button className="page-link"  onClick={() => setCurrentPage(currentPage + 1)} >
+                        <li
+                          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                        >
+                          <button
+                            className="page-link"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                          >
                             <IconChevronRight size={18} />
                           </button>
                         </li>
@@ -930,7 +962,11 @@ const GoalsPage = () => {
 
       {showAddModal && (
         <div
-          className="modal modal-blur show" style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}  tabIndex="-1"  role="dialog"  >
+          className="modal modal-blur show"
+          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          tabIndex="-1"
+          role="dialog"
+        >
           <div className="modal-dialog modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
@@ -946,14 +982,26 @@ const GoalsPage = () => {
                   <div className="mb-3">
                     <label className="form-label">Nom de l'objectif</label>
                     <input
-                      type="text"  className="form-control"  placeholder="Ex: Objectif de réduction carbone 2025"  value={newGoal.name} onChange={(e) => handleGoalChange("name", e.target.value)}  required
+                      type="text"
+                      className="form-control"
+                      placeholder="Ex: Objectif de réduction carbone 2025"
+                      value={newGoal.name}
+                      onChange={(e) => handleGoalChange("name", e.target.value)}
+                      required
                     />
                   </div>
 
                   <div className="mb-3">
                     <label className="form-label">Année cible</label>
                     <input
-                      type="number"  min={new Date().getFullYear()}  max={new Date().getFullYear() + 30}  className="form-control"   value={newGoal.year} onChange={(e) => handleGoalChange("year", e.target.value)}     required />
+                      type="number"
+                      min={new Date().getFullYear()}
+                      max={new Date().getFullYear() + 30}
+                      className="form-control"
+                      value={newGoal.year}
+                      onChange={(e) => handleGoalChange("year", e.target.value)}
+                      required
+                    />
                   </div>
 
                   {validationErrors.general && (
@@ -965,8 +1013,15 @@ const GoalsPage = () => {
                   <div className="form-label mb-2">Sélectionnez les scopes pour définir des objectifs</div>
                   <div className="form-selectgroup-boxes row mb-3">
                     <div className="col-md-4">
-                      <label  className={`form-selectgroup-item ${selectedScopes.scope1 ? "active" : ""}`}  >
-                        <input  type="checkbox"  name="scope-1"   value="1"  className="form-selectgroup-input" checked={selectedScopes.scope1}  onChange={() => toggleScope(1)}  />
+                      <label className={`form-selectgroup-item ${selectedScopes.scope1 ? "active" : ""}`}>
+                        <input
+                          type="checkbox"
+                          name="scope-1"
+                          value="1"
+                          className="form-selectgroup-input"
+                          checked={selectedScopes.scope1}
+                          onChange={() => toggleScope(1)}
+                        />
                         <span className="form-selectgroup-label d-flex align-items-center p-3">
                           <span className="me-3">
                             <span className="form-selectgroup-check"></span>
@@ -981,8 +1036,15 @@ const GoalsPage = () => {
                       </label>
                     </div>
                     <div className="col-md-4">
-                      <label className={`form-selectgroup-item ${selectedScopes.scope2 ? "active" : ""}`} >
-                        <input  type="checkbox"name="scope-2"value="1"className="form-selectgroup-input"checked={selectedScopes.scope2}onChange={() => toggleScope(2)}  />
+                      <label className={`form-selectgroup-item ${selectedScopes.scope2 ? "active" : ""}`}>
+                        <input
+                          type="checkbox"
+                          name="scope-2"
+                          value="1"
+                          className="form-selectgroup-input"
+                          checked={selectedScopes.scope2}
+                          onChange={() => toggleScope(2)}
+                        />
                         <span className="form-selectgroup-label d-flex align-items-center p-3">
                           <span className="me-3">
                             <span className="form-selectgroup-check"></span>
@@ -997,8 +1059,15 @@ const GoalsPage = () => {
                       </label>
                     </div>
                     <div className="col-md-4">
-                      <label  className={`form-selectgroup-item ${selectedScopes.scope3 ? "active" : ""}`}  >
-                        <input type="checkbox" name="scope-3" value="1" className="form-selectgroup-input" checked={selectedScopes.scope3} onChange={() => toggleScope(3)}  />
+                      <label className={`form-selectgroup-item ${selectedScopes.scope3 ? "active" : ""}`}>
+                        <input
+                          type="checkbox"
+                          name="scope-3"
+                          value="1"
+                          className="form-selectgroup-input"
+                          checked={selectedScopes.scope3}
+                          onChange={() => toggleScope(3)}
+                        />
                         <span className="form-selectgroup-label d-flex align-items-center p-3">
                           <span className="me-3">
                             <span className="form-selectgroup-check"></span>
@@ -1017,8 +1086,16 @@ const GoalsPage = () => {
                   {selectedScopes.scope1 && (
                     <div className="mb-3">
                       <label className="form-label">Objectif Scope 1 (tCO₂e)</label>
-                      <input type="number"   step="0.01"  min="0.01" max={currentEmissions.scope1 - 0.01}  className={`form-control ${validationErrors.scope1Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"  value={newGoal.scope1Goal}  onChange={(e) => handleGoalChange("scope1Goal", e.target.value)}  required={selectedScopes.scope1}
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        max={currentEmissions.scope1 - 0.01}
+                        className={`form-control ${validationErrors.scope1Goal ? "is-invalid" : ""}`}
+                        placeholder="Émissions cibles en tCO₂e"
+                        value={newGoal.scope1Goal}
+                        onChange={(e) => handleGoalChange("scope1Goal", e.target.value)}
+                        required={selectedScopes.scope1}
                       />
                       {validationErrors.scope1Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope1Goal}</div>
@@ -1035,8 +1112,15 @@ const GoalsPage = () => {
                     <div className="mb-3">
                       <label className="form-label">Objectif Scope 2 (tCO₂e)</label>
                       <input
-                        type="number"  step="0.01"  min="0.01"  max={currentEmissions.scope2 - 0.01}   className={`form-control ${validationErrors.scope2Goal ? "is-invalid" : ""}`} 
-                        placeholder="Émissions cibles en tCO₂e"     value={newGoal.scope2Goal}    onChange={(e) => handleGoalChange("scope2Goal", e.target.value)}  required={selectedScopes.scope2}
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        max={currentEmissions.scope2 - 0.01}
+                        className={`form-control ${validationErrors.scope2Goal ? "is-invalid" : ""}`}
+                        placeholder="Émissions cibles en tCO₂e"
+                        value={newGoal.scope2Goal}
+                        onChange={(e) => handleGoalChange("scope2Goal", e.target.value)}
+                        required={selectedScopes.scope2}
                       />
                       {validationErrors.scope2Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope2Goal}</div>
@@ -1053,8 +1137,15 @@ const GoalsPage = () => {
                     <div className="mb-3">
                       <label className="form-label">Objectif Scope 3 (tCO₂e)</label>
                       <input
-                        type="number"  step="0.01"  min="0.01" max={currentEmissions.scope3 - 0.01}  className={`form-control ${validationErrors.scope3Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"  value={newGoal.scope3Goal} onChange={(e) => handleGoalChange("scope3Goal", e.target.value)}  required={selectedScopes.scope3}
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        max={currentEmissions.scope3 - 0.01}
+                        className={`form-control ${validationErrors.scope3Goal ? "is-invalid" : ""}`}
+                        placeholder="Émissions cibles en tCO₂e"
+                        value={newGoal.scope3Goal}
+                        onChange={(e) => handleGoalChange("scope3Goal", e.target.value)}
+                        required={selectedScopes.scope3}
                       />
                       {validationErrors.scope3Goal ? (
                         <div className="invalid-feedback">{validationErrors.scope3Goal}</div>
@@ -1069,7 +1160,12 @@ const GoalsPage = () => {
 
                   <div className="mb-3">
                     <label className="form-label">Description (Optionnel)</label>
-                    <textarea   className="form-control" rows="3"    placeholder="Décrivez votre stratégie de réduction"  value={newGoal.description}  onChange={(e) => handleGoalChange("description", e.target.value)}
+                    <textarea
+                      className="form-control"
+                      rows="3"
+                      placeholder="Décrivez votre stratégie de réduction"
+                      value={newGoal.description}
+                      onChange={(e) => handleGoalChange("description", e.target.value)}
                     ></textarea>
                   </div>
 
@@ -1098,11 +1194,18 @@ const GoalsPage = () => {
                   )}
                 </div>
                 <div className="modal-footer">
-                  <button   type="button"  className="btn btn-link link-secondary"   onClick={() => setShowAddModal(false)}
+                  <button
+                    type="button"
+                    className="btn btn-link link-secondary"
+                    onClick={() => setShowAddModal(false)}
                   >
                     Annuler
                   </button>
-                  <button   type="submit"   className="btn btn-primary ms-auto"  disabled={!(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3)} >
+                  <button
+                    type="submit"
+                    className="btn btn-primary ms-auto"
+                    disabled={!(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3)}
+                  >
                     <IconPlus className="icon" />
                     Ajouter l'objectif
                   </button>
@@ -1135,13 +1238,30 @@ const GoalsPage = () => {
                   <div className="mb-3">
                     <label className="form-label">Nom de l'objectif</label>
                     <input
-                      type="text"  className="form-control"   value={editingGoal.name} onChange={(e) => setEditingGoal({ ...editingGoal, name: e.target.value })} required  />
+                      type="text"
+                      className="form-control"
+                      value={editingGoal.name}
+                      onChange={(e) => setEditingGoal({ ...editingGoal, name: e.target.value })}
+                      required
+                    />
                   </div>
 
                   <div className="mb-3">
                     <label className="form-label">Année cible</label>
-                    <input type="number" min={new Date().getFullYear()} max={new Date().getFullYear() + 30} className="form-control" value={editingGoal.year} 
-                     onChange={(e) =>  setEditingGoal({  ...editingGoal,  year: parseInt(e.target.value) || new Date().getFullYear(),    }) }    required  />
+                    <input
+                      type="number"
+                      min={new Date().getFullYear()}
+                      max={new Date().getFullYear() + 30}
+                      className="form-control"
+                      value={editingGoal.year}
+                      onChange={(e) =>
+                        setEditingGoal({
+                          ...editingGoal,
+                          year: parseInt(e.target.value) || new Date().getFullYear(),
+                        })
+                      }
+                      required
+                    />
                   </div>
 
                   <div className="row g-3">
@@ -1155,11 +1275,18 @@ const GoalsPage = () => {
                               `${((1 - editingGoal.scope1Goal / currentEmissions.scope1) * 100).toFixed(1)}% de réduction`}
                           </span>
                         </label>
-                        <input type="number" step="0.01" min="0" max={currentEmissions.scope1} className="form-control" value={editingGoal.scope1Goal}
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max={currentEmissions.scope1}
+                          className="form-control"
+                          value={editingGoal.scope1Goal}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
                             setEditingGoal({ ...editingGoal, scope1Goal: value });
-                          }} />
+                          }}
+                        />
                         <small
                           className={`form-hint ${
                             editingGoal.scope1Goal >= currentEmissions.scope1 &&
@@ -1185,8 +1312,18 @@ const GoalsPage = () => {
                               `${((1 - editingGoal.scope2Goal / currentEmissions.scope2) * 100).toFixed(1)}% de réduction`}
                           </span>
                         </label>
-                        <input  type="number"   step="0.01"  min="0"    max={currentEmissions.scope2}   className="form-control" value={editingGoal.scope2Goal}  
-                        onChange={(e) => { const value = parseFloat(e.target.value) || 0; setEditingGoal({ ...editingGoal, scope2Goal: value });   }}  />
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max={currentEmissions.scope2}
+                          className="form-control"
+                          value={editingGoal.scope2Goal}
+                          onChange={(e) => {
+                            const value = parseFloat(e.target.value) || 0;
+                            setEditingGoal({ ...editingGoal, scope2Goal: value });
+                          }}
+                        />
                         <small
                           className={`form-hint ${
                             editingGoal.scope2Goal >= currentEmissions.scope2 &&
@@ -1212,7 +1349,14 @@ const GoalsPage = () => {
                               `${((1 - editingGoal.scope3Goal / currentEmissions.scope3) * 100).toFixed(1)}% de réduction`}
                           </span>
                         </label>
-                        <input type="number"  step="0.01"   min="0" max={currentEmissions.scope3} className="form-control"  value={editingGoal.scope3Goal}  onChange={(e) => {
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max={currentEmissions.scope3}
+                          className="form-control"
+                          value={editingGoal.scope3Goal}
+                          onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0;
                             setEditingGoal({ ...editingGoal, scope3Goal: value });
                           }}
@@ -1236,7 +1380,12 @@ const GoalsPage = () => {
 
                   <div className="mb-3">
                     <label className="form-label">Description</label>
-                    <textarea  className="form-control" rows="3"  value={editingGoal.description || ""}  onChange={(e) =>  setEditingGoal({ ...editingGoal, description: e.target.value })
+                    <textarea
+                      className="form-control"
+                      rows="3"
+                      value={editingGoal.description || ""}
+                      onChange={(e) =>
+                        setEditingGoal({ ...editingGoal, description: e.target.value })
                       }
                     ></textarea>
                   </div>
@@ -1266,7 +1415,11 @@ const GoalsPage = () => {
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button  type="button"   className="btn btn-link link-secondary" onClick={() => setShowEditModal(false)}   >
+                  <button
+                    type="button"
+                    className="btn btn-link link-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
                     Annuler
                   </button>
                   <button type="submit" className="btn btn-primary ms-auto">
