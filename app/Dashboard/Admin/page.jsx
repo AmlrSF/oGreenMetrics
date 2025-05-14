@@ -558,7 +558,7 @@ const CompanyDash = () => {
           className="mt-2"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(400px,1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(550px,1fr))",
             gap: "10px",
           }}
         >

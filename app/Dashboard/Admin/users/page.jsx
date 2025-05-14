@@ -67,7 +67,7 @@ const Page = () => {
 
   const handleApproveUser = async () => {
     try {
-      const response = await fetch(
+      const responseUsers = await fetch(
         `http://localhost:4000/users/${selectedUser._id}`,
         {
           method: "PUT",
@@ -79,7 +79,46 @@ const Page = () => {
           }),
         }
       );
-      await response.json();
+      const response = await responseUsers.json();
+      console.log(response);
+
+      if (response?.role === "entreprise") {
+        const responseCompanies = await fetch(
+          `http://localhost:4000/companies`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const companyData = await responseCompanies.json();
+
+        let company = companyData?.data.filter(
+          (item) => item?.userId?._id === response?._id
+        );
+
+        console.log(company);
+        
+
+        const UpdatecompanyStatus = await fetch(
+          `http://localhost:4000/updatecompany/${company[0]?._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({
+              isVerified: !selectedUser.isVerified,
+            }),
+          }
+        );
+        console.log(UpdatecompanyStatus);
+
+        await UpdatecompanyStatus.json();
+      }
+
       setModalOpen(false);
       fetchUsers();
     } catch (error) {
@@ -154,7 +193,6 @@ const Page = () => {
             <div className="modal-content">
               <div className="modal-body">
                 <div className="text-center py-4">
-               
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -228,8 +266,10 @@ const Page = () => {
         </div>
       )}
 
-      <div className="py-4  d-flex flex-column justify-content-center
-       align-items-start ">
+      <div
+        className="py-4  d-flex flex-column justify-content-center
+       align-items-start "
+      >
         <h3
           className="mb-1 fw-bold"
           style={{ fontSize: "30px", color: "#263589" }}
@@ -376,19 +416,16 @@ const Page = () => {
                                   } btn-icon`}
                                 >
                                   {user.isVerified ? (
-                                    <IconUserX size={18}  />
+                                    <IconUserX size={18} />
                                   ) : (
-                                    <IconUserCheck   size={18}/>
+                                    <IconUserCheck size={18} />
                                   )}
                                 </button>
                                 <button
                                   onClick={() => openModal("delete", user)}
                                   className="btn btn-ghost-danger btn-icon"
-                                  
                                 >
-                                  
-                                 <IconTrash  size={18} />
-                                  
+                                  <IconTrash size={18} />
                                 </button>
                               </div>
                             </td>

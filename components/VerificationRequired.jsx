@@ -5,7 +5,7 @@ export default function VerificationRequired({naviagteToLoginPage}) {
  
 
   return (
-    <div className="page page-center bg-white h-[100vh]">
+    <div className="page page-center mt-5 bg-white h-[100vh]">
       <div className="container container-tight">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -30,8 +30,9 @@ export default function VerificationRequired({naviagteToLoginPage}) {
               whileTap={{ scale: 0.98 }}
               onClick={() => naviagteToLoginPage()}
               className="btn btn-lime w-100 mt-3"
+              
             >
-              Return to Login
+             Return to Login
             </motion.button>
           </div>
         </motion.div>

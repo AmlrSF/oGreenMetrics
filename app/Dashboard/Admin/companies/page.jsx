@@ -251,6 +251,7 @@ const Page = () => {
                     <th>Email de contact</th>
                     <th>Industrie</th>
                     <th>pays</th>
+                    <th>statut</th>
                     <th>Date d'inscription</th>
                     {userAccess == "10" ? (
                       <></>
@@ -302,6 +303,17 @@ const Page = () => {
                               {company.country}
                             </span>
                           </td>
+                          <td>
+                            <span
+                              className={`badge ${
+                                company.isVerified
+                                  ? "bg-success-lt"
+                                  : "bg-danger-lt"
+                              }`}
+                            >
+                              {company.isVerified ? "Verified" : "Unverified"}
+                            </span>
+                          </td>
                           <td className="text-secondary">
                             {formatDate(company.createdAt)}
                           </td>
@@ -316,7 +328,7 @@ const Page = () => {
                                   }
                                   className="btn btn-ghost-blue btn-icon"
                                 >
-                                  <IconEye size={18}  />
+                                  <IconEye size={18} />
                                 </button>
                                 {/* <button
                                   onClick={() => openModal(company)}
