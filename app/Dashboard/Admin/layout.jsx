@@ -31,9 +31,9 @@ const DashboardLayout = ({ children }) => {
         const data = await response.json();
 
         if (data?.user) {
-          
-          if (data?.user?.role === "Admin"  ) {
-            setUser(data.user);
+           setUser(data.user);
+          if (data?.user?.role === "Admin" ||  data?.user?.AdminRoles) {
+           
             setIsLoading(false);
            
             if (data?.user?.AdminRoles) {

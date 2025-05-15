@@ -54,6 +54,8 @@ const CompanyDash = () => {
   const [companiesEmissions, setCompaniesEmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [RolesUser, setRolesUser] = useState([]);
+  const [userAccess, setUserAccess] = useState("");
+  const [User, setUser] = useState()
 
   const scroll = (direction) => {
     const container = scrollRef.current;
@@ -78,6 +80,24 @@ const CompanyDash = () => {
       counts[company.country] = (counts[company.country] || 0) + 1;
     });
     return counts;
+  };
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data?.user) {
+        setUserAccess(data?.user?.AdminRoles?.userManagement);
+        setUser(data?.user);
+      }
+    } catch (err) {
+      console.log();
+    }
   };
 
   const sortedSites = sites
@@ -150,22 +170,25 @@ const CompanyDash = () => {
         (item) => item?.AdminRoles || item?.role === "Admin"
       ).length;
 
-      const nonAdmins = users.filter((item) => item?.role === "régulier" || item?.role === "entreprise").length;
+      const nonAdmins = users.filter(
+        (item) => item?.role === "régulier" || item?.role === "entreprise"
+      ).length;
 
       console.log(nonAdmins);
-      
 
       setAdminCount(admins);
       setUserCount(nonAdmins);
 
       setRecentUsers(
         users
-          .filter((item) => item?.role === "régulier" || item?.role === "entreprise")
+          .filter(
+            (item) => item?.role === "régulier" || item?.role === "entreprise"
+          )
           .slice(0, 5)
       );
 
       console.log(users);
-      
+
       setRolesUser(users.filter((item) => item?.AdminRoles).slice(0, 5));
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -199,8 +222,8 @@ const CompanyDash = () => {
     }
   };
 
-  
   useEffect(() => {
+    checkAuth();
     fetchCompanies();
     fetchUsers();
     fetchReports();
@@ -310,7 +333,7 @@ const CompanyDash = () => {
 
   const handleApproveUser = async () => {
     try {
-      const response = await fetch(
+      const responseUsers = await fetch(
         `http://localhost:4000/users/${selectedUser._id}`,
         {
           method: "PUT",
@@ -322,11 +345,48 @@ const CompanyDash = () => {
           }),
         }
       );
-      await response.json();
+      const response = await responseUsers.json();
+      console.log(response);
+
+      if (response?.role === "entreprise") {
+        const responseCompanies = await fetch(
+          `http://localhost:4000/companies`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const companyData = await responseCompanies.json();
+
+        let company = companyData?.data.filter(
+          (item) => item?.userId?._id === response?._id
+        );
+
+        console.log(company);
+
+        const UpdatecompanyStatus = await fetch(
+          `http://localhost:4000/updatecompany/${company[0]?._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              isVerified: !selectedUser.isVerified,
+            }),
+          }
+        );
+
+        await UpdatecompanyStatus.json();
+      }
+
       setModalOpen(false);
       fetchUsers();
+      fetchCompanies();
     } catch (error) {
-      console.log("Failed to update user status");
+      setError("Failed to update user status");
     }
   };
 
@@ -562,7 +622,9 @@ const CompanyDash = () => {
             gap: "10px",
           }}
         >
-          <div className="card">
+
+          {}
+          { User?.AdminRoles?.userManagement != "00" && <div className="card">
             <div className="card-header d-flex align-content-center justify-content-between">
               <h3 className="card-title">
                 <IconUserCheck className="icon me-2" />
@@ -578,9 +640,12 @@ const CompanyDash = () => {
                   <tr>
                     <th>Nom</th>
                     <th>Role</th>
-
                     <th>Status</th>
-                    <th>Actions</th>
+                    {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <th className="w-1"> Action </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -624,28 +689,33 @@ const CompanyDash = () => {
                           {user.isVerified ? "Verified" : "Unverified"}
                         </span>
                       </td>
-                      <td>
-                        <button
-                          onClick={() => openModal("approve", user)}
-                          className={`btn btn-ghost-${
-                            user.isVerified ? "danger" : "success"
-                          } btn-icon`}
-                        >
-                          {user.isVerified ? (
-                            <IconUserX size={18} />
-                          ) : (
-                            <IconUserCheck size={18} />
-                          )}
-                        </button>
-                      </td>
+
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <td>
+                          <button
+                            onClick={() => openModal("approve", user)}
+                            className={`btn btn-ghost-${
+                              user.isVerified ? "danger" : "success"
+                            } btn-icon`}
+                          >
+                            {user.isVerified ? (
+                              <IconUserX size={18} />
+                            ) : (
+                              <IconUserCheck size={18} />
+                            )}
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </div>}
 
-          <div className="card">
+         { User?.AdminRoles?.companyManagement != "00" && <div className="card">
             <div className="card-header d-flex align-content-center justify-content-between">
               <h3 className="card-title ">
                 <IconBuilding className="icon me-2" />
@@ -662,6 +732,11 @@ const CompanyDash = () => {
                     <th>Entreprise</th>
                     <th>Industrie</th>
                     <th>Status</th>
+                    {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <th className=""> Action </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -679,21 +754,41 @@ const CompanyDash = () => {
                         </span>
                       </td>
                       <td>
-                        <button
-                          onClick={() => navigateToCompanyDetails(company._id)}
-                          className="btn btn-ghost-blue btn-icon"
+                        <span
+                          className={`badge ${
+                            company.isVerified
+                              ? "bg-success-lt"
+                              : "bg-danger-lt"
+                          }`}
                         >
-                          <IconEye size={18} />
-                        </button>
+                          {company.isVerified ? "Verified" : "Unverified"}
+                        </span>
                       </td>
+
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <td>
+                          <div className="gap-2 d-flex">
+                            <button
+                              onClick={() =>
+                                navigateToCompanyDetails(company._id)
+                              }
+                              className="btn btn-ghost-blue btn-icon"
+                            >
+                              <IconEye size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </div>}
 
-          <div className="card">
+          { User?.AdminRoles?.roleManagement != "00" &&  <div className="card">
             <div className="card-header d-flex align-content-center justify-content-between">
               <h3 className="card-title">
                 <IconShieldLock className="icon me-2" />
@@ -729,16 +824,19 @@ const CompanyDash = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </div>}
 
-          <div className="card">
+         {  User?.role === "Admin" && <div className="card">
             <div className="card-header d-flex align-content-center justify-content-between">
               <h3 className="card-title">
                 <IconUserCheck className="icon me-2" />
-                Modérateurs  Récents
+                Modérateurs Récents
               </h3>
-              <a href="/Dashboard/Admin/Users-management" className="btn  btn-primary">
-                Gérez les Modérateurs 
+              <a
+                href="/Dashboard/Admin/Users-management"
+                className="btn  btn-primary"
+              >
+                Gérez les Modérateurs
               </a>
             </div>
             <div className="table-responsive">
@@ -749,7 +847,11 @@ const CompanyDash = () => {
                     <th>Role</th>
 
                     <th>Status</th>
-                    <th>Actions</th>
+                       {userAccess == "10" ? (
+                      <></>
+                    ) : (
+                      <th className="w-1"> Action </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -775,9 +877,7 @@ const CompanyDash = () => {
                         </div>
                       </td>
                       <td>
-                        <span
-                          className={`badge `}
-                        >
+                        <span className={`badge `}>
                           {user?.AdminRoles?.name}
                         </span>
                       </td>
@@ -791,26 +891,30 @@ const CompanyDash = () => {
                           {user.isVerified ? "Verified" : "Unverified"}
                         </span>
                       </td>
-                      <td>
-                        <button
-                          onClick={() => openModal("approve", user)}
-                          className={`btn btn-ghost-${
-                            user.isVerified ? "danger" : "success"
-                          } btn-icon`}
-                        >
-                          {user.isVerified ? (
-                            <IconUserX size={18} />
-                          ) : (
-                            <IconUserCheck size={18} />
-                          )}
-                        </button>
-                      </td>
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <td>
+                          <button
+                            onClick={() => openModal("approve", user)}
+                            className={`btn btn-ghost-${
+                              user.isVerified ? "danger" : "success"
+                            } btn-icon`}
+                          >
+                            {user.isVerified ? (
+                              <IconUserX size={18} />
+                            ) : (
+                              <IconUserCheck size={18} />
+                            )}
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </div>}
         </div>
 
         <div className="page-header mt-5 mb-2">

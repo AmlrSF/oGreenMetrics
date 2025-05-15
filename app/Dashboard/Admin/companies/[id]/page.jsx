@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { getCountryCode } from "@/lib/Data";
 
 const Page = () => {
   const { id } = useParams();
@@ -38,6 +39,8 @@ const Page = () => {
     return <div className="alert alert-danger m-4">Error: {error}</div>;
   }
 
+   const countryCode = getCountryCode(company?.country);
+
   return (
     <div className="page-wrapper">
       <div className="container-xl">
@@ -53,7 +56,7 @@ const Page = () => {
             {/* Carte d'en-tête de l'entreprise */}
             <div className="col-12">
               <div className="card">
-                <div className="card-body">
+                <div className="card-body d-flex justify-content-between align-items-center">
                   <div className="row align-items-center">
                     <div className="col-auto">
                       <span className="avatar avatar-lg rounded bg-blue-lt">
@@ -68,6 +71,9 @@ const Page = () => {
                         </span>
                       )}
                     </div>
+                  </div>
+                  <div className="d-flex align-items-center gap-2">
+                    <span className={`flag flag-country-${countryCode}`}></span>
                   </div>
                 </div>
               </div>
@@ -201,33 +207,32 @@ const Page = () => {
           </div>
         ) : (
           <div className="empty">
-          <div className="empty-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="icon"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <circle cx="12" cy="12" r="9" />
-              <line x1="9" y1="10" x2="9.01" y2="10" />
-              <line x1="15" y1="10" x2="15.01" y2="10" />
-              <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
-            </svg>
+            <div className="empty-icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <circle cx="12" cy="12" r="9" />
+                <line x1="9" y1="10" x2="9.01" y2="10" />
+                <line x1="15" y1="10" x2="15.01" y2="10" />
+                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
+              </svg>
+            </div>
+            <p className="empty-title">Aucune entreprise trouvée</p>
+            <p className="empty-subtitle text-muted">
+              Essayez d'ajuster votre recherche ou vos filtres pour trouver ce
+              que vous cherchez.
+            </p>
           </div>
-          <p className="empty-title">Aucune entreprise trouvée</p>
-          <p className="empty-subtitle text-muted">
-            Essayez d'ajuster votre recherche ou vos filtres pour trouver ce que vous
-            cherchez.
-          </p>
-        </div>
-        
         )}
       </div>
     </div>
