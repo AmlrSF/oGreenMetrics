@@ -2,9 +2,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import VerificationRequired from "@/components/VerificationRequired";
+
 
 const SignupPage = () => {
-  const router = useRouter();
+  const { push } = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [accountType, setAccountType] = useState("régulier");
@@ -14,7 +16,7 @@ const SignupPage = () => {
     nom_entreprise: "", matricule_fiscale: "", num_tel: "", adresse: "", date_fondation: "", industrie: "", country: ""
   });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(true);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -105,12 +107,19 @@ const SignupPage = () => {
         role: accountType, nom_entreprise: "", matricule_fiscale: "",
         num_tel: "", adresse: "", date_fondation: "", industrie: "", country: ""
       });
-      router.push("/");
+      
     } catch (err) {
       setError("Failed to connect to the server");
       console.error(err);
     }
   };
+
+  const naviagteToLoginPage = ()=>{
+    push("/login");
+  }
+
+  if(success)
+    return <VerificationRequired naviagteToLoginPage={naviagteToLoginPage} />
 
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">

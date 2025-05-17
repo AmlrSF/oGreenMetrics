@@ -55,7 +55,8 @@ const CompanyDash = () => {
   const [loading, setLoading] = useState(true);
   const [RolesUser, setRolesUser] = useState([]);
   const [userAccess, setUserAccess] = useState("");
-  const [User, setUser] = useState()
+  const [User, setUser] = useState();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const scroll = (direction) => {
     const container = scrollRef.current;
@@ -332,6 +333,10 @@ const CompanyDash = () => {
   };
 
   const handleApproveUser = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
     try {
       const responseUsers = await fetch(
         `http://localhost:4000/users/${selectedUser._id}`,
@@ -387,6 +392,8 @@ const CompanyDash = () => {
       fetchCompanies();
     } catch (error) {
       setError("Failed to update user status");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -454,8 +461,17 @@ const CompanyDash = () => {
                             : "btn-danger"
                         }`}
                         onClick={handleApproveUser}
+                        disabled={isSubmitting}
                       >
-                        {selectedUser.isVerified ? "Désapprouver" : "Approuver"}
+                        {isSubmitting ? (
+                          <span>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                          </span>
+                        ) : selectedUser.isVerified ? (
+                          "Désapprouver"
+                        ) : (
+                          "Approuver"
+                        )}
                       </button>
                     </div>
                   </div>
@@ -622,299 +638,309 @@ const CompanyDash = () => {
             gap: "10px",
           }}
         >
-
           {}
-          { User?.AdminRoles?.userManagement != "00" && <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title">
-                <IconUserCheck className="icon me-2" />
-                Utilisateurs Récents
-              </h3>
-              <a href="/Dashboard/Admin/users" className="btn  btn-primary">
-                Gérez les utilisateurs
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    {userAccess == "10" ? (
-                      <></>
-                    ) : (
-                      <th className="w-1"> Action </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentUsers.map((user, index) => (
-                    <tr key={index}>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <span
-                            className="avatar border-1 border-gray-950 avatar-md text-white me-2"
-                            style={{ backgroundColor: "#263589" }}
-                          >
-                            {user.photo_de_profil ? (
-                              <img
-                                className="w-full h-full rounded-sm object-fit-cover"
-                                src={user.photo_de_profil}
-                                alt={`${user.prenom} ${user.nom}`}
-                              />
-                            ) : (
-                              getInitials(user.prenom, user.nom)
-                            )}
-                          </span>
-                          {`${user.prenom} ${user.nom}`}
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            roleTypes[user.role?.toLowerCase()]
-                          }`}
-                        >
-                          {user.role}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span
-                          className={`badge ${
-                            user.isVerified ? "bg-success-lt" : "bg-danger-lt"
-                          }`}
-                        >
-                          {user.isVerified ? "Verified" : "Unverified"}
-                        </span>
-                      </td>
-
+          {User?.AdminRoles?.userManagement != "00" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title">
+                  <IconUserCheck className="icon me-2" />
+                  Utilisateurs Récents
+                </h3>
+                <a href="/Dashboard/Admin/users" className="btn  btn-primary">
+                  Gérez les utilisateurs
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Role</th>
+                      <th>Status</th>
                       {userAccess == "10" ? (
                         <></>
                       ) : (
-                        <td>
-                          <button
-                            onClick={() => openModal("approve", user)}
-                            className={`btn btn-ghost-${
-                              user.isVerified ? "danger" : "success"
-                            } btn-icon`}
-                          >
-                            {user.isVerified ? (
-                              <IconUserX size={18} />
-                            ) : (
-                              <IconUserCheck size={18} />
-                            )}
-                          </button>
-                        </td>
+                        <th className="w-1"> Action </th>
                       )}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>}
-
-         { User?.AdminRoles?.companyManagement != "00" && <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title ">
-                <IconBuilding className="icon me-2" />
-                Entreprises Récentes
-              </h3>
-              <a href="/Dashboard/Admin/companies" className="btn  btn-primary">
-                Gérez les entreprises
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Entreprise</th>
-                    <th>Industrie</th>
-                    <th>Status</th>
-                    {userAccess == "10" ? (
-                      <></>
-                    ) : (
-                      <th className=""> Action </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentCompanies.map((company, index) => (
-                    <tr key={index}>
-                      <td>{company.nom_entreprise}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            industryBadgeColors[company.industrie] ||
-                            industryBadgeColors.Default
-                          }`}
-                        >
-                          {company.industrie}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            company.isVerified
-                              ? "bg-success-lt"
-                              : "bg-danger-lt"
-                          }`}
-                        >
-                          {company.isVerified ? "Verified" : "Unverified"}
-                        </span>
-                      </td>
-
-                      {userAccess == "10" ? (
-                        <></>
-                      ) : (
+                  </thead>
+                  <tbody>
+                    {recentUsers.map((user, index) => (
+                      <tr key={index}>
                         <td>
-                          <div className="gap-2 d-flex">
-                            <button
-                              onClick={() =>
-                                navigateToCompanyDetails(company._id)
-                              }
-                              className="btn btn-ghost-blue btn-icon"
+                          <div className="d-flex align-items-center">
+                            <span
+                              className="avatar border-1 border-gray-950 avatar-md text-white me-2"
+                              style={{ backgroundColor: "#263589" }}
                             >
-                              <IconEye size={18} />
-                            </button>
+                              {user.photo_de_profil ? (
+                                <img
+                                  className="w-full h-full rounded-sm object-fit-cover"
+                                  src={user.photo_de_profil}
+                                  alt={`${user.prenom} ${user.nom}`}
+                                />
+                              ) : (
+                                getInitials(user.prenom, user.nom)
+                              )}
+                            </span>
+                            {`${user.prenom} ${user.nom}`}
                           </div>
                         </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>}
-
-          { User?.AdminRoles?.roleManagement != "00" &&  <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title">
-                <IconShieldLock className="icon me-2" />
-                Rôles Récents
-              </h3>{" "}
-              <a
-                href="/Dashboard/Admin/users"
-                className="btn d-flex align-items-center gap-2   btn-primary"
-              >
-                <IconPlus size={18} className="text-white" />
-                Ajouter un rôle
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentRoles.map((role, index) => (
-                    <tr key={index}>
-                      <td>{role.name}</td>
-                      <td>
-                        <span className="text-muted">
-                          {role.description || "Aucune description"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>}
-
-         {  User?.role === "Admin" && <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title">
-                <IconUserCheck className="icon me-2" />
-                Modérateurs Récents
-              </h3>
-              <a
-                href="/Dashboard/Admin/Users-management"
-                className="btn  btn-primary"
-              >
-                Gérez les Modérateurs
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Role</th>
-
-                    <th>Status</th>
-                       {userAccess == "10" ? (
-                      <></>
-                    ) : (
-                      <th className="w-1"> Action </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {RolesUser.map((user, index) => (
-                    <tr key={index}>
-                      <td>
-                        <div className="d-flex align-items-center">
+                        <td>
                           <span
-                            className="avatar border-1 border-gray-950 avatar-md text-white me-2"
-                            style={{ backgroundColor: "#263589" }}
+                            className={`badge ${
+                              roleTypes[user.role?.toLowerCase()]
+                            }`}
                           >
-                            {user.photo_de_profil ? (
-                              <img
-                                className="w-full h-full rounded-sm object-fit-cover"
-                                src={user.photo_de_profil}
-                                alt={`${user.prenom} ${user.nom}`}
-                              />
-                            ) : (
-                              getInitials(user.prenom, user.nom)
-                            )}
+                            {user.role}
                           </span>
-                          {`${user.prenom} ${user.nom}`}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`badge `}>
-                          {user?.AdminRoles?.name}
-                        </span>
-                      </td>
+                        </td>
 
-                      <td>
-                        <span
-                          className={`badge ${
-                            user.isVerified ? "bg-success-lt" : "bg-danger-lt"
-                          }`}
-                        >
-                          {user.isVerified ? "Verified" : "Unverified"}
-                        </span>
-                      </td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              user.isVerified ? "bg-success-lt" : "bg-danger-lt"
+                            }`}
+                          >
+                            {user.isVerified ? "Verified" : "Unverified"}
+                          </span>
+                        </td>
+
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <button
+                              onClick={() => openModal("approve", user)}
+                              className={`btn btn-ghost-${
+                                user.isVerified ? "danger" : "success"
+                              } btn-icon`}
+                            >
+                              {user.isVerified ? (
+                                <IconUserX size={18} />
+                              ) : (
+                                <IconUserCheck size={18} />
+                              )}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {User?.AdminRoles?.companyManagement != "00" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title ">
+                  <IconBuilding className="icon me-2" />
+                  Entreprises Récentes
+                </h3>
+                <a
+                  href="/Dashboard/Admin/companies"
+                  className="btn  btn-primary"
+                >
+                  Gérez les entreprises
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Entreprise</th>
+                      <th>Industrie</th>
+                      <th>Status</th>
                       {userAccess == "10" ? (
                         <></>
                       ) : (
-                        <td>
-                          <button
-                            onClick={() => openModal("approve", user)}
-                            className={`btn btn-ghost-${
-                              user.isVerified ? "danger" : "success"
-                            } btn-icon`}
-                          >
-                            {user.isVerified ? (
-                              <IconUserX size={18} />
-                            ) : (
-                              <IconUserCheck size={18} />
-                            )}
-                          </button>
-                        </td>
+                        <th className=""> Action </th>
                       )}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {recentCompanies.map((company, index) => (
+                      <tr key={index}>
+                        <td>{company.nom_entreprise}</td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              industryBadgeColors[company.industrie] ||
+                              industryBadgeColors.Default
+                            }`}
+                          >
+                            {company.industrie}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              company.isVerified
+                                ? "bg-success-lt"
+                                : "bg-danger-lt"
+                            }`}
+                          >
+                            {company.isVerified ? "Verified" : "Unverified"}
+                          </span>
+                        </td>
+
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <div className="gap-2 d-flex">
+                              <button
+                                onClick={() =>
+                                  navigateToCompanyDetails(company._id)
+                                }
+                                className="btn btn-ghost-blue btn-icon"
+                              >
+                                <IconEye size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>}
+          )}
+
+          {User?.AdminRoles?.roleManagement != "00" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title">
+                  <IconShieldLock className="icon me-2" />
+                  Rôles Récents
+                </h3>{" "}
+                <a
+                  href="/Dashboard/Admin/users"
+                  className="btn d-flex align-items-center gap-2   btn-primary"
+                >
+                  <IconPlus size={18} className="text-white" />
+                  Ajouter un rôle
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentRoles.map((role, index) => (
+                      <tr key={index}>
+                        <td>{role.name}</td>
+                        <td>
+                          <span className="text-muted">
+                            {role.description || "Aucune description"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {User?.role === "Admin" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title">
+                  <IconUserCheck className="icon me-2" />
+                  Modérateurs Récents
+                </h3>
+                <a
+                  href="/Dashboard/Admin/Users-management"
+                  className="btn  btn-primary"
+                >
+                  Gérez les Modérateurs
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Role</th>
+
+                      <th>Status</th>
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <th className="w-1"> Action </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {RolesUser.map((user, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <span
+                              className="avatar border-1 border-gray-950 avatar-md text-white me-2"
+                              style={{ backgroundColor: "#263589" }}
+                            >
+                              {user.photo_de_profil ? (
+                                <img
+                                  className="w-full h-full rounded-sm object-fit-cover"
+                                  src={user.photo_de_profil}
+                                  alt={`${user.prenom} ${user.nom}`}
+                                />
+                              ) : (
+                                getInitials(user.prenom, user.nom)
+                              )}
+                            </span>
+                            {`${user.prenom} ${user.nom}`}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`badge `}>
+                            {user?.AdminRoles?.name}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`badge ${
+                              user.isVerified ? "bg-success-lt" : "bg-danger-lt"
+                            }`}
+                          >
+                            {user.isVerified ? "Verified" : "Unverified"}
+                          </span>
+                        </td>
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <button
+                              onClick={() => openModal("approve", user)}
+                              className={`btn btn-ghost-${
+                                user.isVerified ? "danger" : "success"
+                              } btn-icon`}
+                            >
+                              {user.isVerified ? (
+                                <IconUserX size={18} />
+                              ) : (
+                                <IconUserCheck size={18} />
+                              )}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="page-header mt-5 mb-2">
