@@ -1,15 +1,7 @@
 "use client";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import {
-  IconCalendar,
-  IconFile,
-  IconChartBar,
-  IconEye,
-  IconTrash,
-  IconChevronLeft,
-  IconChevronRight,
-} from "@tabler/icons-react";
+import {IconCalendar,IconFile,IconChartBar,IconEye,IconTrash,IconChevronLeft,IconChevronRight,} from "@tabler/icons-react";
 
 import { useRouter } from "next/navigation";
 
@@ -24,17 +16,7 @@ const Reporting = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [company, setCompany] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    scope1: false,
-    scope2: false,
-    scope3: false,
-    Year: "",
-    includeCharts: "yes",
-    detailLevel: "summary",
-    includeRecomondations: "yes",
-  });
+  const [formData, setFormData] = useState({name: "",description: "",scope1: false,scope2: false,scope3: false,Year: "",includeCharts: "yes",detailLevel: "summary",includeRecomondations: "yes",});
 
   const router = useRouter();
 
@@ -193,32 +175,19 @@ const Reporting = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Générer un nouveau rapport</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setModalOpen(false)}
+                <button  type="button"  className="btn-close" onClick={() => setModalOpen(false)}
                 ></button>
               </div>
               <div className="modal-body">
                 <div className="mb-2">
                   <label className="form-label">Nom du rapport</label>
-                  <input
-                    type="text"
-                    name="name"
-                    className="form-control"
-                    value={formData.name}
-                    onChange={handleInputChange}
+                  <input type="text" name="name" className="form-control" value={formData.name} onChange={handleInputChange}
                   />
                 </div>
 
                 <div className="mb-2">
                   <label className="form-label">Description</label>
-                  <textarea
-                    name="description"
-                    className="form-control"
-                    rows="3"
-                    value={formData.description}
-                    onChange={handleInputChange}
+                  <textarea name="description" className="form-control" rows="3" value={formData.description} onChange={handleInputChange}
                   />
                 </div>
                 <div className="">
@@ -324,24 +293,12 @@ const Reporting = () => {
                   </label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
-                      <input
-                        type="radio"
-                        name="includeCharts"
-                        value="yes"
-                        className="form-selectgroup-input"
-                        checked={formData.includeCharts === "yes"}
-                        onChange={handleInputChange}
+                      <input type="radio" name="includeCharts" value="yes" className="form-selectgroup-input" checked={formData.includeCharts === "yes"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Oui</span>
                     </label>
                     <label className="form-selectgroup-item">
-                      <input
-                        type="radio"
-                        name="includeCharts"
-                        value="no"
-                        className="form-selectgroup-input"
-                        checked={formData.includeCharts === "no"}
-                        onChange={handleInputChange}
+                      <input type="radio" name="includeCharts" value="no" className="form-selectgroup-input" checked={formData.includeCharts === "no"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Non</span>
                     </label>
@@ -353,24 +310,12 @@ const Reporting = () => {
                   </label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
-                      <input
-                        type="radio"
-                        name="includeRecomondations"
-                        value="yes"
-                        className="form-selectgroup-input"
-                        checked={formData.includeRecomondations === "yes"}
-                        onChange={handleInputChange}
+                      <input type="radio" name="includeRecomondations" value="yes" className="form-selectgroup-input" checked={formData.includeRecomondations === "yes"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Oui</span>
                     </label>
                     <label className="form-selectgroup-item">
-                      <input
-                        type="radio"
-                        name="includeRecomondations"
-                        value="no"
-                        className="form-selectgroup-input"
-                        checked={formData.includeRecomondations === "no"}
-                        onChange={handleInputChange}
+                      <input type="radio" name="includeRecomondations" value="no" className="form-selectgroup-input" checked={formData.includeRecomondations === "no"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">No</span>
                     </label>
@@ -381,25 +326,12 @@ const Reporting = () => {
                   <label className="form-label">Niveau de détail</label>
                   <div className="form-selectgroup">
                     <label className="form-selectgroup-item">
-                      <input
-                        type="radio"
-                        name="detailLevel"
-                        value="summary"
-                        className="form-selectgroup-input"
-                        checked={formData.detailLevel === "summary"}
-                        onChange={handleInputChange}
+                      <input type="radio" name="detailLevel" value="summary" className="form-selectgroup-input" checked={formData.detailLevel === "summary"} onChange={handleInputChange}
                       />
                       <span className="form-selectgroup-label">Résumé</span>
                     </label>
                     <label className="form-selectgroup-item">
-                      <input
-                        type="radio"
-                        name="detailLevel"
-                        value="detailed"
-                        className="form-selectgroup-input"
-                        checked={formData.detailLevel === "detailed"}
-                        onChange={handleInputChange}
-                      />
+                      <input type="radio" name="detailLevel" value="detailed" className="form-selectgroup-input" checked={formData.detailLevel === "detailed"} onChange={handleInputChange}/>
                       <span className="form-selectgroup-label">Détaillé</span>
                     </label>
                   </div>
@@ -410,16 +342,11 @@ const Reporting = () => {
                 <button
                   type="button"
                   className="btn btn-link link-secondary"
-                  onClick={() => setModalOpen(false)}
-                >
+                  onClick={() => setModalOpen(false)}   >
                   {" "}
                   Annuler{" "}
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary ms-auto"
-                  onClick={handleSubmit}
-                >
+                <button  type="button"  className="btn btn-primary ms-auto" onClick={handleSubmit}  >
                   {" "}
                   Générer le rapport{" "}
                 </button>
@@ -598,8 +525,7 @@ const Reporting = () => {
                               >
                                 <IconTrash className="text-red" size={18} />
                               </button>
-                              <button
-                                className="btn btn-ghost-blue btn-icon"
+                              <button className="btn btn-ghost-blue btn-icon"
                                 onClick={() =>
                                   router.push(
                                     `/Dashboard/User/reports/view/${data?._id}`
