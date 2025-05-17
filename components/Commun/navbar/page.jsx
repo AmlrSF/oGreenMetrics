@@ -3,24 +3,42 @@
 import React, { useState, useEffect } from "react";
 import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
-import { IconBell, IconX } from "@tabler/icons-react";
+import { IconBell, IconX, IconUser, IconBuilding } from "@tabler/icons-react";
 import { toast } from "react-hot-toast";
 
 const Navbar = ({ user, isAdmin }) => {
   const router = useRouter();
-  const [notifications, setNotifications] = useState([]);
+  const [userNotifications, setUserNotifications] = useState([]);
+  const [adminNotifications, setAdminNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [activeTab, setActiveTab] = useState('user'); // 'user', 'adminUser', 'adminCompany'
 
   const fetchNotifications = async (userId) => {
     try {
-      const res = await fetch(`http://localhost:4000/notifications/${userId}`, {
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (data.success) {
-        setNotifications(data.data);
-      } else {
-        toast.error(data.message || "Échec de la récupération des notifications");
+      // Récupérer les notifications utilisateur
+      if (userId) {
+        const userRes = await fetch(`http://localhost:4000/notifications/${userId}`, {
+          credentials: "include",
+        });
+        const userData = await userRes.json();
+        if (userData.success) {
+          setUserNotifications(userData.data);
+        } else {
+          toast.error(userData.message || "Échec de la récupération des notifications utilisateur");
+        }
+      }
+
+      // Récupérer les notifications admin
+      if (isAdmin) {
+        const adminRes = await fetch(`http://localhost:4000/admin/notifications`, {
+          credentials: "include",
+        });
+        const adminData = await adminRes.json();
+        if (adminData.success) {
+          setAdminNotifications(adminData.data);
+        } else {
+          toast.error(adminData.message || "Échec de la récupération des notifications admin");
+        }
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -36,7 +54,9 @@ const Navbar = ({ user, isAdmin }) => {
       });
       const data = await res.json();
       if (data.success) {
-        setNotifications(notifications.filter((n) => n._id !== notificationId));
+        // Mettre à jour les deux listes de notifications
+        setUserNotifications(userNotifications.filter((n) => n._id !== notificationId));
+        setAdminNotifications(adminNotifications.filter((n) => n._id !== notificationId));
         toast.success("Notification supprimée");
       } else {
         toast.error(data.message || "Échec de la suppression de la notification");
@@ -65,17 +85,40 @@ const Navbar = ({ user, isAdmin }) => {
   };
 
   useEffect(() => {
-    if (user?._id) {
-      fetchNotifications(user._id);
-      // Poll for new notifications every 5 minutes
+    if (user?._id || isAdmin) {
+      fetchNotifications(user?._id);
       const intervalId = setInterval(() => {
-        fetchNotifications(user._id);
+        fetchNotifications(user?._id);
       }, 5 * 60 * 1000);
       return () => clearInterval(intervalId);
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  // Compter les notifications non lues par type
+  const unreadUserCount = userNotifications.filter((n) => !n.is_read).length;
+  const unreadAdminCount = adminNotifications.filter((n) => !n.is_read).length;
+  const totalUnreadCount = unreadUserCount + unreadAdminCount;
+
+  // Filtrer les notifications admin par type
+  const adminUserNotifications = adminNotifications.filter(
+    (n) => n.type === 'admin_user_reminder'
+  );
+  const adminCompanyNotifications = adminNotifications.filter(
+    (n) => n.type === 'admin_company_reminder'
+  );
+
+  const getActiveNotifications = () => {
+    switch (activeTab) {
+      case 'user':
+        return userNotifications;
+      case 'adminUser':
+        return adminUserNotifications;
+      case 'adminCompany':
+        return adminCompanyNotifications;
+      default:
+        return [];
+    }
+  };
 
   return (
     <nav
@@ -101,9 +144,9 @@ const Navbar = ({ user, isAdmin }) => {
               >
                 <IconBell size={18} style={{ color: "#8ebe21" }} />
               </div>
-              {unreadCount > 0 && (
+              {totalUnreadCount > 0 && (
                 <span className="badge bg-danger position-absolute top-0 end-0">
-                  {unreadCount}
+                  {totalUnreadCount}
                 </span>
               )}
               <span className="d-none d-sm-inline-block text-white fw-medium ms-2 pe-2">
@@ -113,20 +156,63 @@ const Navbar = ({ user, isAdmin }) => {
             {showNotifications && (
               <div
                 className="position-absolute end-0 mt-2 p-3 bg-white border rounded shadow"
-                style={{ width: "300px", zIndex: 1000 }}
+                style={{ width: "350px", zIndex: 1000 }}
               >
-                <h6 className="mb-3">Notifications</h6>
-                {notifications.length === 0 ? (
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="mb-0">Notifications</h6>
+                  {isAdmin && (
+                    <div className="btn-group" role="group">
+                      <button 
+                        type="button" 
+                        className={`btn btn-sm ${activeTab === 'user' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setActiveTab('user')}
+                      >
+                        Mes Notifs
+                        {unreadUserCount > 0 && <span className="badge bg-danger ms-1">{unreadUserCount}</span>}
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`btn btn-sm ${activeTab === 'adminUser' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setActiveTab('adminUser')}
+                      >
+                        <IconUser size={16} />
+                        {adminUserNotifications.length > 0 && <span className="badge bg-danger ms-1">{adminUserNotifications.length}</span>}
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`btn btn-sm ${activeTab === 'adminCompany' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setActiveTab('adminCompany')}
+                      >
+                        <IconBuilding size={16} />
+                        {adminCompanyNotifications.length > 0 && <span className="badge bg-danger ms-1">{adminCompanyNotifications.length}</span>}
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                {getActiveNotifications().length === 0 ? (
                   <p className="text-muted">Aucune notification</p>
                 ) : (
-                  notifications.map((notification) => (
+                  getActiveNotifications().map((notification) => (
                     <div
                       key={notification._id}
                       className="d-flex align-items-start mb-2 p-2 border-bottom"
                     >
                       <div className="flex-grow-1">
                         <p className="mb-1">{notification.message}</p>
-                        <small className="text-muted">
+                        {(notification.type === 'admin_user_reminder' || notification.type === 'admin_company_reminder') && notification.entity_id && (
+                          <div>
+                            <small className="text-muted">
+                              {notification.entity_type === "Company"
+                                ? `Entreprise: ${notification.entity_id.nom_entreprise}`
+                                : `Utilisateur: ${notification.entity_id.prenom} ${notification.entity_id.nom}`}
+                            </small>
+                            <small className="d-block text-muted">
+                              Statut: {notification.entity_id.isVerified ? "Vérifié" : "Non vérifié"}
+                            </small>
+                          </div>
+                        )}
+                        <small className="text-muted d-block">
                           {new Date(notification.createdAt).toLocaleDateString("fr-FR")}
                         </small>
                       </div>
@@ -169,7 +255,9 @@ const Navbar = ({ user, isAdmin }) => {
                   }}
                 />
               ) : (
-                <span style={{ color: "#8ebe21" }}>{getInitials(user?.prenom, user?.nom)}</span>
+                <span style={{ color: "#8ebe21" }}>
+                  {getInitials(user?.prenom, user?.nom)}
+                </span>
               )}
             </div>
             <span className="d-none d-sm-inline-block text-white fw-medium ms-2 pe-2">
