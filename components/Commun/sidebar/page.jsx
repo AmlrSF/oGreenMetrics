@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { userMenuItems, menuItems, websiteMenuItems  } from "@/lib/Data";
+import { userMenuItems, menuItems,
+   websiteMenuItems  } from "@/lib/Data";
 import { IconChevronRight, IconChevronLeft ,IconChevronDown} from "@tabler/icons-react";
 import { IconLogout } from "@tabler/icons-react";
 
@@ -35,12 +36,13 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
       
       setItems(
         menuItems.filter(
-          (item) => item.label !== "Profile" && item.label !== "Settings"
+          (item) => item.label !== "Profile" &&
+           item.label !== "Settings"
         )
       );
     } 
     else if (user?.AdminRoles) {
-      const filteredMenuItems = adminMenuItems.filter((item) => {
+      const filteredMenuItems = menuItems.filter((item) => {
         if (!item?.service) return true;
         return user.AdminRoles[item?.service] !== "00";
       });

@@ -78,7 +78,7 @@ const Navbar = () => {
             <Link
               href="/login"
               className="d-none d-md-flex btn btn-primary fw-bold"
-              style={{ backgroundColor: "#8EBE21", borderColor: "#8EBE21" }}
+              style={{ borderColor: "#8EBE21" }}
             >
               Commencez
             </Link>

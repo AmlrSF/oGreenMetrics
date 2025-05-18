@@ -1,10 +1,27 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
-import { Doughnut, Line } from 'react-chartjs-2';
+import React, { useState, useEffect } from "react";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+} from "chart.js";
+import { Doughnut, Line } from "react-chartjs-2";
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement
+);
 
 const Dashboard = () => {
   const [sites, setSites] = useState([]);
@@ -42,11 +59,16 @@ const Dashboard = () => {
   };
 
   const calculateTotalEmissions = () => {
-    return sites.reduce((acc, site) => acc + site.statistics.co2.grid.grams, 0)?.toFixed(2);
+    return sites
+      .reduce((acc, site) => acc + site.statistics.co2.grid.grams, 0)
+      ?.toFixed(2);
   };
 
   const calculateAverageCleanerThan = () => {
-    return (sites.reduce((acc, site) => acc + site.cleanerThan, 0) / sites.length * 100)?.toFixed(0);
+    return (
+      (sites.reduce((acc, site) => acc + site.cleanerThan, 0) / sites.length) *
+      100
+    )?.toFixed(0);
   };
 
   const ratingDistribution = () => {
@@ -57,35 +79,41 @@ const Dashboard = () => {
 
     return {
       labels: Object.keys(distribution),
-      datasets: [{
-        data: Object.values(distribution),
-        backgroundColor: [
-          '#2fb344', // success
-          '#4299e1', // info
-          '#f59f00', // warning
-          '#e53e3e', // danger
-          '#667382'  // secondary
-        ],
-        borderWidth: 0,
-      }]
+      datasets: [
+        {
+          data: Object.values(distribution),
+          backgroundColor: [
+            "#2fb344", // success
+            "#4299e1", // info
+            "#f59f00", // warning
+            "#e53e3e", // danger
+            "#667382", // secondary
+          ],
+          borderWidth: 0,
+        },
+      ],
     };
   };
 
-  if (loading) return (
-    <div className="container-narrow d-flex justify-content-center align-items-center vh-100">
-      <div className="spinner-border text-primary" role="status"></div>
-      <span className="ms-2">Loading dashboard data...</span>
-    </div>
-  );
-  
-  if (error) return (
-    <div className="container-narrow my-3">
-      <div className="alert alert-danger" role="alert">
-        <h4 className="alert-title">Error</h4>
-        <div className="text-muted">{error}</div>
+  if (loading)
+    return (
+      <div className="container-narrow d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status"></div>
+        <span className="ms-2">
+          Chargement des données du tableau de bord...
+        </span>
       </div>
-    </div>
-  );
+    );
+
+  if (error)
+    return (
+      <div className="container-narrow my-3">
+        <div className="alert alert-danger" role="alert">
+          <h4 className="alert-title">Error</h4>
+          <div className="text-muted">{error}</div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="page">
@@ -94,10 +122,11 @@ const Dashboard = () => {
           <div className="container-xl">
             <div className="row align-items-center">
               <div className="col">
-                <h2 className="page-title">Dashboard Overview</h2>
-                <div className="text-muted mt-1">Monitor your website performance metrics</div>
+                <h2 className="page-title">Aperçu du tableau de bord</h2>
+                <div className="text-muted mt-1">
+                  Surveillez les indicateurs de performance de votre site web
+                </div>
               </div>
-             
             </div>
           </div>
         </div>
@@ -110,10 +139,25 @@ const Dashboard = () => {
                 <div className="card">
                   <div className="card-body">
                     <div className="d-flex align-items-center">
-                      <div className="subheader">Total Sites</div>
+                      <div className="subheader">Nombre total de sites</div>{" "}
                       <div className="ms-auto avatar bg-primary-lt">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-world" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="icon icon-tabler icon-tabler-world"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="currentColor"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path
+                            stroke="none"
+                            d="M0 0h24v24H0z"
+                            fill="none"
+                          ></path>
                           <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
                           <path d="M3.6 9h16.8"></path>
                           <path d="M3.6 15h16.8"></path>
@@ -124,7 +168,7 @@ const Dashboard = () => {
                     </div>
                     <div className="h1 mb-0">{sites.length}</div>
                     <div className="d-flex mt-1">
-                      <div className="text-muted">Websites monitored</div>
+                      <div className="text-muted">Sites web surveillés</div>
                     </div>
                   </div>
                 </div>
@@ -134,10 +178,25 @@ const Dashboard = () => {
                 <div className="card">
                   <div className="card-body">
                     <div className="d-flex align-items-center">
-                      <div className="subheader">Total Emissions (g CO2)</div>
+                      <div className="subheader">Émissions totales (g CO₂)</div>
                       <div className="ms-auto avatar bg-green-lt">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-leaf" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="icon icon-tabler icon-tabler-leaf"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="currentColor"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path
+                            stroke="none"
+                            d="M0 0h24v24H0z"
+                            fill="none"
+                          ></path>
                           <path d="M5 21c.5 -4.5 2.5 -8 7 -10"></path>
                           <path d="M9 18c6.218 0 10.5 -3.288 11 -12v-2h-4.014c-9 0 -11.986 4 -12 9c0 1 0 3 2 5h3z"></path>
                         </svg>
@@ -145,7 +204,7 @@ const Dashboard = () => {
                     </div>
                     <div className="h1 mb-0">{calculateTotalEmissions()}</div>
                     <div className="d-flex mt-1">
-                      <div className="text-muted">Carbon footprint</div>
+                      <div className="text-muted">Empreinte carbone</div>
                     </div>
                   </div>
                 </div>
@@ -155,19 +214,38 @@ const Dashboard = () => {
                 <div className="card">
                   <div className="card-body">
                     <div className="d-flex align-items-center">
-                      <div className="subheader">Average Cleaner Than</div>
+                      <div className="subheader">
+                        Plus propre que la moyenne
+                      </div>
                       <div className="ms-auto avatar bg-azure-lt">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-chart-bar" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="icon icon-tabler icon-tabler-chart-bar"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="currentColor"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path
+                            stroke="none"
+                            d="M0 0h24v24H0z"
+                            fill="none"
+                          ></path>
                           <path d="M3 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
                           <path d="M9 8m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
                           <path d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
                         </svg>
                       </div>
                     </div>
-                    <div className="h1 mb-0">{calculateAverageCleanerThan()}%</div>
+                    <div className="h1 mb-0">
+                      {calculateAverageCleanerThan()}%
+                    </div>
                     <div className="d-flex mt-1">
-                      <div className="text-muted">Industry comparison</div>
+                      <div className="text-muted">Comparaison sectorielle</div>
                     </div>
                   </div>
                 </div>
@@ -177,10 +255,25 @@ const Dashboard = () => {
                 <div className="card">
                   <div className="card-body">
                     <div className="d-flex align-items-center">
-                      <div className="subheader">Green Hosting</div>
+                      <div className="subheader">Hébergement vert</div>{" "}
                       <div className="ms-auto avatar bg-yellow-lt">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-solar-panel" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="icon icon-tabler icon-tabler-solar-panel"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                          stroke="currentColor"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path
+                            stroke="none"
+                            d="M0 0h24v24H0z"
+                            fill="none"
+                          ></path>
                           <path d="M4.28 14h15.44a1 1 0 0 0 .97 -1.243l-1.5 -6a1 1 0 0 0 -.97 -.757h-12.44a1 1 0 0 0 -.97 .757l-1.5 6a1 1 0 0 0 .97 1.243z"></path>
                           <path d="M4 10h16"></path>
                           <path d="M10 6l-1 8"></path>
@@ -190,9 +283,11 @@ const Dashboard = () => {
                         </svg>
                       </div>
                     </div>
-                    <div className="h1 mb-0">{sites.filter(site => site.green).length}</div>
+                    <div className="h1 mb-0">
+                      {sites.filter((site) => site.green).length}
+                    </div>
                     <div className="d-flex mt-1">
-                      <div className="text-muted">Eco-friendly sites</div>
+                      <div className="text-muted">Sites écologiques</div>
                     </div>
                   </div>
                 </div>
@@ -204,27 +299,27 @@ const Dashboard = () => {
               <div className="col-lg-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Rating Distribution</h3>
+                    <h3 className="card-title">Distribution des évaluations</h3>
                   </div>
                   <div className="card-body">
                     <div className="d-flex justify-content-center">
                       <div style={{ height: "250px", width: "250px" }}>
-                        <Doughnut 
-                          data={ratingDistribution()} 
+                        <Doughnut
+                          data={ratingDistribution()}
                           options={{
                             plugins: {
                               legend: {
-                                position: 'bottom',
+                                position: "bottom",
                                 labels: {
                                   usePointStyle: true,
-                                  padding: 20
-                                }
-                              }
+                                  padding: 20,
+                                },
+                              },
                             },
-                            cutout: '70%',
+                            cutout: "70%",
                             responsive: true,
-                            maintainAspectRatio: false
-                          }} 
+                            maintainAspectRatio: false,
+                          }}
                         />
                       </div>
                     </div>
@@ -235,10 +330,13 @@ const Dashboard = () => {
               <div className="col-lg-6">
                 <div className="card">
                   <div className="card-header">
-                    <h3 className="card-title">Recent Sites</h3>
+                    <h3 className="card-title">Sites récents</h3>
                     <div className="card-actions">
-                      <a href="/Dashboard/Regular/Sites" className="btn btn-outline-primary btn-sm">
-                        View all
+                      <a
+                        href="/Dashboard/Regular/Sites"
+                        className="btn btn-outline-primary btn-sm"
+                      >
+                       Voir tout
                       </a>
                     </div>
                   </div>
@@ -253,24 +351,49 @@ const Dashboard = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {sites.slice(0, 5).map(site => (
+                        {sites.slice(0, 5).map((site) => (
                           <tr key={site._id}>
                             <td className="text-nowrap">{site.url}</td>
                             <td>
-                              <span className={`badge ${
-                                site.rating === 'A' ? 'bg-success' : 
-                                site.rating === 'B' ? 'bg-info' :
-                                site.rating === 'C' ? 'bg-warning' :
-                                'bg-danger'
-                              }`}>
+                              <span
+                                className={`badge ${
+                                  site.rating === "A"
+                                    ? "bg-success"
+                                    : site.rating === "B"
+                                    ? "bg-info"
+                                    : site.rating === "C"
+                                    ? "bg-warning"
+                                    : "bg-danger"
+                                }`}
+                              >
                                 {site.rating}
                               </span>
                             </td>
-                            <td>{site.statistics.co2.grid.grams?.toFixed(3)} g</td>
                             <td>
-                              <a href="#" className="btn btn-icon btn-ghost-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-external-link" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                              {site.statistics.co2.grid.grams?.toFixed(3)} g
+                            </td>
+                            <td>
+                              <a
+                                href="#"
+                                className="btn btn-icon btn-ghost-primary"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="icon icon-tabler icon-tabler-external-link"
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="2"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path
+                                    stroke="none"
+                                    d="M0 0h24v24H0z"
+                                    fill="none"
+                                  ></path>
                                   <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"></path>
                                   <path d="M11 13l9 -9"></path>
                                   <path d="M15 4h5v5"></path>

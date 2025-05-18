@@ -72,6 +72,12 @@ const DashboardLayout = ({ children }) => {
     }
   }, [isCollapsed]);
 
+
+  const naviagteToLoginPage = ()=>{
+    push("/login");
+  }
+  if(!user?.isVerified) return <VerificationRequired naviagteToLoginPage={naviagteToLoginPage} />
+
   if (isLoading) return <Loader />;
 
   return (

@@ -54,6 +54,9 @@ const CompanyDash = () => {
   const [companiesEmissions, setCompaniesEmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [RolesUser, setRolesUser] = useState([]);
+  const [userAccess, setUserAccess] = useState("");
+  const [User, setUser] = useState();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const scroll = (direction) => {
     const container = scrollRef.current;
@@ -78,6 +81,24 @@ const CompanyDash = () => {
       counts[company.country] = (counts[company.country] || 0) + 1;
     });
     return counts;
+  };
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/auth", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data?.user) {
+        setUserAccess(data?.user?.AdminRoles?.userManagement);
+        setUser(data?.user);
+      }
+    } catch (err) {
+      console.log();
+    }
   };
 
   const sortedSites = sites
@@ -150,22 +171,25 @@ const CompanyDash = () => {
         (item) => item?.AdminRoles || item?.role === "Admin"
       ).length;
 
-      const nonAdmins = users.filter((item) => item?.role === "régulier" || item?.role === "entreprise").length;
+      const nonAdmins = users.filter(
+        (item) => item?.role === "régulier" || item?.role === "entreprise"
+      ).length;
 
       console.log(nonAdmins);
-      
 
       setAdminCount(admins);
       setUserCount(nonAdmins);
 
       setRecentUsers(
         users
-          .filter((item) => item?.role === "régulier" || item?.role === "entreprise")
+          .filter(
+            (item) => item?.role === "régulier" || item?.role === "entreprise"
+          )
           .slice(0, 5)
       );
 
       console.log(users);
-      
+
       setRolesUser(users.filter((item) => item?.AdminRoles).slice(0, 5));
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -199,8 +223,8 @@ const CompanyDash = () => {
     }
   };
 
-  
   useEffect(() => {
+    checkAuth();
     fetchCompanies();
     fetchUsers();
     fetchReports();
@@ -309,8 +333,12 @@ const CompanyDash = () => {
   };
 
   const handleApproveUser = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
     try {
-      const response = await fetch(
+      const responseUsers = await fetch(
         `http://localhost:4000/users/${selectedUser._id}`,
         {
           method: "PUT",
@@ -322,11 +350,50 @@ const CompanyDash = () => {
           }),
         }
       );
-      await response.json();
+      const response = await responseUsers.json();
+      console.log(response);
+
+      if (response?.role === "entreprise") {
+        const responseCompanies = await fetch(
+          `http://localhost:4000/companies`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const companyData = await responseCompanies.json();
+
+        let company = companyData?.data.filter(
+          (item) => item?.userId?._id === response?._id
+        );
+
+        console.log(company);
+
+        const UpdatecompanyStatus = await fetch(
+          `http://localhost:4000/updatecompany/${company[0]?._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              isVerified: !selectedUser.isVerified,
+            }),
+          }
+        );
+
+        await UpdatecompanyStatus.json();
+      }
+
       setModalOpen(false);
       fetchUsers();
+      fetchCompanies();
     } catch (error) {
-      console.log("Failed to update user status");
+      setError("Failed to update user status");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -394,8 +461,17 @@ const CompanyDash = () => {
                             : "btn-danger"
                         }`}
                         onClick={handleApproveUser}
+                        disabled={isSubmitting}
                       >
-                        {selectedUser.isVerified ? "Désapprouver" : "Approuver"}
+                        {isSubmitting ? (
+                          <span>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                          </span>
+                        ) : selectedUser.isVerified ? (
+                          "Désapprouver"
+                        ) : (
+                          "Approuver"
+                        )}
                       </button>
                     </div>
                   </div>
@@ -558,259 +634,313 @@ const CompanyDash = () => {
           className="mt-2"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(400px,1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(550px,1fr))",
             gap: "10px",
           }}
         >
-          <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title">
-                <IconUserCheck className="icon me-2" />
-                Utilisateurs Récents
-              </h3>
-              <a href="/Dashboard/Admin/users" className="btn  btn-primary">
-                Gérez les utilisateurs
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Role</th>
-
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentUsers.map((user, index) => (
-                    <tr key={index}>
-                      <td>
-                        <div className="d-flex align-items-center">
+          {}
+          {User?.AdminRoles?.userManagement != "00" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title">
+                  <IconUserCheck className="icon me-2" />
+                  Utilisateurs Récents
+                </h3>
+                <a href="/Dashboard/Admin/users" className="btn  btn-primary">
+                  Gérez les utilisateurs
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <th className="w-1"> Action </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentUsers.map((user, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <span
+                              className="avatar border-1 border-gray-950 avatar-md text-white me-2"
+                              style={{ backgroundColor: "#263589" }}
+                            >
+                              {user.photo_de_profil ? (
+                                <img
+                                  className="w-full h-full rounded-sm object-fit-cover"
+                                  src={user.photo_de_profil}
+                                  alt={`${user.prenom} ${user.nom}`}
+                                />
+                              ) : (
+                                getInitials(user.prenom, user.nom)
+                              )}
+                            </span>
+                            {`${user.prenom} ${user.nom}`}
+                          </div>
+                        </td>
+                        <td>
                           <span
-                            className="avatar border-1 border-gray-950 avatar-md text-white me-2"
-                            style={{ backgroundColor: "#263589" }}
+                            className={`badge ${
+                              roleTypes[user.role?.toLowerCase()]
+                            }`}
                           >
-                            {user.photo_de_profil ? (
-                              <img
-                                className="w-full h-full rounded-sm object-fit-cover"
-                                src={user.photo_de_profil}
-                                alt={`${user.prenom} ${user.nom}`}
-                              />
-                            ) : (
-                              getInitials(user.prenom, user.nom)
-                            )}
+                            {user.role}
                           </span>
-                          {`${user.prenom} ${user.nom}`}
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            roleTypes[user.role?.toLowerCase()]
-                          }`}
-                        >
-                          {user.role}
-                        </span>
-                      </td>
+                        </td>
 
-                      <td>
-                        <span
-                          className={`badge ${
-                            user.isVerified ? "bg-success-lt" : "bg-danger-lt"
-                          }`}
-                        >
-                          {user.isVerified ? "Verified" : "Unverified"}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => openModal("approve", user)}
-                          className={`btn btn-ghost-${
-                            user.isVerified ? "danger" : "success"
-                          } btn-icon`}
-                        >
-                          {user.isVerified ? (
-                            <IconUserX size={18} />
-                          ) : (
-                            <IconUserCheck size={18} />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title ">
-                <IconBuilding className="icon me-2" />
-                Entreprises Récentes
-              </h3>
-              <a href="/Dashboard/Admin/companies" className="btn  btn-primary">
-                Gérez les entreprises
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Entreprise</th>
-                    <th>Industrie</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentCompanies.map((company, index) => (
-                    <tr key={index}>
-                      <td>{company.nom_entreprise}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            industryBadgeColors[company.industrie] ||
-                            industryBadgeColors.Default
-                          }`}
-                        >
-                          {company.industrie}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => navigateToCompanyDetails(company._id)}
-                          className="btn btn-ghost-blue btn-icon"
-                        >
-                          <IconEye size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title">
-                <IconShieldLock className="icon me-2" />
-                Rôles Récents
-              </h3>{" "}
-              <a
-                href="/Dashboard/Admin/users"
-                className="btn d-flex align-items-center gap-2   btn-primary"
-              >
-                <IconPlus size={18} className="text-white" />
-                Ajouter un rôle
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentRoles.map((role, index) => (
-                    <tr key={index}>
-                      <td>{role.name}</td>
-                      <td>
-                        <span className="text-muted">
-                          {role.description || "Aucune description"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header d-flex align-content-center justify-content-between">
-              <h3 className="card-title">
-                <IconUserCheck className="icon me-2" />
-                Modérateurs  Récents
-              </h3>
-              <a href="/Dashboard/Admin/Users-management" className="btn  btn-primary">
-                Gérez les Modérateurs 
-              </a>
-            </div>
-            <div className="table-responsive">
-              <table className="table table-vcenter card-table">
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Role</th>
-
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {RolesUser.map((user, index) => (
-                    <tr key={index}>
-                      <td>
-                        <div className="d-flex align-items-center">
+                        <td>
                           <span
-                            className="avatar border-1 border-gray-950 avatar-md text-white me-2"
-                            style={{ backgroundColor: "#263589" }}
+                            className={`badge ${
+                              user.isVerified ? "bg-success-lt" : "bg-danger-lt"
+                            }`}
                           >
-                            {user.photo_de_profil ? (
-                              <img
-                                className="w-full h-full rounded-sm object-fit-cover"
-                                src={user.photo_de_profil}
-                                alt={`${user.prenom} ${user.nom}`}
-                              />
-                            ) : (
-                              getInitials(user.prenom, user.nom)
-                            )}
+                            {user.isVerified ? "Verified" : "Unverified"}
                           </span>
-                          {`${user.prenom} ${user.nom}`}
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`badge `}
-                        >
-                          {user?.AdminRoles?.name}
-                        </span>
-                      </td>
+                        </td>
 
-                      <td>
-                        <span
-                          className={`badge ${
-                            user.isVerified ? "bg-success-lt" : "bg-danger-lt"
-                          }`}
-                        >
-                          {user.isVerified ? "Verified" : "Unverified"}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => openModal("approve", user)}
-                          className={`btn btn-ghost-${
-                            user.isVerified ? "danger" : "success"
-                          } btn-icon`}
-                        >
-                          {user.isVerified ? (
-                            <IconUserX size={18} />
-                          ) : (
-                            <IconUserCheck size={18} />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <button
+                              onClick={() => openModal("approve", user)}
+                              className={`btn btn-ghost-${
+                                user.isVerified ? "danger" : "success"
+                              } btn-icon`}
+                            >
+                              {user.isVerified ? (
+                                <IconUserX size={18} />
+                              ) : (
+                                <IconUserCheck size={18} />
+                              )}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
+
+          {User?.AdminRoles?.companyManagement != "00" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title ">
+                  <IconBuilding className="icon me-2" />
+                  Entreprises Récentes
+                </h3>
+                <a
+                  href="/Dashboard/Admin/companies"
+                  className="btn  btn-primary"
+                >
+                  Gérez les entreprises
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Entreprise</th>
+                      <th>Industrie</th>
+                      <th>Status</th>
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <th className=""> Action </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentCompanies.map((company, index) => (
+                      <tr key={index}>
+                        <td>{company.nom_entreprise}</td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              industryBadgeColors[company.industrie] ||
+                              industryBadgeColors.Default
+                            }`}
+                          >
+                            {company.industrie}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              company.isVerified
+                                ? "bg-success-lt"
+                                : "bg-danger-lt"
+                            }`}
+                          >
+                            {company.isVerified ? "Verified" : "Unverified"}
+                          </span>
+                        </td>
+
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <div className="gap-2 d-flex">
+                              <button
+                                onClick={() =>
+                                  navigateToCompanyDetails(company._id)
+                                }
+                                className="btn btn-ghost-blue btn-icon"
+                              >
+                                <IconEye size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {User?.AdminRoles?.roleManagement != "00" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title">
+                  <IconShieldLock className="icon me-2" />
+                  Rôles Récents
+                </h3>{" "}
+                <a
+                  href="/Dashboard/Admin/users"
+                  className="btn d-flex align-items-center gap-2   btn-primary"
+                >
+                  <IconPlus size={18} className="text-white" />
+                  Ajouter un rôle
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentRoles.map((role, index) => (
+                      <tr key={index}>
+                        <td>{role.name}</td>
+                        <td>
+                          <span className="text-muted">
+                            {role.description || "Aucune description"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {User?.role === "Admin" && (
+            <div className="card">
+              <div className="card-header d-flex align-content-center justify-content-between">
+                <h3 className="card-title">
+                  <IconUserCheck className="icon me-2" />
+                  Modérateurs Récents
+                </h3>
+                <a
+                  href="/Dashboard/Admin/Users-management"
+                  className="btn  btn-primary"
+                >
+                  Gérez les Modérateurs
+                </a>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-vcenter card-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Role</th>
+
+                      <th>Status</th>
+                      {userAccess == "10" ? (
+                        <></>
+                      ) : (
+                        <th className="w-1"> Action </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {RolesUser.map((user, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <span
+                              className="avatar border-1 border-gray-950 avatar-md text-white me-2"
+                              style={{ backgroundColor: "#263589" }}
+                            >
+                              {user.photo_de_profil ? (
+                                <img
+                                  className="w-full h-full rounded-sm object-fit-cover"
+                                  src={user.photo_de_profil}
+                                  alt={`${user.prenom} ${user.nom}`}
+                                />
+                              ) : (
+                                getInitials(user.prenom, user.nom)
+                              )}
+                            </span>
+                            {`${user.prenom} ${user.nom}`}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`badge `}>
+                            {user?.AdminRoles?.name}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`badge ${
+                              user.isVerified ? "bg-success-lt" : "bg-danger-lt"
+                            }`}
+                          >
+                            {user.isVerified ? "Verified" : "Unverified"}
+                          </span>
+                        </td>
+                        {userAccess == "10" ? (
+                          <></>
+                        ) : (
+                          <td>
+                            <button
+                              onClick={() => openModal("approve", user)}
+                              className={`btn btn-ghost-${
+                                user.isVerified ? "danger" : "success"
+                              } btn-icon`}
+                            >
+                              {user.isVerified ? (
+                                <IconUserX size={18} />
+                              ) : (
+                                <IconUserCheck size={18} />
+                              )}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="page-header mt-5 mb-2">

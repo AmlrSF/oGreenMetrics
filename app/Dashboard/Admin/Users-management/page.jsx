@@ -28,8 +28,6 @@ const Page = () => {
   const [deletingIds, setDeletingIds] = useState(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
-
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
@@ -88,9 +86,8 @@ const Page = () => {
 
   const deleteUser = async (userId) => {
     if (deletingIds.has(userId)) return;
-    
-    setDeletingIds(prev => new Set([...prev, userId]));
-    
+
+    setDeletingIds((prev) => new Set([...prev, userId]));
 
     try {
       const response = await fetch(`http://localhost:4000/users/${userId}`, {
@@ -102,7 +99,7 @@ const Page = () => {
     } catch (error) {
       setError("Failed to delete user");
     } finally {
-      setDeletingIds(prev => {
+      setDeletingIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(userId);
         return newSet;
@@ -156,11 +153,10 @@ const Page = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-   
+
     if (isSubmitting) return;
 
     setIsSubmitting(true);
-
 
     try {
       const response = await fetch("http://localhost:4000/register", {
@@ -174,6 +170,15 @@ const Page = () => {
       const data = await response.json();
       setError(data?.error);
       if (response.ok) {
+        const response = await fetch("http://localhost:4000/InviteUser", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newUser),
+        });
+        const data = await response.json();
+
         fetchUsers();
         setIsModalOpen(false);
         setNewUser({
@@ -186,11 +191,10 @@ const Page = () => {
       }
     } catch (error) {
       setError("Failed to create user");
-    }finally {
+    } finally {
       setIsSubmitting(false);
-      setError(null)
+      setError(null);
     }
-
   };
 
   return (
@@ -214,7 +218,6 @@ const Page = () => {
           <button
             className="btn  d-flex align-items-center btn-primary"
             onClick={() => setIsModalOpen(true)}
-         
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -366,11 +369,11 @@ const Page = () => {
                                   handleApproveUser(user._id, user.isVerified)
                                 }
                               >
-                                  {user.isVerified ? (
-                                    <IconUserX size={18}  />
-                                  ) : (
-                                    <IconUserCheck   size={18}/>
-                                  )}
+                                {user.isVerified ? (
+                                  <IconUserX size={18} />
+                                ) : (
+                                  <IconUserCheck size={18} />
+                                )}
                               </button>
                               <button
                                 className="btn btn-ghost-danger btn-icon"
@@ -414,7 +417,21 @@ const Page = () => {
                       setCurrentPage((prev) => Math.max(prev - 1, 1))
                     }
                   >
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M15 6l-6 6l6 6" />
+                    </svg>
                   </button>
                 </li>
                 <li className="page-item active">
@@ -439,7 +456,21 @@ const Page = () => {
                       setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                     }
                   >
-                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M9 6l6 6l-6 6" />
+                    </svg>
                   </button>
                 </li>
               </ul>
@@ -466,7 +497,9 @@ const Page = () => {
               <form onSubmit={handleAddUser}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Email<span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Email<span className="text-red fs-2">*</span>
+                    </label>
                     <input
                       type="email"
                       className="form-control"
@@ -480,7 +513,9 @@ const Page = () => {
                     <span className="text-danger">{error}</span>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Prénom<span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Prénom<span className="text-red fs-2">*</span>
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -493,7 +528,9 @@ const Page = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Nom<span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Nom<span className="text-red fs-2">*</span>
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -506,7 +543,9 @@ const Page = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Rôle<span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Rôle<span className="text-red fs-2">*</span>
+                    </label>
                     <select
                       className="form-select"
                       value={newUser.role}
@@ -523,7 +562,9 @@ const Page = () => {
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Mot de passe<span className="text-red fs-2">*</span></label>
+                    <label className="form-label">
+                      Mot de passe<span className="text-red fs-2">*</span>
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -558,7 +599,11 @@ const Page = () => {
                     style={{ backgroundColor: "#263589" }}
                     disabled={isSubmitting}
                   >
-                    Créer un utilisateur
+                    {isSubmitting ? (
+                      <span className="spinner-border spinner-border-sm" />
+                    ) : (
+                      "Créer un utilisateur"
+                    )}
                   </button>
                 </div>
               </form>
