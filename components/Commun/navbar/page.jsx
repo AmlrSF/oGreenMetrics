@@ -11,7 +11,6 @@ const Navbar = ({ user, isAdmin }) => {
   const [userNotifications, setUserNotifications] = useState([]);
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [activeTab, setActiveTab] = useState('user'); // 'user', 'adminUser', 'adminCompany'
 
   const fetchNotifications = async (userId) => {
     try {
@@ -94,31 +93,16 @@ const Navbar = ({ user, isAdmin }) => {
     }
   }, [user, isAdmin]);
 
-  // Compter les notifications non lues par type
+  // Compter les notifications non lues
   const unreadUserCount = userNotifications.filter((n) => !n.is_read).length;
   const unreadAdminCount = adminNotifications.filter((n) => !n.is_read).length;
   const totalUnreadCount = unreadUserCount + unreadAdminCount;
 
-  // Filtrer les notifications admin par type
-  const adminUserNotifications = adminNotifications.filter(
-    (n) => n.type === 'admin_user_reminder'
-  );
-  const adminCompanyNotifications = adminNotifications.filter(
-    (n) => n.type === 'admin_company_reminder'
-  );
-
-  const getActiveNotifications = () => {
-    switch (activeTab) {
-      case 'user':
-        return userNotifications;
-      case 'adminUser':
-        return adminUserNotifications;
-      case 'adminCompany':
-        return adminCompanyNotifications;
-      default:
-        return [];
-    }
-  };
+  // Combiner toutes les notifications
+  const allNotifications = [...userNotifications, ...adminNotifications];
+  
+  // Trier par date (les plus récentes en premier)
+  allNotifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   return (
     <nav
@@ -145,7 +129,7 @@ const Navbar = ({ user, isAdmin }) => {
                 <IconBell size={18} style={{ color: "#8ebe21" }} />
               </div>
               {totalUnreadCount > 0 && (
-                <span className="badge bg-danger position-absolute top-0 end-0">
+                <span className="badge bg-red-500 position-absolute top-0 end-0">
                   {totalUnreadCount}
                 </span>
               )}
@@ -156,53 +140,32 @@ const Navbar = ({ user, isAdmin }) => {
             {showNotifications && (
               <div
                 className="position-absolute end-0 mt-2 p-3 bg-white border rounded shadow"
-                style={{ width: "350px", zIndex: 1000 }}
+                style={{ width: "350px", zIndex: 1000, maxHeight: "500px", overflowY: "auto" }}
               >
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h6 className="mb-0">Notifications</h6>
-                  {isAdmin && (
-                    <div className="btn-group" role="group">
-                      <button 
-                        type="button" 
-                        className={`btn btn-sm ${activeTab === 'user' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setActiveTab('user')}
-                      >
-                        Mes Notifs
-                        {unreadUserCount > 0 && <span className="badge bg-danger ms-1">{unreadUserCount}</span>}
-                      </button>
-                      <button 
-                        type="button" 
-                        className={`btn btn-sm ${activeTab === 'adminUser' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setActiveTab('adminUser')}
-                      >
-                        <IconUser size={16} />
-                        {adminUserNotifications.length > 0 && <span className="badge bg-danger ms-1">{adminUserNotifications.length}</span>}
-                      </button>
-                      <button 
-                        type="button" 
-                        className={`btn btn-sm ${activeTab === 'adminCompany' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setActiveTab('adminCompany')}
-                      >
-                        <IconBuilding size={16} />
-                        {adminCompanyNotifications.length > 0 && <span className="badge bg-danger ms-1">{adminCompanyNotifications.length}</span>}
-                      </button>
-                    </div>
-                  )}
-                </div>
+                 </div>
                 
-                {getActiveNotifications().length === 0 ? (
+                {allNotifications.length === 0 ? (
                   <p className="text-muted">Aucune notification</p>
                 ) : (
-                  getActiveNotifications().map((notification) => (
+                  allNotifications.map((notification) => (
                     <div
                       key={notification._id}
-                      className="d-flex align-items-start mb-2 p-2 border-bottom"
+                      className={`d-flex align-items-start mb-2 p-2 border-bottom ${!notification.is_read ? 'bg-light' : ''}`}
                     >
                       <div className="flex-grow-1">
                         <p className="mb-1">{notification.message}</p>
                         {(notification.type === 'admin_user_reminder' || notification.type === 'admin_company_reminder') && notification.entity_id && (
                           <div>
                             <small className="text-muted">
+                              <span className="d-inline-flex align-items-center me-1">
+                                {notification.entity_type === "Company" ? (
+                                  <IconBuilding size={14} className="me-1" />
+                                ) : (
+                                  <IconUser size={14} className="me-1" />
+                                )}
+                              </span>
                               {notification.entity_type === "Company"
                                 ? `Entreprise: ${notification.entity_id.nom_entreprise}`
                                 : `Utilisateur: ${notification.entity_id.prenom} ${notification.entity_id.nom}`}
@@ -213,7 +176,13 @@ const Navbar = ({ user, isAdmin }) => {
                           </div>
                         )}
                         <small className="text-muted d-block">
-                          {new Date(notification.createdAt).toLocaleDateString("fr-FR")}
+                          {new Date(notification.createdAt).toLocaleDateString("fr-FR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })}
                         </small>
                       </div>
                       <button

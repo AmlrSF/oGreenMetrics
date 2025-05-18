@@ -258,7 +258,7 @@ const UserProfilePage = () => {
       <form onSubmit={handleSubmit}> 
         <div className="card mb-4">
           <div className="card-body">
-            <div className="hr-text mb-4">Personal Information</div>
+            <div className="hr-text mb-4">Informations personnelles</div>
             <div className="row align-items-center mb-4">
               <div className="col-auto">
               {formData.personal.photo_de_profil ? (
@@ -277,7 +277,7 @@ const UserProfilePage = () => {
                       <path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"></path>
                       <path d="M12 13m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
                     </svg>
-                    Change avatar
+                    Modifier votre avatar 
                   </button>
                   <button 
                     type="button" 
@@ -297,7 +297,7 @@ const UserProfilePage = () => {
                       <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
                       <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
                     </svg>
-                    Delete avatar
+                    Supprimer votre avatar
                   </button>
                 </div>
                 <input 
@@ -339,8 +339,7 @@ const UserProfilePage = () => {
                       type="email" className="form-control" name="email" value={formData.personal.email} onChange={handlePersonalChange} required
                     />
                   </div>
-                  <small className="form-hint text-muted">This contact will be shown to others publicly, so choose it carefully.</small>
-                </div>
+                 </div>
               </div>
             </div>
 
@@ -356,9 +355,9 @@ const UserProfilePage = () => {
                   <path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l6.558 -6.558l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z"></path>
                   <path d="M15 9h.01"></path>
                 </svg>
-                Reset Password
+                Réinitialiser votre mot de passe
               </button>
-              <small className="form-hint d-block mt-1">Update your account password.</small>
+              <small className="form-hint d-block mt-1">Mettez à jour le mot de passe de votre compte.</small>
             </div>
           </div>
         </div>
@@ -367,7 +366,7 @@ const UserProfilePage = () => {
         {company && (
           <div className="card mb-4">
             <div className="card-body">
-              <div className="hr-text mb-4">Company Information</div>
+              <div className="hr-text mb-4">Informations sur l'entreprise</div>
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label">Nom d'entreprise</label>
@@ -481,20 +480,16 @@ const UserProfilePage = () => {
                     </select>
                   </div>
                 </div>
-                <div className="col-12">
+               <div className="col-12">
                   <label className="form-label">Adresse</label>
-                  <select 
-                    className="form-select mb-2" 
+                  <input 
+                    type="text" 
+                    className="form-control mb-2" 
                     name="adresse"
-                    value={locations.includes(formData.company.adresse) ? formData.company.adresse : ""}
+                    value={formData.company.adresse}
                     onChange={handleCompanyChange}
-                  >
-                    <option value="">Select a location</option>
-                    {locations.map(location => (
-                      <option key={location} value={location}>{location}</option>
-                    ))}
-                  </select>
-                 
+                    placeholder="Enter your address"
+                  />
                 </div>
               </div>
             </div>
@@ -507,13 +502,13 @@ const UserProfilePage = () => {
                   className="btn" 
                   onClick={handleCancel}
                 >
-                  Cancel
+                  Annuler
                 </button>
                 <button 
                   type="submit" 
                   className="btn btn-primary"
                 >
-                  Submit
+                  Mettre à jour
                 </button>
               </div>
             </div>
@@ -545,7 +540,7 @@ const UserProfilePage = () => {
                   </div>
                 )}
                 <div className="mb-3">
-                  <label className="form-label">Current Password</label>
+                  <label className="form-label">Mot de passe actuel</label>
                   <input 
                     type="password" 
                     className="form-control" 
@@ -556,7 +551,7 @@ const UserProfilePage = () => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">New Password</label>
+                  <label className="form-label">nouveau mot de passe</label>
                   <input 
                     type="password" 
                     className="form-control" 
@@ -567,7 +562,7 @@ const UserProfilePage = () => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Confirm New Password</label>
+                  <label className="form-label">Confirmer le nouveau mot de passe</label>
                   <input 
                     type="password" 
                     className="form-control" 

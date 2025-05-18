@@ -422,9 +422,7 @@ const UserProfilePage = () => {
                 {LoadingText ? "Saving..." : "Save Info"} 
               </button>
             </div>
-            <small className="form-hint d-block mt-1">
-              Update your account password.
-            </small>
+             
           </div>
         </div>
       </form>
