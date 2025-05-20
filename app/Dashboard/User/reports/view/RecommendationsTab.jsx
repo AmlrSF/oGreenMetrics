@@ -18,7 +18,7 @@ const RecommendationsTab = ({
   formatNumber,
   activeTab,
 }) => {
-  // Chart refs
+  // Références pour les graphiques
   const emissionReductionPotentialChartRef = useRef(null);
   const energyEfficiencyChartRef = useRef(null);
   const transportOptimizationChartRef = useRef(null);
@@ -26,13 +26,13 @@ const RecommendationsTab = ({
   const businessTravelChartRef = useRef(null);
   const fuelEfficiencyChartRef = useRef(null);
 
-  // Chart instances
+  // Instances des graphiques
   const [charts, setCharts] = useState({});
   const initializeTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (report && report.includeCharts === "yes" && activeTab === "recommendations") {
-      // Debounce chart initialization
+      // Délai pour l'initialisation des graphiques
       if (initializeTimeoutRef.current) {
         clearTimeout(initializeTimeoutRef.current);
       }
@@ -75,43 +75,40 @@ const RecommendationsTab = ({
     const newCharts = {};
 
     try {
-      // Emission Reduction Potential Chart
+      // Graphique du potentiel de réduction des émissions (Pie Chart)
       if (emissionReductionPotentialChartRef.current) {
         const reductionData = [
           {
             scope: "Scope 1",
             current: emissionTotals.scope1,
-            potential: emissionTotals.scope1 * 0.7, // Assume 30% reduction potential
+            potential: emissionTotals.scope1 * 0.7, // Réduction potentielle de 30%
           },
           {
             scope: "Scope 2",
             current: emissionTotals.scope2,
-            potential: emissionTotals.scope2 * 0.6, // Assume 40% reduction
+            potential: emissionTotals.scope2 * 0.6, // Réduction de 40%
           },
           {
             scope: "Scope 3",
             current: emissionTotals.scope3,
-            potential: emissionTotals.scope3 * 0.75, // Assume 25% reduction
+            potential: emissionTotals.scope3 * 0.75, // Réduction de 25%
           },
         ].filter((d) => d.current > 0);
+
+        const totalCurrent = reductionData.reduce((sum, item) => sum + item.current, 0);
+        const totalPotential = reductionData.reduce((sum, item) => sum + item.potential, 0);
+        const totalReduction = totalCurrent - totalPotential;
 
         newCharts.emissionReductionPotential = new Chart(
           emissionReductionPotentialChartRef.current,
           {
-            type: "bar",
+            type: "pie",
             data: {
-              labels: reductionData.map((d) => d.scope),
+              labels: ["Potentiel de réduction", "Émissions restantes"],
               datasets: [
                 {
-                  label: "Current Emissions (tCO₂)",
-                  data: reductionData.map((d) => d.current),
-                  backgroundColor: "#328E6E",
-                  borderWidth: 1,
-                },
-                {
-                  label: "Potential Emissions After Reduction (tCO₂)",
-                  data: reductionData.map((d) => d.potential),
-                  backgroundColor: "#90C67C",
+                  data: [totalReduction, totalPotential],
+                  backgroundColor: ["#90C67C", "#328E6E"],
                   borderWidth: 1,
                 },
               ],
@@ -122,41 +119,42 @@ const RecommendationsTab = ({
                 ...chartOptions.plugins,
                 title: {
                   display: true,
-                  text: "Potential Emission Reductions by Scope",
+                  text: "Réductions potentielles des émissions par scope",
                 },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  title: {
-                    display: true,
-                    text: "Emissions (tCO₂)",
-                  },
-                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      const label = context.label || '';
+                      const value = context.raw;
+                      const percentage = Math.round((value / totalCurrent) * 100);
+                      return `${label}: ${value.toFixed(2)} tCO₂ (${percentage}%)`;
+                    }
+                  }
+                }
               },
             },
           }
         );
       }
 
-      // Energy Efficiency Chart
+      // Graphique d'efficacité énergétique (Column Chart)
       if (energyEfficiencyChartRef.current && scope2Details.energyConsumptionEmissions > 0) {
         const efficiencyData = [
           {
-            measure: "Current Consumption",
+            measure: "Consommation actuelle",
             emissions: scope2Details.energyConsumptionEmissions,
           },
           {
-            measure: "LED Lighting",
-            emissions: scope2Details.energyConsumptionEmissions * 0.8, // 20% reduction
+            measure: "Éclairage LED",
+            emissions: scope2Details.energyConsumptionEmissions * 0.8, // Réduction de 20%
           },
           {
-            measure: "Smart HVAC",
-            emissions: scope2Details.energyConsumptionEmissions * 0.7, // 30% reduction
+            measure: "CVC intelligent",
+            emissions: scope2Details.energyConsumptionEmissions * 0.7, // Réduction de 30%
           },
           {
-            measure: "Renewable Energy",
-            emissions: scope2Details.energyConsumptionEmissions * 0.4, // 60% reduction
+            measure: "Énergie renouvelable",
+            emissions: scope2Details.energyConsumptionEmissions * 0.4, // Réduction de 60%
           },
         ];
 
@@ -168,7 +166,7 @@ const RecommendationsTab = ({
               labels: efficiencyData.map((d) => d.measure),
               datasets: [
                 {
-                  label: "Emissions (tCO₂)",
+                  label: "Émissions (tCO₂)",
                   data: efficiencyData.map((d) => d.emissions),
                   backgroundColor: ["#328E6E", "#67AE6E", "#90C67C", "#E1EEBC"],
                   borderWidth: 1,
@@ -177,19 +175,20 @@ const RecommendationsTab = ({
             },
             options: {
               ...chartOptions,
+              indexAxis: 'y',
               plugins: {
                 ...chartOptions.plugins,
                 title: {
                   display: true,
-                  text: "Impact of Energy Efficiency Measures",
+                  text: "Impact des mesures d'efficacité énergétique",
                 },
               },
               scales: {
-                y: {
+                x: {
                   beginAtZero: true,
                   title: {
                     display: true,
-                    text: "Emissions (tCO₂)",
+                    text: "Émissions (tCO₂)",
                   },
                 },
               },
@@ -198,24 +197,24 @@ const RecommendationsTab = ({
         );
       }
 
-      // Transport Optimization Chart
+      // Graphique d'optimisation du transport (Bar Chart)
       if (transportOptimizationChartRef.current && scope3Details.transportEmissions > 0) {
         const optimizationData = [
           {
-            mode: "Current Transport",
+            mode: "Transport actuel",
             emissions: scope3Details.transportEmissions,
           },
           {
-            mode: "Electric Vehicles",
-            emissions: scope3Details.transportEmissions * 0.5, // 50% reduction
+            mode: "Véhicules électriques",
+            emissions: scope3Details.transportEmissions * 0.5, // Réduction de 50%
           },
           {
-            mode: "Route Optimization",
-            emissions: scope3Details.transportEmissions * 0.7, // 30% reduction
+            mode: "Optimisation des itinéraires",
+            emissions: scope3Details.transportEmissions * 0.7, // Réduction de 30%
           },
           {
-            mode: "Rail Preference",
-            emissions: scope3Details.transportEmissions * 0.6, // 40% reduction
+            mode: "Préférence ferroviaire",
+            emissions: scope3Details.transportEmissions * 0.6, // Réduction de 40%
           },
         ];
 
@@ -227,7 +226,7 @@ const RecommendationsTab = ({
               labels: optimizationData.map((d) => d.mode),
               datasets: [
                 {
-                  label: "Emissions (tCO₂)",
+                  label: "Émissions (tCO₂)",
                   data: optimizationData.map((d) => d.emissions),
                   backgroundColor: ["#328E6E", "#4299e1", "#94d82d", "#f59f00"],
                   borderWidth: 1,
@@ -240,7 +239,7 @@ const RecommendationsTab = ({
                 ...chartOptions.plugins,
                 title: {
                   display: true,
-                  text: "Transport Emission Reduction Strategies",
+                  text: "Stratégies de réduction des émissions de transport",
                 },
               },
               scales: {
@@ -248,7 +247,7 @@ const RecommendationsTab = ({
                   beginAtZero: true,
                   title: {
                     display: true,
-                    text: "Emissions (tCO₂)",
+                    text: "Émissions (tCO₂)",
                   },
                 },
               },
@@ -257,36 +256,36 @@ const RecommendationsTab = ({
         );
       }
 
-      // Waste Management Impact Chart
+      // Graphique d'impact de la gestion des déchets (Doughnut Chart)
       if (wasteManagementChartRef.current && scope3Details.wasteEmissions > 0) {
         const wasteData = [
           {
-            strategy: "Current Waste",
+            strategy: "Déchets actuels",
             emissions: scope3Details.wasteEmissions,
           },
           {
-            strategy: "Recycling Program",
-            emissions: scope3Details.wasteEmissions * 0.5, // 50% reduction
+            strategy: "Programme de recyclage",
+            emissions: scope3Details.wasteEmissions * 0.5, // Réduction de 50%
           },
           {
-            strategy: "Waste-to-Energy",
-            emissions: scope3Details.wasteEmissions * 0.4, // 60% reduction
+            strategy: "Déchets-à-Énergie",
+            emissions: scope3Details.wasteEmissions * 0.4, // Réduction de 60%
           },
           {
-            strategy: "Composting",
-            emissions: scope3Details.wasteEmissions * 0.6, // 40% reduction
+            strategy: "Compostage",
+            emissions: scope3Details.wasteEmissions * 0.6, // Réduction de 40%
           },
         ];
 
         newCharts.wasteManagement = new Chart(
           wasteManagementChartRef.current,
           {
-            type: "bar",
+            type: "doughnut",
             data: {
               labels: wasteData.map((d) => d.strategy),
               datasets: [
                 {
-                  label: "Emissions (tCO₂)",
+                  label: "Émissions (tCO₂)",
                   data: wasteData.map((d) => d.emissions),
                   backgroundColor: ["#328E6E", "#67AE6E", "#90C67C", "#E1EEBC"],
                   borderWidth: 1,
@@ -299,16 +298,7 @@ const RecommendationsTab = ({
                 ...chartOptions.plugins,
                 title: {
                   display: true,
-                  text: "Impact of Waste Management Strategies",
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  title: {
-                    display: true,
-                    text: "Emissions (tCO₂)",
-                  },
+                  text: "Impact des stratégies de gestion des déchets",
                 },
               },
             },
@@ -316,36 +306,36 @@ const RecommendationsTab = ({
         );
       }
 
-      // Business Travel Reduction Chart
+      // Graphique de réduction des voyages d'affaires (Polar Area Chart)
       if (businessTravelChartRef.current && scope3Details.businessTravelEmissions > 0) {
         const travelData = [
           {
-            strategy: "Current Travel",
+            strategy: "Voyages actuels",
             emissions: scope3Details.businessTravelEmissions,
           },
           {
-            strategy: "Virtual Meetings",
-            emissions: scope3Details.businessTravelEmissions * 0.3, // 70% reduction
+            strategy: "Réunions virtuelles",
+            emissions: scope3Details.businessTravelEmissions * 0.3, // Réduction de 70%
           },
           {
-            strategy: "Train Travel",
-            emissions: scope3Details.businessTravelEmissions * 0.4, // 60% reduction
+            strategy: "Voyages en train",
+            emissions: scope3Details.businessTravelEmissions * 0.4, // Réduction de 60%
           },
           {
-            strategy: "Travel Policy",
-            emissions: scope3Details.businessTravelEmissions * 0.5, // 50% reduction
+            strategy: "Politique de voyage",
+            emissions: scope3Details.businessTravelEmissions * 0.5, // Réduction de 50%
           },
         ];
 
         newCharts.businessTravel = new Chart(
           businessTravelChartRef.current,
           {
-            type: "bar",
+            type: "polarArea",
             data: {
               labels: travelData.map((d) => d.strategy),
               datasets: [
                 {
-                  label: "Emissions (tCO₂)",
+                  label: "Émissions (tCO₂)",
                   data: travelData.map((d) => d.emissions),
                   backgroundColor: ["#328E6E", "#4299e1", "#94d82d", "#f59f00"],
                   borderWidth: 1,
@@ -358,16 +348,7 @@ const RecommendationsTab = ({
                 ...chartOptions.plugins,
                 title: {
                   display: true,
-                  text: "Business Travel Emission Reduction Strategies",
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  title: {
-                    display: true,
-                    text: "Emissions (tCO₂)",
-                  },
+                  text: "Stratégies de réduction des émissions de voyages d'affaires",
                 },
               },
             },
@@ -375,32 +356,32 @@ const RecommendationsTab = ({
         );
       }
 
-      // Fuel Efficiency Comparison Chart
+      // Graphique de comparaison de l'efficacité des carburants (Bar Chart - horizontal)
       if (fuelEfficiencyChartRef.current && scope1Details.fuelEmissions > 0) {
         const fuelData = [
           {
             fuel: "Diesel",
-            emissions: 2.68, // kg CO2 per liter
+            emissions: 2.68, // kg CO2 par litre
           },
           {
-            fuel: "Gasoline",
-            emissions: 2.31, // kg CO2 per liter
+            fuel: "Essence",
+            emissions: 2.31, // kg CO2 par litre
           },
           {
-            fuel: "Natural Gas",
-            emissions: 1.89, // kg CO2 per m3
+            fuel: "Gaz naturel",
+            emissions: 1.89, // kg CO2 par m3
           },
           {
             fuel: "Biodiesel (B100)",
-            emissions: 0.33, // kg CO2 per liter
+            emissions: 0.33, // kg CO2 par litre
           },
           {
-            fuel: "Biogas",
-            emissions: 0.21, // kg CO2 per m3
+            fuel: "Biogaz",
+            emissions: 0.21, // kg CO2 par m3
           },
           {
-            fuel: "Hydrogen (Green)",
-            emissions: 0.01, // kg CO2 per kg
+            fuel: "Hydrogène (Vert)",
+            emissions: 0.01, // kg CO2 par kg
           },
         ];
 
@@ -412,15 +393,15 @@ const RecommendationsTab = ({
               labels: fuelData.map((d) => d.fuel),
               datasets: [
                 {
-                  label: "Emissions (kg CO₂ per unit)",
+                  label: "Émissions (kg CO₂ par unité)",
                   data: fuelData.map((d) => d.emissions),
                   backgroundColor: [
-                    "#ef4444", // Red for diesel (highest emissions)
-                    "#f97316", // Orange for gasoline
-                    "#f59e0b", // Amber for natural gas
-                    "#84cc16", // Lime for biodiesel
-                    "#10b981", // Emerald for biogas
-                    "#06b6d4", // Cyan for hydrogen (lowest emissions)
+                    "#ef4444", // Rouge pour diesel (émissions les plus élevées)
+                    "#f97316", // Orange pour essence
+                    "#f59e0b", // Ambre pour gaz naturel
+                    "#84cc16", // Citron pour biodiesel
+                    "#10b981", // Émeraude pour biogaz
+                    "#06b6d4", // Cyan pour hydrogène (émissions les plus faibles)
                   ],
                   borderWidth: 1,
                 },
@@ -428,19 +409,20 @@ const RecommendationsTab = ({
             },
             options: {
               ...chartOptions,
+              indexAxis: 'y',
               plugins: {
                 ...chartOptions.plugins,
                 title: {
                   display: true,
-                  text: "Fuel Types Carbon Intensity Comparison",
+                  text: "Comparaison de l'intensité carbone des types de carburant",
                 },
               },
               scales: {
-                y: {
+                x: {
                   beginAtZero: true,
                   title: {
                     display: true,
-                    text: "Carbon Intensity (kg CO₂ per unit)",
+                    text: "Intensité carbone (kg CO₂ par unité)",
                   },
                 },
               },
@@ -449,13 +431,13 @@ const RecommendationsTab = ({
         );
       }
     } catch (error) {
-      console.error("Error initializing charts:", error);
+      console.error("Erreur lors de l'initialisation des graphiques:", error);
     }
 
     setCharts(newCharts);
   };
 
-  // Generate recommendations based on emission data
+  // Générer des recommandations basées sur les données d'émissions
   const getRecommendations = () => {
     const recommendations = [];
     const emissionTotals = calculateTotalEmissions;
@@ -465,29 +447,29 @@ const RecommendationsTab = ({
     
     let idCounter = 1;
 
-    // Scope 1 Recommendations
+    // Recommandations Scope 1
     if (report.scope1 && emissionTotals.scope1 > 0) {
       if (scope1Details.fuelEmissions > 0) {
         recommendations.push({
           id: idCounter++,
-          title: "Transition to Low-Carbon Fuels",
+          title: "Transition vers des carburants à faible teneur en carbone",
           description:
-            "Switch from high-emission fuels (e.g., diesel) to low-carbon alternatives like biofuels or green hydrogen for your fleet and machinery. This can significantly reduce your direct emissions while maintaining operational efficiency. Start with a pilot program for a subset of your fleet to evaluate performance and ROI before full implementation.",
-          impact: `Potential to reduce Scope 1 emissions by approximately ${formatNumber(
+            "Passez des carburants à fortes émissions (par exemple, le diesel) à des alternatives à faible émission de carbone comme les biocarburants ou l'hydrogène vert pour votre flotte et vos machines. Cela peut réduire considérablement vos émissions directes tout en maintenant l'efficacité opérationnelle. Commencez par un programme pilote pour un sous-ensemble de votre flotte afin d'évaluer les performances et le retour sur investissement avant une mise en œuvre complète.",
+          impact: `Potentiel de réduction des émissions de Scope 1 d'environ ${formatNumber(
             scope1Details.fuelEmissions * 0.3
-          )} tCO₂ annually.`,
+          )} tCO₂ par an.`,
           scope: "Scope 1",
-          priority: "High",
+          priority: "Élevée",
           potential: scope1Details.fuelEmissions * 0.3,
-          payback: "2-3 years",
-          difficulty: "Medium",
+          payback: "2-3 ans",
+          difficulty: "Moyenne",
           sources: [
             {
-              title: "IPCC, 2022: Climate Change 2022: Mitigation of Climate Change",
+              title: "GIEC, 2022: Changement climatique 2022: Atténuation du changement climatique",
               url: "https://www.ipcc.ch/report/ar6/wg3/",
             },
             {
-              title: "IEA, 2023: The Role of Low-Carbon Fuels in the Clean Energy Transition",
+              title: "AIE, 2023: Le rôle des carburants à faible teneur en carbone dans la transition énergétique propre",
               url: "https://www.iea.org/reports/the-role-of-low-carbon-fuels-in-the-clean-energy-transition",
             },
           ],
@@ -496,24 +478,24 @@ const RecommendationsTab = ({
       if (scope1Details.productionEmissions > 0) {
         recommendations.push({
           id: idCounter++,
-          title: "Optimize Production Processes",
+          title: "Optimiser les processus de production",
           description:
-            "Implement energy-efficient technologies in production processes, such as advanced automation, heat recovery systems, and optimized equipment scheduling. This can lead to both emissions reduction and operational cost savings. Consider conducting an energy audit to identify the most impactful opportunities for improvement.",
-          impact: `Could reduce production-related emissions by up to ${formatNumber(
+            "Implémentez des technologies écoénergétiques dans les processus de production, telles que l'automatisation avancée, les systèmes de récupération de chaleur et la planification optimisée des équipements. Cela peut conduire à la fois à une réduction des émissions et à des économies de coûts opérationnels. Envisagez de réaliser un audit énergétique pour identifier les opportunités d'amélioration les plus impactantes.",
+          impact: `Pourrait réduire les émissions liées à la production jusqu'à ${formatNumber(
             scope1Details.productionEmissions * 0.25
-          )} tCO₂ per year.`,
+          )} tCO₂ par an.`,
           scope: "Scope 1",
-          priority: "Medium",
+          priority: "Moyenne",
           potential: scope1Details.productionEmissions * 0.25,
-          payback: "1-4 years",
-          difficulty: "Medium",
+          payback: "1-4 ans",
+          difficulty: "Moyenne",
           sources: [
             {
-              title: "IEA, 2023: Energy Efficiency 2023 Report",
+              title: "AIE, 2023: Rapport sur l'efficacité énergétique 2023",
               url: "https://www.iea.org/reports/energy-efficiency-2023",
             },
             {
-              title: "EPA, 2022: Energy Efficiency in Industrial Processes",
+              title: "EPA, 2022: Efficacité énergétique dans les processus industriels",
               url: "https://www.epa.gov/energy/industrial-processes",
             },
           ],
@@ -521,29 +503,29 @@ const RecommendationsTab = ({
       }
     }
 
-    // Scope 2 Recommendations
+    // Recommandations Scope 2
     if (report.scope2 && emissionTotals.scope2 > 0) {
       if (scope2Details.energyConsumptionEmissions > 0) {
         recommendations.push({
           id: idCounter++,
-          title: "Adopt Renewable Energy Sources",
+          title: "Adopter des sources d'énergie renouvelable",
           description:
-            "Source electricity from renewable energy providers or install on-site solar/wind systems to reduce reliance on fossil fuel-based electricity. Begin with a feasibility study to determine the most cost-effective renewable energy solutions for your specific locations and energy usage patterns.",
-          impact: `Potential reduction of ${formatNumber(
+            "Approvisionnez-vous en électricité auprès de fournisseurs d'énergie renouvelable ou installez des systèmes solaires/éoliens sur site pour réduire la dépendance à l'électricité basée sur les combustibles fossiles. Commencez par une étude de faisabilité pour déterminer les solutions d'énergie renouvelable les plus rentables pour vos emplacements spécifiques et vos modèles de consommation d'énergie.",
+          impact: `Réduction potentielle de ${formatNumber(
             scope2Details.energyConsumptionEmissions * 0.6
-          )} tCO₂ in Scope 2 emissions.`,
+          )} tCO₂ dans les émissions de Scope 2.`,
           scope: "Scope 2",
-          priority: "High",
+          priority: "Élevée",
           potential: scope2Details.energyConsumptionEmissions * 0.6,
-          payback: "4-8 years",
-          difficulty: "Medium",
+          payback: "4-8 ans",
+          difficulty: "Moyenne",
           sources: [
             {
-              title: "IRENA, 2023: Renewable Energy Roadmap",
+              title: "IRENA, 2023: Feuille de route pour l'énergie renouvelable",
               url: "https://www.irena.org/publications/2023/renewable-energy-roadmap",
             },
             {
-              title: "NREL, 2023: Renewable Energy for Commercial Buildings",
+              title: "NREL, 2023: Énergie renouvelable pour bâtiments commerciaux",
               url: "https://www.nrel.gov/commercial/renewable-energy.html",
             },
           ],
@@ -552,24 +534,24 @@ const RecommendationsTab = ({
       if (scope2Details.coolingEmissions > 0 || scope2Details.heatingEmissions > 0) {
         recommendations.push({
           id: idCounter++,
-          title: "Upgrade HVAC Systems",
+          title: "Moderniser les systèmes CVC",
           description:
-            "Install smart HVAC systems with energy-efficient cooling and heating technologies to minimize energy consumption. Integrate smart controls and zoning systems to optimize temperature regulation based on occupancy and usage patterns. Regular maintenance and performance monitoring can further improve efficiency.",
-          impact: `Could save up to ${formatNumber(
+            "Installez des systèmes CVC intelligents avec des technologies de refroidissement et de chauffage écoénergétiques pour minimiser la consommation d'énergie. Intégrez des contrôles intelligents et des systèmes de zonage pour optimiser la régulation de la température en fonction de l'occupation et des modèles d'utilisation. L'entretien régulier et la surveillance des performances peuvent améliorer davantage l'efficacité.",
+          impact: `Pourrait économiser jusqu'à ${formatNumber(
             (scope2Details.coolingEmissions + scope2Details.heatingEmissions) * 0.3
-          )} tCO₂ annually.`,
+          )} tCO₂ par an.`,
           scope: "Scope 2",
-          priority: "Medium",
+          priority: "Moyenne",
           potential: (scope2Details.coolingEmissions + scope2Details.heatingEmissions) * 0.3,
-          payback: "3-5 years",
-          difficulty: "Medium",
+          payback: "3-5 ans",
+          difficulty: "Moyenne",
           sources: [
             {
-              title: "US DOE, 2022: Energy Savings Performance Contracting for HVAC Systems",
+              title: "US DOE, 2022: Contrats de performance d'économie d'énergie pour les systèmes CVC",
               url: "https://www.energy.gov/eere/buildings/energy-savings-performance-contracting",
             },
             {
-              title: "ASHRAE, 2023: Advanced HVAC System Design Guide",
+              title: "ASHRAE, 2023: Guide de conception de systèmes CVC avancés",
               url: "https://www.ashrae.org/technical-resources/bookstore/advanced-hvac-systems",
             },
           ],
@@ -577,29 +559,29 @@ const RecommendationsTab = ({
       }
     }
 
-    // Scope 3 Recommendations
+    // Recommandations Scope 3
     if (report.scope3 && emissionTotals.scope3 > 0) {
       if (scope3Details.transportEmissions > 0) {
         recommendations.push({
           id: idCounter++,
-          title: "Optimize Logistics and Transport",
+          title: "Optimiser la logistique et le transport",
           description:
-            "Shift to electric vehicles for short-haul transport, optimize delivery routes using AI-driven logistics software, and prioritize rail over road transport for long-distance shipping. Collaborate with logistics partners to establish shared sustainability goals and implement joint emission reduction initiatives.",
-          impact: `Potential to cut transport emissions by ${formatNumber(
+            "Passez aux véhicules électriques pour le transport à courte distance, optimisez les itinéraires de livraison à l'aide de logiciels logistiques basés sur l'IA et privilégiez le rail plutôt que la route pour les expéditions longue distance. Collaborez avec des partenaires logistiques pour établir des objectifs de durabilité partagés et mettre en œuvre des initiatives conjointes de réduction des émissions.",
+          impact: `Potentiel de réduction des émissions de transport de ${formatNumber(
             scope3Details.transportEmissions * 0.4
-          )} tCO₂ per year.`,
+          )} tCO₂ par an.`,
           scope: "Scope 3",
-          priority: "High",
+          priority: "Élevée",
           potential: scope3Details.transportEmissions * 0.4,
-          payback: "2-5 years",
-          difficulty: "Medium",
+          payback: "2-5 ans",
+          difficulty: "Moyenne",
           sources: [
             {
-              title: "Smart Freight Centre, 2023: Global Logistics Emissions Council Framework",
+              title: "Smart Freight Centre, 2023: Cadre du Conseil mondial des émissions logistiques",
               url: "https://www.smartfreightcentre.org/en/how-to-implement-items/what-is-glec-framework/58/",
             },
             {
-              title: "McKinsey, 2022: Decarbonizing the Global Supply Chain",
+              title: "McKinsey, 2022: Décarbonation de la chaîne d'approvisionnement mondiale",
               url: "https://www.mckinsey.com/capabilities/operations/our-insights/decarbonizing-global-supply-chains",
             },
           ],
@@ -608,24 +590,24 @@ const RecommendationsTab = ({
       if (scope3Details.wasteEmissions > 0) {
         recommendations.push({
           id: idCounter++,
-          title: "Enhance Waste Management",
+          title: "Améliorer la gestion des déchets",
           description:
-            "Implement comprehensive recycling programs and partner with waste-to-energy facilities to reduce emissions from waste disposal. Adopt circular economy principles to minimize waste generation at the source. Conduct waste audits to identify major waste streams and develop targeted reduction strategies.",
-          impact: `Could reduce waste-related emissions by ${formatNumber(
+            "Mettez en œuvre des programmes de recyclage complets et collaborez avec des installations de valorisation énergétique des déchets pour réduire les émissions liées à l'élimination des déchets. Adoptez les principes de l'économie circulaire pour minimiser la génération de déchets à la source. Effectuez des audits de déchets pour identifier les principaux flux de déchets et développer des stratégies de réduction ciblées.",
+          impact: `Pourrait réduire les émissions liées aux déchets de ${formatNumber(
             scope3Details.wasteEmissions * 0.5
-          )} tCO₂ annually.`,
+          )} tCO₂ par an.`,
           scope: "Scope 3",
-          priority: "Medium",
+          priority: "Moyenne",
           potential: scope3Details.wasteEmissions * 0.5,
-          payback: "1-3 years",
-          difficulty: "Low",
+          payback: "1-3 ans",
+          difficulty: "Faible",
           sources: [
             {
-              title: "EPA, 2023: Advancing Sustainable Materials Management",
+              title: "EPA, 2023: Promotion de la gestion durable des matériaux",
               url: "https://www.epa.gov/smm/advancing-sustainable-materials-management-facts-and-figures-report",
             },
             {
-              title: "Ellen MacArthur Foundation, 2023: Circular Economy in Business",
+              title: "Fondation Ellen MacArthur, 2023: Économie circulaire en entreprise",
               url: "https://ellenmacarthurfoundation.org/topics/business/overview",
             },
           ],
@@ -634,24 +616,24 @@ const RecommendationsTab = ({
       if (scope3Details.businessTravelEmissions > 0) {
         recommendations.push({
           id: idCounter++,
-          title: "Reduce Business Travel Emissions",
+          title: "Réduire les émissions des voyages d'affaires",
           description:
-            "Encourage virtual meetings and incentivize low-carbon travel options like train travel for business trips. Develop a sustainable travel policy that incorporates carbon budgets for different types of business travel. Invest in high-quality video conferencing technology to make virtual meetings more effective and engaging.",
-          impact: `Potential reduction of ${formatNumber(
+            "Encouragez les réunions virtuelles et incitez à des options de voyage à faible émission de carbone comme le train pour les voyages d'affaires. Développez une politique de voyage durable qui intègre des budgets carbone pour différents types de voyages d'affaires. Investissez dans une technologie de vidéoconférence de haute qualité pour rendre les réunions virtuelles plus efficaces et engageantes.",
+          impact: `Réduction potentielle de ${formatNumber(
             scope3Details.businessTravelEmissions * 0.3
-          )} tCO₂ per year.`,
+          )} tCO₂ par an.`,
           scope: "Scope 3",
-          priority: "Medium",
+          priority: "Moyenne",
           potential: scope3Details.businessTravelEmissions * 0.3,
-          payback: "1-2 years",
-          difficulty: "Low",
+          payback: "1-2 ans",
+          difficulty: "Faible",
           sources: [
             {
-              title: "WRI, 2022: GHG Protocol Corporate Value Chain (Scope 3) Standard",
+              title: "WRI, 2022: Protocole GES Chaîne de valeur (Scope 3)",
               url: "https://ghgprotocol.org/standards/scope-3-standard",
             },
             {
-              title: "WBCSD, 2023: Sustainable Business Travel Framework",
+              title: "WBCSD, 2023: Cadre des voyages d'affaires durables",
               url: "https://www.wbcsd.org/Programs/Climate-and-Energy/Climate/SOS-1.5/Resources/Sustainable-Business-Travel",
             },
           ],
@@ -664,13 +646,16 @@ const RecommendationsTab = ({
 
   const recommendations = getRecommendations();
 
-  // Function to determine the color class for priority badges
+  // Fonction pour déterminer la classe de couleur pour les badges de priorité
   const getPriorityClass = (priority) => {
     switch (priority.toLowerCase()) {
+      case "élevée":
       case "high":
         return "bg-danger";
+      case "moyenne":
       case "medium":
         return "bg-warning";
+      case "faible":
       case "low":
         return "bg-info";
       default:
@@ -678,7 +663,7 @@ const RecommendationsTab = ({
     }
   };
 
-  // Creates a chart for each recommendation
+  // Crée un graphique pour chaque recommandation
   const createRecommendationCharts = () => {
     recommendations.forEach((rec, index) => {
       const chartRef = document.getElementById(`chart-${rec.id}`);
@@ -692,34 +677,34 @@ const RecommendationsTab = ({
         let backgroundColor = [];
         let labels = [];
 
-        // Customize chart data based on recommendation type
-        if (rec.title.includes("Fuel")) {
+        // Personnaliser les données du graphique en fonction du type de recommandation
+        if (rec.title.includes("carburant") || rec.title.includes("Fuel")) {
           data = [2.68, 2.31, 1.89, 0.33, 0.21, 0.01];
-          labels = ["Diesel", "Gasoline", "Natural Gas", "Biodiesel", "Biogas", "Green Hydrogen"];
+          labels = ["Diesel", "Essence", "Gaz naturel", "Biodiesel", "Biogaz", "Hydrogène vert"];
           backgroundColor = ["#ef4444", "#f97316", "#f59e0b", "#84cc16", "#10b981", "#06b6d4"];
-        } else if (rec.title.includes("Energy") || rec.title.includes("Renewable")) {
+        } else if (rec.title.includes("énergie") || rec.title.includes("Renewable")) {
           data = [100, 60, 0, 2, 4, 6];
-          labels = ["Coal", "Natural Gas", "Solar", "Wind", "Hydro", "Biomass"];
+          labels = ["Charbon", "Gaz naturel", "Solaire", "Éolien", "Hydro", "Biomasse"];
           backgroundColor = ["#ef4444", "#f97316", "#10b981", "#06b6d4", "#3b82f6", "#84cc16"];
-        } else if (rec.title.includes("Transport") || rec.title.includes("Travel")) {
+        } else if (rec.title.includes("transport") || rec.title.includes("voyage")) {
           data = [170, 140, 104, 14, 6, 1];
-          labels = ["Air", "Car (Gasoline)", "Car (Diesel)", "Train", "Bus", "Electric Vehicle"];
+          labels = ["Avion", "Voiture (Essence)", "Voiture (Diesel)", "Train", "Bus", "Véhicule électrique"];
           backgroundColor = ["#ef4444", "#f97316", "#f59e0b", "#3b82f6", "#84cc16", "#10b981"];
-        } else if (rec.title.includes("Waste")) {
+        } else if (rec.title.includes("déchet")) {
           data = [600, 240, 70, 18];
-          labels = ["Landfill", "Incineration", "Recycling", "Composting"];
+          labels = ["Décharge", "Incinération", "Recyclage", "Compostage"];
           backgroundColor = ["#ef4444", "#f97316", "#10b981", "#84cc16"];
-        } else if (rec.title.includes("HVAC")) {
+        } else if (rec.title.includes("CVC") || rec.title.includes("HVAC")) {
           data = [100, 70, 45, 30];
-          labels = ["Standard HVAC", "High-Efficiency HVAC", "Smart HVAC", "Heat Pump"];
+          labels = ["CVC standard", "CVC haute efficacité", "CVC intelligent", "Pompe à chaleur"];
           backgroundColor = ["#ef4444", "#f97316", "#10b981", "#06b6d4"];
-        } else if (rec.title.includes("Production")) {
+        } else if (rec.title.includes("production")) {
           data = [100, 80, 60, 40];
-          labels = ["Current Process", "Optimized Process", "Heat Recovery", "Advanced Automation"];
+          labels = ["Processus actuel", "Processus optimisé", "Récupération de chaleur", "Automatisation avancée"];
           backgroundColor = ["#ef4444", "#f97316", "#10b981", "#06b6d4"];
         } else {
           data = [100, rec.potential / (rec.potential * 0.3) * 100];
-          labels = ["Current Emissions", "With Implemented Recommendation"];
+          labels = ["Émissions actuelles", "Avec recommandation mise en œuvre"];
           backgroundColor = ["#ef4444", "#10b981"];
         }
 
@@ -729,7 +714,7 @@ const RecommendationsTab = ({
             labels: labels,
             datasets: [
               {
-                label: "Emissions (relative scale)",
+                label: "Émissions (échelle relative)",
                 data: data,
                 backgroundColor: backgroundColor,
                 borderWidth: 1,
@@ -745,7 +730,7 @@ const RecommendationsTab = ({
               },
               title: {
                 display: true,
-                text: "Impact Comparison",
+                text: "Comparaison d'impact",
               },
             },
             scales: {
@@ -761,7 +746,7 @@ const RecommendationsTab = ({
 
   useEffect(() => {
     if (recommendations.length > 0 && activeTab === "recommendations") {
-      // Use a timeout to ensure the DOM is updated before attempting to access the canvas elements
+      // Utiliser un délai pour s'assurer que le DOM est mis à jour avant d'essayer d'accéder aux éléments canvas
       const timer = setTimeout(() => {
         createRecommendationCharts();
       }, 500);
@@ -771,14 +756,14 @@ const RecommendationsTab = ({
 
   return (
     <div className="container-xl">
-      {/* Charts Section */}
+      {/* Section des graphiques */}
       {report?.includeCharts === "yes" && (
         <div className="row row-cards mb-4">
           <div className="col-md-6 col-lg-4 mb-3">
             <div className="card">
               <div className="card-header">
                 <h3 className="card-title">
-                  Potential Emission Reductions by Scope
+                  Réductions potentielles des émissions par scope
                 </h3>
               </div>
               <div className="card-body">
@@ -790,8 +775,8 @@ const RecommendationsTab = ({
                 </div>
                 <p className="text-muted mt-2">
                   <small>
-                    Source: IPCC, 2022: Climate Change 2022: Mitigation of Climate
-                    Change; IEA, 2023: Net Zero Roadmap.
+                    Source: GIEC, 2022: Changement climatique 2022: Atténuation du
+                    changement climatique; AIE, 2023: Feuille de route Net Zéro.
                   </small>
                 </p>
               </div>
@@ -801,7 +786,7 @@ const RecommendationsTab = ({
             <div className="card">
               <div className="card-header">
                 <h3 className="card-title">
-                  Fuel Types Carbon Intensity Comparison
+                  Comparaison de l'intensité carbone des types de carburant
                 </h3>
               </div>
               <div className="card-body">
@@ -813,7 +798,7 @@ const RecommendationsTab = ({
                 </div>
                 <p className="text-muted mt-2">
                   <small>
-                    Source: IEA, 2024: Greenhouse Gas Emissions from Energy; EPA, 2023: Emission Factors for Greenhouse Gas Inventories.
+                    Source: AIE, 2024: Émissions de gaz à effet de serre issues de l'énergie; EPA, 2023: Facteurs d'émission pour les inventaires de gaz à effet de serre.
                   </small>
                 </p>
               </div>
@@ -824,7 +809,7 @@ const RecommendationsTab = ({
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    Impact of Energy Efficiency Measures
+                    Impact des mesures d'efficacité énergétique
                   </h3>
                 </div>
                 <div className="card-body">
@@ -836,8 +821,8 @@ const RecommendationsTab = ({
                   </div>
                   <p className="text-muted mt-2">
                     <small>
-                      Source: US DOE, 2023: Energy Efficiency and Renewable Energy
-                      Reports; IRENA, 2023: Renewable Power Generation Costs.
+                      Source: US DOE, 2023: Rapports sur l'efficacité énergétique et les
+                      énergies renouvelables; IRENA, 2023: Coûts de production d'énergie renouvelable.
                     </small>
                   </p>
                 </div>
@@ -849,7 +834,7 @@ const RecommendationsTab = ({
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    Transport Emission Reduction Strategies
+                    Stratégies de réduction des émissions de transport
                   </h3>
                 </div>
                 <div className="card-body">
@@ -861,9 +846,9 @@ const RecommendationsTab = ({
                   </div>
                   <p className="text-muted mt-2">
                     <small>
-                      Source: Smart Freight Centre, 2023: Global Logistics
-                      Emissions Council; IEA, 2023: The Future of Electric
-                      Vehicles.
+                      Source: Smart Freight Centre, 2023: Conseil mondial
+                      des émissions logistiques; AIE, 2023: L'avenir des
+                      véhicules électriques.
                     </small>
                   </p>
                 </div>
@@ -875,7 +860,7 @@ const RecommendationsTab = ({
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    Impact of Waste Management Strategies
+                    Impact des stratégies de gestion des déchets
                   </h3>
                 </div>
                 <div className="card-body">
@@ -887,8 +872,8 @@ const RecommendationsTab = ({
                   </div>
                   <p className="text-muted mt-2">
                     <small>
-                      Source: EPA, 2023: Advancing Sustainable Materials
-                      Management; EU, 2023: Circular Economy Action Plan.
+                      Source: EPA, 2023: Promotion de la gestion durable des
+                      matériaux; UE, 2023: Plan d'action pour l'économie circulaire.
                     </small>
                   </p>
                 </div>
@@ -900,7 +885,7 @@ const RecommendationsTab = ({
               <div className="card">
                 <div className="card-header">
                   <h3 className="card-title">
-                    Business Travel Emission Reduction Strategies
+                    Stratégies de réduction des émissions des voyages d'affaires
                   </h3>
                 </div>
                 <div className="card-body">
@@ -912,8 +897,8 @@ const RecommendationsTab = ({
                   </div>
                   <p className="text-muted mt-2">
                     <small>
-                      Source: WRI, 2022: GHG Protocol Corporate Value Chain (Scope
-                      3) Standard; IATA, 2023: Sustainable Aviation Strategies.
+                      Source: WRI, 2022: Protocole GES Chaîne de valeur (Scope
+                      3); IATA, 2023: Stratégies d'aviation durable.
                     </small>
                   </p>
                 </div>
@@ -923,18 +908,18 @@ const RecommendationsTab = ({
         </div>
       )}
 
-      {/* Recommendations Swipeable Section */}
+      {/* Section de recommandations avec défilement */}
       <div className="card mb-4">
         <div className="card-header">
           <h3 className="card-title">
             <IconBulb size={24} className="me-2" />
-            Recommendations for Emission Reduction
+            Recommandations pour la réduction des émissions
           </h3>
         </div>
         <div className="card-body">
           <p className="text-secondary mb-4">
-            Swipe to explore tailored recommendations to reduce your carbon
-            footprint across different scopes.
+            Faites défiler pour explorer des recommandations personnalisées afin de réduire votre
+            empreinte carbone dans les différents scopes.
           </p>
           {recommendations.length > 0 ? (
             <div
@@ -966,15 +951,14 @@ const RecommendationsTab = ({
             </div>
           ) : (
             <div className="alert alert-info">
-              No specific recommendations available based on the current data.
-              Please ensure emission data is complete for all relevant scopes.
+              Aucune recommandation spécifique disponible sur la base des données actuelles.
+              Veuillez vous assurer que les données d'émissions sont complètes pour tous les scopes pertinents.
             </div>
           )}
         </div>
       </div>
  
-
-      {/* Inline CSS for swipeable container */}
+      {/* CSS en ligne pour le conteneur avec défilement */}
       <style jsx>{`
         .overflow-x-auto::-webkit-scrollbar {
           height: 8px;

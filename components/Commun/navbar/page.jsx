@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
 import { IconBell, IconX, IconUser, IconBuilding } from "@tabler/icons-react";
@@ -11,41 +11,58 @@ const Navbar = ({ user, isAdmin }) => {
   const [userNotifications, setUserNotifications] = useState([]);
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const lastFetchTimeRef = useRef(0); // Use ref instead of state
 
-  const fetchNotifications = async (userId) => {
-    try {
-      // Récupérer les notifications utilisateur
-      if (userId) {
-        const userRes = await fetch(`http://localhost:4000/notifications/${userId}`, {
-          credentials: "include",
-        });
-        const userData = await userRes.json();
-        if (userData.success) {
-          setUserNotifications(userData.data);
-        } else {
-          toast.error(userData.message || "Échec de la récupération des notifications utilisateur");
-        }
+  const fetchNotifications = useCallback(
+    async (userId, force = false) => { 
+      const currentTime = Date.now();
+      if (!force && currentTime - lastFetchTimeRef.current < 1) { 
+        return;
       }
 
-      // Récupérer les notifications admin
-      if (isAdmin) {
-        const adminRes = await fetch(`http://localhost:4000/admin/notifications`, {
-          credentials: "include",
-        });
-        const adminData = await adminRes.json();
-        if (adminData.success) {
-          setAdminNotifications(adminData.data);
-        } else {
-          toast.error(adminData.message || "Échec de la récupération des notifications admin");
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      toast.error("Échec de la récupération des notifications");
-    }
-  };
+      lastFetchTimeRef.current = currentTime; // Update ref instead of state
+      setLoading(true);
 
-  const handleDeleteNotification = async (notificationId) => {
+      try {
+        // Fetch user notifications
+        if (userId) {
+          const userRes = await fetch(`http://localhost:4000/notifications/${userId}`, {
+            credentials: "include",
+          });
+          const userData = await userRes.json();
+          if (userData.success) {
+            setUserNotifications(userData.data);
+          } else {
+            toast.error(userData.message || "Échec de la récupération des notifications utilisateur");
+          }
+        }
+
+        // Fetch admin notifications
+        if (isAdmin) {
+          const adminRes = await fetch(`http://localhost:4000/admin/notifications`, {
+            credentials: "include",
+          });
+          const adminData = await adminRes.json();
+          if (adminData.success) {
+            setAdminNotifications(adminData.data);
+          } else {
+            toast.error(adminData.message || "Échec de la récupération des notifications admin");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        toast.error("Échec de la récupération des notifications");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAdmin] // Removed lastFetchTime from dependencies
+  );
+
+  const handleDeleteNotification = async (notificationId, e) => {
+    e.stopPropagation();
+
     try {
       const res = await fetch(`http://localhost:4000/notifications/${notificationId}`, {
         method: "DELETE",
@@ -53,9 +70,8 @@ const Navbar = ({ user, isAdmin }) => {
       });
       const data = await res.json();
       if (data.success) {
-        // Mettre à jour les deux listes de notifications
-        setUserNotifications(userNotifications.filter((n) => n._id !== notificationId));
-        setAdminNotifications(adminNotifications.filter((n) => n._id !== notificationId));
+        setUserNotifications((prev) => prev.filter((n) => n._id !== notificationId));
+        setAdminNotifications((prev) => prev.filter((n) => n._id !== notificationId));
         toast.success("Notification supprimée");
       } else {
         toast.error(data.message || "Échec de la suppression de la notification");
@@ -63,6 +79,32 @@ const Navbar = ({ user, isAdmin }) => {
     } catch (error) {
       console.error("Error deleting notification:", error);
       toast.error("Échec de la suppression de la notification");
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId, e) => {
+    e.stopPropagation();
+
+    try {
+      const res = await fetch(`http://localhost:4000/notifications/${notificationId}/read`, {
+        method: "PUT",
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setUserNotifications((prev) =>
+          prev.map((n) => (n._id === notificationId ? { ...n, is_read: true } : n))
+        );
+        setAdminNotifications((prev) =>
+          prev.map((n) => (n._id === notificationId ? { ...n, is_read: true } : n))
+        );
+      } else {
+        toast.error(data.message || "Échec de la mise à jour de la notification");
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      toast.error("Échec de la mise à jour de la notification");
     }
   };
 
@@ -83,40 +125,65 @@ const Navbar = ({ user, isAdmin }) => {
     }
   };
 
+  const toggleNotifications = () => {
+    if (!showNotifications) {
+      fetchNotifications(user?._id, true);
+    }
+    setShowNotifications(!showNotifications);
+  };
+
   useEffect(() => {
     if (user?._id || isAdmin) {
-      fetchNotifications(user?._id);
+      fetchNotifications(user?._id, true);
+
       const intervalId = setInterval(() => {
         fetchNotifications(user?._id);
-      }, 5 * 60 * 1000);
+      }, 30000);
+
       return () => clearInterval(intervalId);
     }
-  }, [user, isAdmin]);
+  }, [user, isAdmin, fetchNotifications]);
 
-  // Compter les notifications non lues
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const notificationPanel = document.getElementById("notification-panel");
+      const notificationButton = document.getElementById("notification-button");
+
+      if (
+        showNotifications &&
+        notificationPanel &&
+        !notificationPanel.contains(event.target) &&
+        notificationButton &&
+        !notificationButton.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifications]);
+
   const unreadUserCount = userNotifications.filter((n) => !n.is_read).length;
   const unreadAdminCount = adminNotifications.filter((n) => !n.is_read).length;
   const totalUnreadCount = unreadUserCount + unreadAdminCount;
 
-  // Combiner toutes les notifications
   const allNotifications = [...userNotifications, ...adminNotifications];
-  
-  // Trier par date (les plus récentes en premier)
   allNotifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   return (
-    <nav
-      className="position-sticky sticky-top navbar py-2 navbar-expand-lg"
-      style={{ backgroundColor: "#8ebe21" }}
-    >
+    <nav className="position-sticky sticky-top navbar py-2 navbar-expand-lg" style={{ backgroundColor: "#8ebe21" }}>
       <div className="container-xl d-flex justify-content-end px-4">
         <div className="d-flex align-items-center gap-3">
           {/* Notifications */}
           <div className="position-relative">
             <div
+              id="notification-button"
               className="d-flex align-items-center border rounded-pill p-1"
               style={{ cursor: "pointer", backgroundColor: "#ffffff30" }}
-              onClick={() => setShowNotifications(!showNotifications)}
+              onClick={toggleNotifications}
             >
               <div
                 className="rounded-circle d-flex align-items-center justify-content-center text-white"
@@ -129,7 +196,7 @@ const Navbar = ({ user, isAdmin }) => {
                 <IconBell size={18} style={{ color: "#8ebe21" }} />
               </div>
               {totalUnreadCount > 0 && (
-                <span className="badge bg-red-500 position-absolute top-0 end-0">
+                <span className="badge bg-danger position-absolute top-0 end-0">
                   {totalUnreadCount}
                 </span>
               )}
@@ -137,57 +204,62 @@ const Navbar = ({ user, isAdmin }) => {
                 Notifications
               </span>
             </div>
+
             {showNotifications && (
               <div
+                id="notification-panel"
                 className="position-absolute end-0 mt-2 p-3 bg-white border rounded shadow"
                 style={{ width: "350px", zIndex: 1000, maxHeight: "500px", overflowY: "auto" }}
               >
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h6 className="mb-0">Notifications</h6>
                  </div>
-                
+
                 {allNotifications.length === 0 ? (
                   <p className="text-muted">Aucune notification</p>
                 ) : (
                   allNotifications.map((notification) => (
                     <div
                       key={notification._id}
-                      className={`d-flex align-items-start mb-2 p-2 border-bottom ${!notification.is_read ? 'bg-light' : ''}`}
+                      className={`d-flex align-items-start mb-2 p-2 border-bottom ${!notification.is_read ? "bg-light" : ""}`}
+                      onClick={(e) => handleMarkAsRead(notification._id, e)}
+                      style={{ cursor: "pointer" }}
                     >
                       <div className="flex-grow-1">
                         <p className="mb-1">{notification.message}</p>
-                        {(notification.type === 'admin_user_reminder' || notification.type === 'admin_company_reminder') && notification.entity_id && (
-                          <div>
-                            <small className="text-muted">
-                              <span className="d-inline-flex align-items-center me-1">
-                                {notification.entity_type === "Company" ? (
-                                  <IconBuilding size={14} className="me-1" />
-                                ) : (
-                                  <IconUser size={14} className="me-1" />
-                                )}
-                              </span>
-                              {notification.entity_type === "Company"
-                                ? `Entreprise: ${notification.entity_id.nom_entreprise}`
-                                : `Utilisateur: ${notification.entity_id.prenom} ${notification.entity_id.nom}`}
-                            </small>
-                            <small className="d-block text-muted">
-                              Statut: {notification.entity_id.isVerified ? "Vérifié" : "Non vérifié"}
-                            </small>
-                          </div>
-                        )}
+                        {(notification.type === "admin_user_reminder" || notification.type === "admin_company_reminder") &&
+                          notification.entity_id && (
+                            <div>
+                              <small className="text-muted">
+                                <span className="d-inline-flex align-items-center me-1">
+                                  {notification.entity_type === "Company" ? (
+                                    <IconBuilding size={14} className="me-1" />
+                                  ) : (
+                                    <IconUser size={14} className="me-1" />
+                                  )}
+                                </span>
+                                {notification.entity_type === "Company"
+                                  ? `Entreprise: ${notification.entity_id.nom_entreprise}`
+                                  : `Utilisateur: ${notification.entity_id.prenom} ${notification.entity_id.nom}`}
+                              </small>
+                              <small className="d-block text-muted">
+                                Statut: {notification.entity_id.isVerified ? "Vérifié" : "Non vérifié"}
+                              </small>
+                            </div>
+                          )}
                         <small className="text-muted d-block">
                           {new Date(notification.createdAt).toLocaleDateString("fr-FR", {
                             day: "2-digit",
                             month: "2-digit",
                             year: "numeric",
                             hour: "2-digit",
-                            minute: "2-digit"
+                            minute: "2-digit",
                           })}
                         </small>
                       </div>
                       <button
                         className="btn btn-sm btn-icon btn-ghost-secondary"
-                        onClick={() => handleDeleteNotification(notification._id)}
+                        onClick={(e) => handleDeleteNotification(notification._id, e)}
                       >
                         <IconX size={16} />
                       </button>
