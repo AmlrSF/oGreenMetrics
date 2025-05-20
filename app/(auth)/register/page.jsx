@@ -16,7 +16,7 @@ const SignupPage = () => {
     nom_entreprise: "", matricule_fiscale: "", num_tel: "", adresse: "", date_fondation: "", industrie: "", country: ""
   });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(true);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
