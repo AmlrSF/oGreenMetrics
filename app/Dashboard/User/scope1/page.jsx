@@ -630,7 +630,7 @@ const Scope1 = () => {
               <form onSubmit={modalMode === "add" ? handleAdd : handleEdit}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Nom</label>
+                    <label className="form-label">Nom <span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -642,16 +642,17 @@ const Scope1 = () => {
                   {activeTab === "Combustion de carburant" ? (
                     <>
                       <div className="mb-3">
-                        <label className="form-label">Modèle</label>
+                        <label className="form-label">Modèle <span className="text-danger">*</span></label>
                         <input
                           type="text"
                           className="form-control"
                           name="modele"
                           defaultValue={editingItem?.modele || ""}
+                          required
                         />
                       </div>
                       <div className="mb-3">
-                        <label className="form-label">Type de carburant</label>
+                        <label className="form-label">Type de carburant <span className="text-danger">*</span></label>
                         <select
                           className="form-select"
                           name="typeDeCarburant"
@@ -670,7 +671,7 @@ const Scope1 = () => {
                     </>
                   ) : (
                     <div className="mb-3">
-                      <label className="form-label">Ligne de Production</label>
+                      <label className="form-label">Ligne de Production <span className="text-danger">*</span></label>
                       <input
                         type="text"
                         className="form-control"
@@ -681,7 +682,7 @@ const Scope1 = () => {
                     </div>
                   )}
                   <div className="mb-3">
-                    <label className="form-label">Quantité</label>
+                    <label className="form-label">Quantité <span className="text-danger">*</span></label>
                     <input
                       type="number"
                       className="form-control"

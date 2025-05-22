@@ -1,6 +1,7 @@
+ 
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { IconChartBar, IconFileText, IconCalendar, IconInfoCircle, IconBuildingFactory, IconArrowLeft, IconDownload, IconPrinter, IconFlame, IconTruck, IconBriefcase, IconTrash, IconBatteryCharging, IconSnowflake, IconBulb } from "@tabler/icons-react";
 import { jsPDF } from "jspdf";
@@ -18,6 +19,7 @@ const ViewReport = ({ id }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [downloadLoading, setDownloadLoading] = useState(false);
   const router = useRouter();
+  const reportContainerRef = useRef(null);  
 
   useEffect(() => {
     const fetchReportData = async () => {
@@ -28,7 +30,7 @@ const ViewReport = ({ id }) => {
       }
 
       try {
-        setLoading(true); 
+        setLoading(true);
         const response = await fetch(`http://localhost:4000/report/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch report");
@@ -43,7 +45,7 @@ const ViewReport = ({ id }) => {
       } finally {
         setLoading(false);
       }
-    }; 
+    };
     fetchReportData();
   }, [id]);
 
@@ -145,12 +147,7 @@ const ViewReport = ({ id }) => {
     const wasteEmissions = parseFloat(memoizedReport.scope3Data.dechetEmissions || 0);
     const capitalGoodEmissions = parseFloat(memoizedReport.scope3Data.capitalGoodEmissions || 0);
 
-    return {
-      businessTravelEmissions,
-      transportEmissions,
-      wasteEmissions,
-      capitalGoodEmissions,
-    };
+    return { businessTravelEmissions, transportEmissions, wasteEmissions, capitalGoodEmissions };
   };
 
   const getFuelTypes = () => {
@@ -241,96 +238,95 @@ const ViewReport = ({ id }) => {
   const downloadPDF = async () => {
     try {
       setDownloadLoading(true);
-      
-      // Create a new jsPDF instance in portrait orientation (better for charts)
+
+      // Create a new jsPDF instance in portrait orientation
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
+
       // Add custom fonts/styling
       pdf.setFont("helvetica", "bold");
-      
+
       // Create cover page
-      pdf.setFillColor(41, 98, 255); // Modern blue header
+      pdf.setFillColor(41, 98, 255);
       pdf.rect(0, 0, pdfWidth, 40, 'F');
-      
+
       // Add report title
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(24);
       pdf.text(memoizedReport.name || "Environmental Impact Report", 10, 25);
-      
+
       // Add company details
       pdf.setFontSize(12);
       pdf.setTextColor(100, 100, 100);
       pdf.text(`Year: ${memoizedReport.Year || "N/A"}`, 10, 50);
       pdf.text(`Report Type: ${memoizedReport.detailLevel === "detailed" ? "Detailed" : "Summary"}`, 10, 57);
-      
+
       // Add total emissions on cover
       pdf.setFontSize(16);
       pdf.setTextColor(41, 98, 255);
       pdf.text("Total Emissions:", 10, 70);
       pdf.setFontSize(22);
       pdf.text(`${formatNumber(calculateTotalEmissions.total)} tCO₂`, 10, 78);
-      
+
       // Add scope breakdown
       pdf.setFontSize(12);
       pdf.setTextColor(100, 100, 100);
-      
+
       let yPosition = 90;
       if (memoizedReport.scope1) {
         pdf.text(`Scope 1: ${formatNumber(calculateTotalEmissions.scope1)} tCO₂`, 10, yPosition);
         yPosition += 7;
       }
-      
+
       if (memoizedReport.scope2) {
         pdf.text(`Scope 2: ${formatNumber(calculateTotalEmissions.scope2)} tCO₂`, 10, yPosition);
         yPosition += 7;
       }
-      
+
       if (memoizedReport.scope3) {
         pdf.text(`Scope 3: ${formatNumber(calculateTotalEmissions.scope3)} tCO₂`, 10, yPosition);
       }
-      
+
       // Add date
       pdf.setFontSize(10);
       pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 10, pdfHeight - 10);
-      
+
       // Save the original activeTab
       const originalActiveTab = activeTab;
       const tabsToExport = ["overview"];
-      
+
       // If detailed report, add all available tabs
       if (memoizedReport.detailLevel === "detailed") {
         if (memoizedReport.scope1) tabsToExport.push("scope1");
         if (memoizedReport.scope2) tabsToExport.push("scope2");
         if (memoizedReport.scope3) tabsToExport.push("scope3");
       }
-      
+
       tabsToExport.push("recommendations");
-      
+
       // Export each tab sequentially
       for (let i = 0; i < tabsToExport.length; i++) {
         const tabName = tabsToExport[i];
-        
+
         // Set active tab and wait for rendering
         setActiveTab(tabName);
-        
-        // Give charts more time to render properly - crucial for correct capture
+
+        // Give charts more time to render properly
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        
+
         // Create a new page for each tab (after cover page)
         pdf.addPage();
-        
+
         // Add tab header
         pdf.setFillColor(41, 98, 255);
         pdf.rect(0, 0, pdfWidth, 20, 'F');
-        
+
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(16);
-        
+
         let tabTitle;
-        switch(tabName) {
+        switch (tabName) {
           case "overview": tabTitle = "Overview"; break;
           case "scope1": tabTitle = "Scope 1 - Direct Emissions"; break;
           case "scope2": tabTitle = "Scope 2 - Indirect Emissions"; break;
@@ -338,54 +334,50 @@ const ViewReport = ({ id }) => {
           case "recommendations": tabTitle = "Recommendations"; break;
           default: tabTitle = tabName;
         }
-        
+
         pdf.text(tabTitle, 10, 14);
-        
-        // Important: Capture the whole container but remove unnecessary elements for the PDF
-        const tempHeaderDisplay = [];
-        const tempTabsDisplay = [];
-        
+
         // Temporarily hide header and tabs for clean capture
-        const headerElements = reportContainer.querySelectorAll('.card-header, .nav-tabs');
+        const tempHeaderDisplay = [];
+        const headerElements = reportContainerRef.current.querySelectorAll('.card-header, .nav-tabs');
         headerElements.forEach((el, idx) => {
           tempHeaderDisplay[idx] = el.style.display;
           el.style.display = 'none';
         });
-        
-        // Get canvas of the content - using the entire container
-        const canvas = await html2canvas(reportContainer, {
+
+        // Get canvas of the content using the ref
+        const canvas = await html2canvas(reportContainerRef.current, {
           scale: 2,
           useCORS: true,
           logging: false,
           allowTaint: true,
           backgroundColor: "#FFFFFF"
         });
-        
+
         // Restore header and tabs display
         headerElements.forEach((el, idx) => {
           el.style.display = tempHeaderDisplay[idx];
         });
-        
+
         // Calculate ratio to fit content
         const imgData = canvas.toDataURL('image/png');
         const imgWidth = pdfWidth - 20; // Add margin
         const imgHeight = Math.min(pdfHeight - 30, canvas.height * imgWidth / canvas.width);
-        
+
         // Add content image to PDF
         pdf.addImage(imgData, 'PNG', 10, 25, imgWidth, imgHeight);
-        
+
         // Add page number
         pdf.setTextColor(150, 150, 150);
         pdf.setFontSize(10);
         pdf.text(`Page ${i + 2} of ${tabsToExport.length + 1}`, pdfWidth - 40, pdfHeight - 10);
       }
-      
+
       // Reset to original tab
       setActiveTab(originalActiveTab);
-      
+
       // Save the PDF
       pdf.save(`${memoizedReport.name || 'Environmental-Report'}.pdf`);
-      
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try again.');
@@ -438,16 +430,13 @@ const ViewReport = ({ id }) => {
   };
 
   return (
-    <div className="container-xl py-4" id="report-container">
+    <div className="container-xl py-4" id="report-container" ref={reportContainerRef}>
       {/* Report Header */}
       <div className="card mb-3">
         <div className="card-header">
           <div className="d-flex align-items-center justify-content-between w-full">
             <div className="d-flex align-items-center">
-              <button
-                className="btn btn-icon"
-                onClick={() => router.push("/Dashboard/User/reports")}
-              >
+              <button className="btn btn-icon" onClick={() => router.push("/Dashboard/User/reports")}>
                 <IconArrowLeft />
               </button>
               <h2 className="ms-3 mb-0">{memoizedReport.name || "Environmental Impact Report"}</h2>
@@ -456,8 +445,8 @@ const ViewReport = ({ id }) => {
               <button className="btn btn-outline-primary btn-icon" onClick={() => window.print()}>
                 <IconPrinter size={18} />
               </button>
-              <button 
-                className="btn btn-outline-primary btn-icon" 
+              <button
+                className="btn btn-outline-primary btn-icon"
                 onClick={downloadPDF}
                 disabled={downloadLoading}
               >
@@ -493,8 +482,7 @@ const ViewReport = ({ id }) => {
                 </div>
               </div>
               <div className="mt-3">
-                Scopes included:
-                {memoizedReport.scope1 && <span className="badge bg-blue-lt ms-2">Scope 1</span>}
+                Scopes included: {memoizedReport.scope1 && <span className="badge bg-blue-lt ms-2">Scope 1</span>}
                 {memoizedReport.scope2 && <span className="badge bg-purple-lt ms-2">Scope 2</span>}
                 {memoizedReport.scope3 && <span className="badge bg-green-lt ms-2">Scope 3</span>}
               </div>
@@ -525,10 +513,10 @@ const ViewReport = ({ id }) => {
         <div className="card-body">
           <ul className="nav nav-tabs nav-fill" role="tablist">
             <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === "overview" ? "active" : ""}`} 
-                onClick={() => setActiveTab("overview")} 
-                role="tab" 
+              <button
+                className={`nav-link ${activeTab === "overview" ? "active" : ""}`}
+                onClick={() => setActiveTab("overview")}
+                role="tab"
                 aria-selected={activeTab === "overview"}
               >
                 <IconChartBar size={16} className="me-2" />
@@ -537,10 +525,10 @@ const ViewReport = ({ id }) => {
             </li>
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope1 && (
               <li className="nav-item">
-                <button 
-                  className={`nav-link ${activeTab === "scope1" ? "active" : ""}`}   
-                  onClick={() => setActiveTab("scope1")}   
-                  role="tab"   
+                <button
+                  className={`nav-link ${activeTab === "scope1" ? "active" : ""}`}
+                  onClick={() => setActiveTab("scope1")}
+                  role="tab"
                   aria-selected={activeTab === "scope1"}
                 >
                   <IconFlame size={16} className="me-2" />
@@ -550,10 +538,10 @@ const ViewReport = ({ id }) => {
             )}
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope2 && (
               <li className="nav-item">
-                <button 
-                  className={`nav-link ${activeTab === "scope2" ? "active" : ""}`} 
-                  onClick={() => setActiveTab("scope2")} 
-                  role="tab" 
+                <button
+                  className={`nav-link ${activeTab === "scope2" ? "active" : ""}`}
+                  onClick={() => setActiveTab("scope2")}
+                  role="tab"
                   aria-selected={activeTab === "scope2"}
                 >
                   <IconBatteryCharging size={16} className="me-2" />
@@ -563,10 +551,10 @@ const ViewReport = ({ id }) => {
             )}
             {memoizedReport.detailLevel === "detailed" && memoizedReport.scope3 && (
               <li className="nav-item">
-                <button 
-                  className={`nav-link ${activeTab === "scope3" ? "active" : ""}`} 
-                  onClick={() => setActiveTab("scope3")} 
-                  role="tab" 
+                <button
+                  className={`nav-link ${activeTab === "scope3" ? "active" : ""}`}
+                  onClick={() => setActiveTab("scope3")}
+                  role="tab"
                   aria-selected={activeTab === "scope3"}
                 >
                   <IconTruck size={16} className="me-2" />
@@ -575,10 +563,10 @@ const ViewReport = ({ id }) => {
               </li>
             )}
             <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === "recommendations" ? "active" : ""}`} 
-                onClick={() => setActiveTab("recommendations")} 
-                role="tab" 
+              <button
+                className={`nav-link ${activeTab === "recommendations" ? "active" : ""}`}
+                onClick={() => setActiveTab("recommendations")}
+                role="tab"
                 aria-selected={activeTab === "recommendations"}
               >
                 <IconBulb size={16} className="me-2" />
@@ -599,4 +587,4 @@ const ViewReport = ({ id }) => {
   );
 };
 
-export default ViewReport;
+export default ViewReport; 

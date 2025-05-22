@@ -1,12 +1,46 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
-import { IconCheck, IconPlus, IconPencil, IconTrash, IconChevronLeft, IconChevronRight, IconBuildingFactory, IconBolt, IconTruck, IconWorld, IconTarget, IconInfoCircle, IconEdit } from '@tabler/icons-react';
+import { toast, Toaster } from "react-hot-toast";
+import {
+  IconCheck,
+  IconPlus,
+  IconPencil,
+  IconTrash,
+  IconChevronLeft,
+  IconChevronRight,
+  IconBuildingFactory,
+  IconBolt,
+  IconTruck,
+  IconWorld,
+  IconTarget,
+  IconInfoCircle,
+  IconEdit,
+} from "@tabler/icons-react";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const GoalsPage = () => {
   const [company, setCompany] = useState(null);
-  const [user, setUser] = useState(null); // Added to store user data
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentEmissions, setCurrentEmissions] = useState({
     scope1: 0,
@@ -14,8 +48,14 @@ const GoalsPage = () => {
     scope3: 0,
     total: 0,
   });
+  const [initialEmissions, setInitialEmissions] = useState({
+    scope1: 0,
+    scope2: 0,
+    scope3: 0,
+    total: 0,
+  });
   const [goalsList, setGoalsList] = useState([]);
-  const [notifications, setNotifications] = useState([]); // Added for notifications
+  const [notifications, setNotifications] = useState([]);
   const [newGoal, setNewGoal] = useState({
     name: "Objectif de Réduction Carbone",
     year: new Date().getFullYear(),
@@ -125,16 +165,34 @@ const GoalsPage = () => {
 
       const total = scope1 + scope2 + scope3;
 
+      // Placeholder for initial emissions (e.g., 20% higher than current)
+      // Replace with actual historical data from your backend
+      const initialScope1 = scope1 * 1.2;
+      const initialScope2 = scope2 * 1.2;
+      const initialScope3 = scope3 * 1.2;
+      const initialTotal = initialScope1 + initialScope2 + initialScope3;
+
       return {
-        scope1: parseFloat(scope1.toFixed(2)),
-        scope2: parseFloat(scope2.toFixed(2)),
-        scope3: parseFloat(scope3.toFixed(2)),
-        total: parseFloat(total.toFixed(2)),
+        current: {
+          scope1: parseFloat(scope1.toFixed(2)),
+          scope2: parseFloat(scope2.toFixed(2)),
+          scope3: parseFloat(scope3.toFixed(2)),
+          total: parseFloat(total.toFixed(2)),
+        },
+        initial: {
+          scope1: parseFloat(initialScope1.toFixed(2)),
+          scope2: parseFloat(initialScope2.toFixed(2)),
+          scope3: parseFloat(initialScope3.toFixed(2)),
+          total: parseFloat(initialTotal.toFixed(2)),
+        },
       };
     } catch (error) {
       console.error("Error calculating emissions:", error);
       toast.error("Échec du calcul des émissions actuelles");
-      return { scope1: 0, scope2: 0, scope3: 0, total: 0 };
+      return {
+        current: { scope1: 0, scope2: 0, scope3: 0, total: 0 },
+        initial: { scope1: 0, scope2: 0, scope3: 0, total: 0 },
+      };
     }
   };
 
@@ -249,6 +307,9 @@ const GoalsPage = () => {
         scope1Goal: selectedScopes.scope1 ? newGoal.scope1Goal : 0,
         scope2Goal: selectedScopes.scope2 ? newGoal.scope2Goal : 0,
         scope3Goal: selectedScopes.scope3 ? newGoal.scope3Goal : 0,
+        initialScope1: initialEmissions.scope1,
+        initialScope2: initialEmissions.scope2,
+        initialScope3: initialEmissions.scope3,
       };
 
       payload.totalGoal =
@@ -282,7 +343,7 @@ const GoalsPage = () => {
       });
       setShowAddModal(false);
       fetchGoals(company._id);
-      if (user?._id) fetchNotifications(user._id); // Refresh notifications
+      if (user?._id) fetchNotifications(user._id);
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
     }
@@ -337,6 +398,9 @@ const GoalsPage = () => {
           parseFloat(editingGoal.scope1Goal || 0) +
           parseFloat(editingGoal.scope2Goal || 0) +
           parseFloat(editingGoal.scope3Goal || 0),
+        initialScope1: initialEmissions.scope1,
+        initialScope2: initialEmissions.scope2,
+        initialScope3: initialEmissions.scope3,
       };
 
       const res = await fetch(`http://localhost:4000/goals/${editingGoal._id}`, {
@@ -351,7 +415,7 @@ const GoalsPage = () => {
 
       setShowEditModal(false);
       fetchGoals(company._id);
-      if (user?._id) fetchNotifications(user._id); // Refresh notifications
+      if (user?._id) fetchNotifications(user._id);
     } catch (err) {
       console.error("Update error:", err);
       toast.error(`Erreur: ${err.message}`);
@@ -375,7 +439,7 @@ const GoalsPage = () => {
       }
 
       fetchGoals(company._id);
-      if (user?._id) fetchNotifications(user._id); // Refresh notifications
+      if (user?._id) fetchNotifications(user._id);
     } catch (err) {
       toast.error(`Erreur: ${err.message}`);
     }
@@ -387,14 +451,14 @@ const GoalsPage = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ currentEmissions: emissions, userId }),
+        body: JSON.stringify({ currentEmissions: emissions.current, userId }),
       });
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.message || "Failed to check goal attainment");
       }
-      fetchGoals(companyId); // Refresh goals to reflect updated statuses
-      if (userId) fetchNotifications(userId); // Refresh notifications
+      fetchGoals(companyId);
+      if (userId) fetchNotifications(userId);
     } catch (error) {
       console.error("Error checking goal attainment:", error);
       toast.error("Échec de la vérification des objectifs atteints");
@@ -409,7 +473,6 @@ const GoalsPage = () => {
       const data = await res.json();
 
       if (data.success && Array.isArray(data.data)) {
-        // Update the statuses based on current emissions
         const updatedGoals = data.data.map((goal) => {
           const isScope1Achieved = goal.scope1Goal === 0 || currentEmissions.scope1 <= goal.scope1Goal;
           const isScope2Achieved = goal.scope2Goal === 0 || currentEmissions.scope2 <= goal.scope2Goal;
@@ -432,7 +495,7 @@ const GoalsPage = () => {
                     Math.max(
                       0,
                       ((currentEmissions.scope1 - goal.scope1Goal) /
-                        (goal.initialScope1 || currentEmissions.scope1)) *
+                        (goal.initialScope1 || initialEmissions.scope1)) *
                         100
                     )
                   )
@@ -444,7 +507,7 @@ const GoalsPage = () => {
                     Math.max(
                       0,
                       ((currentEmissions.scope2 - goal.scope2Goal) /
-                        (goal.initialScope2 || currentEmissions.scope2)) *
+                        (goal.initialScope2 || initialEmissions.scope2)) *
                         100
                     )
                   )
@@ -456,7 +519,7 @@ const GoalsPage = () => {
                     Math.max(
                       0,
                       ((currentEmissions.scope3 - goal.scope3Goal) /
-                        (goal.initialScope3 || currentEmissions.scope3)) *
+                        (goal.initialScope3 || initialEmissions.scope3)) *
                         100
                     )
                   )
@@ -494,7 +557,7 @@ const GoalsPage = () => {
         const userId = authData?.user?._id;
         if (!userId) throw new Error("Non autorisé");
 
-        setUser(authData.user); // Store user data
+        setUser(authData.user);
 
         const compRes = await fetch(
           `http://localhost:4000/GetCompanyByOwnerID/${userId}`,
@@ -504,12 +567,12 @@ const GoalsPage = () => {
         setCompany(compData.data);
 
         const emissions = await fetchAndCalculateEmissions(compData.data._id);
-        setCurrentEmissions(emissions);
+        setCurrentEmissions(emissions.current);
+        setInitialEmissions(emissions.initial);
 
         await fetchGoals(compData.data._id);
         await fetchNotifications(userId);
 
-        // Check goal attainment after fetching data
         await checkAchievedGoals(compData.data._id, emissions, userId);
       } catch (err) {
         console.error(err);
@@ -525,13 +588,14 @@ const GoalsPage = () => {
       if (company?._id && user?._id) {
         fetchAndCalculateEmissions(company._id)
           .then((emissions) => {
-            setCurrentEmissions(emissions);
+            setCurrentEmissions(emissions.current);
+            setInitialEmissions(emissions.initial);
             fetchGoals(company._id);
             checkAchievedGoals(company._id, emissions, user._id);
           })
           .catch((error) => console.error("Error in periodic check:", error));
       }
-    }, 30 * 60 * 1000); // Check every 30 minutes
+    }, 30 * 60 * 1000);
 
     return () => clearInterval(intervalId);
   }, [company]);
@@ -563,8 +627,8 @@ const GoalsPage = () => {
       if (goal.scope1Goal > 0) {
         activeScopes++;
         if (currentEmissions.scope1 > goal.scope1Goal) {
-          const reductionNeeded = (goal.initialScope1 || currentEmissions.scope1) - goal.scope1Goal;
-          const reductionAchieved = (goal.initialScope1 || currentEmissions.scope1) - currentEmissions.scope1;
+          const reductionNeeded = (goal.initialScope1 || initialEmissions.scope1) - goal.scope1Goal;
+          const reductionAchieved = (goal.initialScope1 || initialEmissions.scope1) - currentEmissions.scope1;
           const progressPercent = (reductionAchieved / reductionNeeded) * 100;
           totalProgress += Math.min(100, Math.max(0, progressPercent));
         } else {
@@ -575,8 +639,8 @@ const GoalsPage = () => {
       if (goal.scope2Goal > 0) {
         activeScopes++;
         if (currentEmissions.scope2 > goal.scope2Goal) {
-          const reductionNeeded = (goal.initialScope2 || currentEmissions.scope2) - goal.scope2Goal;
-          const reductionAchieved = (goal.initialScope2 || currentEmissions.scope2) - currentEmissions.scope2;
+          const reductionNeeded = (goal.initialScope2 || initialEmissions.scope2) - goal.scope2Goal;
+          const reductionAchieved = (goal.initialScope2 || initialEmissions.scope2) - currentEmissions.scope2;
           const progressPercent = (reductionAchieved / reductionNeeded) * 100;
           totalProgress += Math.min(100, Math.max(0, progressPercent));
         } else {
@@ -587,8 +651,8 @@ const GoalsPage = () => {
       if (goal.scope3Goal > 0) {
         activeScopes++;
         if (currentEmissions.scope3 > goal.scope3Goal) {
-          const reductionNeeded = (goal.initialScope3 || currentEmissions.scope3) - goal.scope3Goal;
-          const reductionAchieved = (goal.initialScope3 || currentEmissions.scope3) - currentEmissions.scope3;
+          const reductionNeeded = (goal.initialScope3 || initialEmissions.scope3) - goal.scope3Goal;
+          const reductionAchieved = (goal.initialScope3 || initialEmissions.scope3) - currentEmissions.scope3;
           const progressPercent = (reductionAchieved / reductionNeeded) * 100;
           totalProgress += Math.min(100, Math.max(0, progressPercent));
         } else {
@@ -646,6 +710,38 @@ const GoalsPage = () => {
     };
   };
 
+  // Bar chart data and options
+  const chartData = {
+    labels: ["Scope 1", "Scope 2", "Scope 3", "Total"],
+    datasets: [
+      {
+        label: "Émissions Initiales (tCO₂e)",
+        data: [
+          initialEmissions.scope1,
+          initialEmissions.scope2,
+          initialEmissions.scope3,
+          initialEmissions.total,
+        ],
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+        borderColor: "rgba(255, 99, 132, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "Émissions Actuelles (tCO₂e)",
+        data: [
+          currentEmissions.scope1,
+          currentEmissions.scope2,
+          currentEmissions.scope3,
+          currentEmissions.total,
+        ],
+        backgroundColor: "rgba(54, 162, 235, 0.5)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+ 
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentGoals = goalsList.slice(indexOfFirstItem, indexOfLastItem);
@@ -653,6 +749,7 @@ const GoalsPage = () => {
 
   return (
     <div className="page-wrapper">
+      <Toaster position="top-right" />
       <div className="container-xl">
         <div className="page-header d-print-none">
           <div className="row align-items-center">
@@ -958,231 +1055,452 @@ const GoalsPage = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {showAddModal && (
-        <div
-          className="modal modal-blur show"
-          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          tabIndex="-1"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Ajouter un nouvel objectif de réduction d'émissions</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowAddModal(false)}
-                ></button>
+        {showAddModal && (
+          <div
+            className="modal modal-blur show"
+            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            tabIndex="-1"
+            role="dialog"
+          >
+            <div className="modal-dialog modal-lg" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Ajouter un nouvel objectif de réduction d'émissions</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowAddModal(false)}
+                  ></button>
+                </div>
+                <form onSubmit={handleAddGoal}>
+                  <div className="modal-body">
+                    <div className="mb-3">
+                      <label className="form-label">Nom de l'objectif</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Ex: Objectif de réduction carbone 2025"
+                        value={newGoal.name}
+                        onChange={(e) => handleGoalChange("name", e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label">Année cible</label>
+                      <input
+                        type="number"
+                        min={new Date().getFullYear()}
+                        max={new Date().getFullYear() + 30}
+                        className="form-control"
+                        value={newGoal.year}
+                        onChange={(e) => handleGoalChange("year", e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    {validationErrors.general && (
+                      <div className="alert alert-danger mb-3" role="alert">
+                        {validationErrors.general}
+                      </div>
+                    )}
+
+                    <div className="form-label mb-2">Sélectionnez les scopes pour définir des objectifs</div>
+                    <div className="form-selectgroup-boxes row mb-3">
+                      <div className="col-md-4">
+                        <label className={`form-selectgroup-item ${selectedScopes.scope1 ? "active" : ""}`}>
+                          <input
+                            type="checkbox"
+                            name="scope-1"
+                            value="1"
+                            className="form-selectgroup-input"
+                            checked={selectedScopes.scope1}
+                            onChange={() => toggleScope(1)}
+                          />
+                          <span className="form-selectgroup-label d-flex align-items-center p-3">
+                            <span className="me-3">
+                              <span className="form-selectgroup-check"></span>
+                            </span>
+                            <span className="form-selectgroup-label-content">
+                              <span className="form-selectgroup-title strong mb-1">Scope 1</span>
+                              <span className="d-block text-secondary">
+                                Actuel: {currentEmissions.scope1} tCO₂e
+                              </span>
+                            </span>
+                          </span>
+                        </label>
+                      </div>
+                      <div className="col-md-4">
+                        <label className={`form-selectgroup-item ${selectedScopes.scope2 ? "active" : ""}`}>
+                          <input
+                            type="checkbox"
+                            name="scope-2"
+                            value="1"
+                            className="form-selectgroup-input"
+                            checked={selectedScopes.scope2}
+                            onChange={() => toggleScope(2)}
+                          />
+                          <span className="form-selectgroup-label d-flex align-items-center p-3">
+                            <span className="me-3">
+                              <span className="form-selectgroup-check"></span>
+                            </span>
+                            <span className="form-selectgroup-label-content">
+                              <span className="form-selectgroup-title strong mb-1">Scope 2</span>
+                              <span className="d-block text-secondary">
+                                Actuel: {currentEmissions.scope2} tCO₂e
+                              </span>
+                            </span>
+                          </span>
+                        </label>
+                      </div>
+                      <div className="col-md-4">
+                        <label className={`form-selectgroup-item ${selectedScopes.scope3 ? "active" : ""}`}>
+                          <input
+                            type="checkbox"
+                            name="scope-3"
+                            value="1"
+                            className="form-selectgroup-input"
+                            checked={selectedScopes.scope3}
+                            onChange={() => toggleScope(3)}
+                          />
+                          <span className="form-selectgroup-label d-flex align-items-center p-3">
+                            <span className="me-3">
+                              <span className="form-selectgroup-check"></span>
+                            </span>
+                            <span className="form-selectgroup-label-content">
+                              <span className="form-selectgroup-title strong mb-1">Scope 3</span>
+                              <span className="d-block text-secondary">
+                                Actuel: {currentEmissions.scope3} tCO₂e
+                              </span>
+                            </span>
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {selectedScopes.scope1 && (
+                      <div className="mb-3">
+                        <label className="form-label">Objectif Scope 1 (tCO₂e)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          max={currentEmissions.scope1 - 0.01}
+                          className={`form-control ${validationErrors.scope1Goal ? "is-invalid" : ""}`}
+                          placeholder="Émissions cibles en tCO₂e"
+                          value={newGoal.scope1Goal}
+                          onChange={(e) => handleGoalChange("scope1Goal", e.target.value)}
+                          required={selectedScopes.scope1}
+                        />
+                        {validationErrors.scope1Goal ? (
+                          <div className="invalid-feedback">{validationErrors.scope1Goal}</div>
+                        ) : (
+                          <small className="form-hint">
+                            Votre objectif doit être inférieur aux émissions actuelles (
+                            {currentEmissions.scope1} tCO₂e)
+                          </small>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedScopes.scope2 && (
+                      <div className="mb-3">
+                        <label className="form-label">Objectif Scope 2 (tCO₂e)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          max={currentEmissions.scope2 - 0.01}
+                          className={`form-control ${validationErrors.scope2Goal ? "is-invalid" : ""}`}
+                          placeholder="Émissions cibles en tCO₂e"
+                          value={newGoal.scope2Goal}
+                          onChange={(e) => handleGoalChange("scope2Goal", e.target.value)}
+                          required={selectedScopes.scope2}
+                        />
+                        {validationErrors.scope2Goal ? (
+                          <div className="invalid-feedback">{validationErrors.scope2Goal}</div>
+                        ) : (
+                          <small className="form-hint">
+                            Votre objectif doit être inférieur aux émissions actuelles (
+                            {currentEmissions.scope2} tCO₂e)
+                          </small>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedScopes.scope3 && (
+                      <div className="mb-3">
+                        <label className="form-label">Objectif Scope 3 (tCO₂e)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          max={currentEmissions.scope3 - 0.01}
+                          className={`form-control ${validationErrors.scope3Goal ? "is-invalid" : ""}`}
+                          placeholder="Émissions cibles en tCO₂e"
+                          value={newGoal.scope3Goal}
+                          onChange={(e) => handleGoalChange("scope3Goal", e.target.value)}
+                          required={selectedScopes.scope3}
+                        />
+                        {validationErrors.scope3Goal ? (
+                          <div className="invalid-feedback">{validationErrors.scope3Goal}</div>
+                        ) : (
+                          <small className="form-hint">
+                            Votre objectif doit être inférieur aux émissions actuelles (
+                            {currentEmissions.scope3} tCO₂e)
+                          </small>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mb-3">
+                      <label className="form-label">Description (Optionnel)</label>
+                      <textarea
+                        className="form-control"
+                        rows="3"
+                        placeholder="Décrivez votre stratégie de réduction"
+                        value={newGoal.description}
+                        onChange={(e) => handleGoalChange("description", e.target.value)}
+                      ></textarea>
+                    </div>
+
+                    {(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3) && (
+                      <div className="alert alert-info" role="alert">
+                        <div className="d-flex">
+                          <div>
+                            <IconInfoCircle className="icon alert-icon" />
+                          </div>
+                          <div>
+                            <h4 className="alert-title">Aperçu de l'objectif</h4>
+                            <div className="text-muted">
+                              Objectif total: {calculateTotalGoal()} tCO₂e
+                            </div>
+                            <div className="text-muted">
+                              Réduction potentielle: {calculatePotentialReduction().amount} tCO₂e (
+                              {calculatePotentialReduction().percentage}%)
+                            </div>
+                            <div className="text-muted mt-2">
+                              <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos
+                              émissions actuelles seront inférieures ou égales à la valeur cible.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-link link-secondary"
+                      onClick={() => setShowAddModal(false)}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary ms-auto"
+                      disabled={!(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3)}
+                    >
+                      <IconPlus className="icon" />
+                      Ajouter l'objectif
+                    </button>
+                  </div>
+                </form>
               </div>
-              <form onSubmit={handleAddGoal}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Nom de l'objectif</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Ex: Objectif de réduction carbone 2025"
-                      value={newGoal.name}
-                      onChange={(e) => handleGoalChange("name", e.target.value)}
-                      required
-                    />
-                  </div>
+            </div>
+          </div>
+        )}
 
-                  <div className="mb-3">
-                    <label className="form-label">Année cible</label>
-                    <input
-                      type="number"
-                      min={new Date().getFullYear()}
-                      max={new Date().getFullYear() + 30}
-                      className="form-control"
-                      value={newGoal.year}
-                      onChange={(e) => handleGoalChange("year", e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {validationErrors.general && (
-                    <div className="alert alert-danger mb-3" role="alert">
-                      {validationErrors.general}
-                    </div>
-                  )}
-
-                  <div className="form-label mb-2">Sélectionnez les scopes pour définir des objectifs</div>
-                  <div className="form-selectgroup-boxes row mb-3">
-                    <div className="col-md-4">
-                      <label className={`form-selectgroup-item ${selectedScopes.scope1 ? "active" : ""}`}>
-                        <input
-                          type="checkbox"
-                          name="scope-1"
-                          value="1"
-                          className="form-selectgroup-input"
-                          checked={selectedScopes.scope1}
-                          onChange={() => toggleScope(1)}
-                        />
-                        <span className="form-selectgroup-label d-flex align-items-center p-3">
-                          <span className="me-3">
-                            <span className="form-selectgroup-check"></span>
-                          </span>
-                          <span className="form-selectgroup-label-content">
-                            <span className="form-selectgroup-title strong mb-1">Scope 1</span>
-                            <span className="d-block text-secondary">
-                              Actuel: {currentEmissions.scope1} tCO₂e
-                            </span>
-                          </span>
-                        </span>
-                      </label>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-selectgroup-item ${selectedScopes.scope2 ? "active" : ""}`}>
-                        <input
-                          type="checkbox"
-                          name="scope-2"
-                          value="1"
-                          className="form-selectgroup-input"
-                          checked={selectedScopes.scope2}
-                          onChange={() => toggleScope(2)}
-                        />
-                        <span className="form-selectgroup-label d-flex align-items-center p-3">
-                          <span className="me-3">
-                            <span className="form-selectgroup-check"></span>
-                          </span>
-                          <span className="form-selectgroup-label-content">
-                            <span className="form-selectgroup-title strong mb-1">Scope 2</span>
-                            <span className="d-block text-secondary">
-                              Actuel: {currentEmissions.scope2} tCO₂e
-                            </span>
-                          </span>
-                        </span>
-                      </label>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-selectgroup-item ${selectedScopes.scope3 ? "active" : ""}`}>
-                        <input
-                          type="checkbox"
-                          name="scope-3"
-                          value="1"
-                          className="form-selectgroup-input"
-                          checked={selectedScopes.scope3}
-                          onChange={() => toggleScope(3)}
-                        />
-                        <span className="form-selectgroup-label d-flex align-items-center p-3">
-                          <span className="me-3">
-                            <span className="form-selectgroup-check"></span>
-                          </span>
-                          <span className="form-selectgroup-label-content">
-                            <span className="form-selectgroup-title strong mb-1">Scope 3</span>
-                            <span className="d-block text-secondary">
-                              Actuel: {currentEmissions.scope3} tCO₂e
-                            </span>
-                          </span>
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {selectedScopes.scope1 && (
+        {showEditModal && editingGoal && (
+          <div
+            className="modal modal-blur show"
+            style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            tabIndex="-1"
+            role="dialog"
+          >
+            <div className="modal-dialog modal-lg" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Modifier l'objectif de réduction d'émissions</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowEditModal(false)}
+                  ></button>
+                </div>
+                <form onSubmit={handleUpdateGoal}>
+                  <div className="modal-body">
                     <div className="mb-3">
-                      <label className="form-label">Objectif Scope 1 (tCO₂e)</label>
+                      <label className="form-label">Nom de l'objectif</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editingGoal.name}
+                        onChange={(e) => setEditingGoal({ ...editingGoal, name: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label">Année cible</label>
                       <input
                         type="number"
-                        step="0.01"
-                        min="0.01"
-                        max={currentEmissions.scope1 - 0.01}
-                        className={`form-control ${validationErrors.scope1Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"
-                        value={newGoal.scope1Goal}
-                        onChange={(e) => handleGoalChange("scope1Goal", e.target.value)}
-                        required={selectedScopes.scope1}
+                        min={new Date().getFullYear()}
+                        max={new Date().getFullYear() + 30}
+                        className="form-control"
+                        value={editingGoal.year}
+                        onChange={(e) =>
+                          setEditingGoal({
+                            ...editingGoal,
+                            year: parseInt(e.target.value) || new Date().getFullYear(),
+                          })
+                        }
+                        required
                       />
-                      {validationErrors.scope1Goal ? (
-                        <div className="invalid-feedback">{validationErrors.scope1Goal}</div>
-                      ) : (
-                        <small className="form-hint">
-                          Votre objectif doit être inférieur aux émissions actuelles (
-                          {currentEmissions.scope1} tCO₂e)
-                        </small>
-                      )}
                     </div>
-                  )}
 
-                  {selectedScopes.scope2 && (
+                    <div className="row g-3">
+                      <div className="col-md-4">
+                        <div className="mb-3">
+                          <label className="form-label">
+                            Objectif Scope 1 (tCO₂e)
+                            <span className="form-label-description">
+                              {editingGoal.scope1Goal > 0 &&
+                                currentEmissions.scope1 > 0 &&
+                                `${((1 - editingGoal.scope1Goal / currentEmissions.scope1) * 100).toFixed(1)}% de réduction`}
+                            </span>
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max={currentEmissions.scope1}
+                            className="form-control"
+                            value={editingGoal.scope1Goal}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value) || 0;
+                              setEditingGoal({ ...editingGoal, scope1Goal: value });
+                            }}
+                          />
+                          <small
+                            className={`form-hint ${
+                              editingGoal.scope1Goal >= currentEmissions.scope1 &&
+                              editingGoal.scope1Goal > 0
+                                ? "text-danger"
+                                : ""
+                            }`}
+                          >
+                            {editingGoal.scope1Goal >= currentEmissions.scope1 &&
+                            editingGoal.scope1Goal > 0
+                              ? "L'objectif doit être inférieur aux émissions actuelles"
+                              : "Émissions actuelles: " + currentEmissions.scope1 + " tCO₂e"}
+                          </small>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="mb-3">
+                          <label className="form-label">
+                            Objectif Scope 2 (tCO₂e)
+                            <span className="form-label-description">
+                              {editingGoal.scope2Goal > 0 &&
+                                currentEmissions.scope2 > 0 &&
+                                `${((1 - editingGoal.scope2Goal / currentEmissions.scope2) * 100).toFixed(1)}% de réduction`}
+                            </span>
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max={currentEmissions.scope2}
+                            className="form-control"
+                            value={editingGoal.scope2Goal}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value) || 0;
+                              setEditingGoal({ ...editingGoal, scope2Goal: value });
+                            }}
+                          />
+                          <small
+                            className={`form-hint ${
+                              editingGoal.scope2Goal >= currentEmissions.scope2 &&
+                              editingGoal.scope2Goal > 0
+                                ? "text-danger"
+                                : ""
+                            }`}
+                          >
+                            {editingGoal.scope2Goal >= currentEmissions.scope2 &&
+                            editingGoal.scope2Goal > 0
+                              ? "L'objectif doit être inférieur aux émissions actuelles"
+                              : "Émissions actuelles: " + currentEmissions.scope2 + " tCO₂e"}
+                          </small>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="mb-3">
+                          <label className="form-label">
+                            Objectif Scope 3 (tCO₂e)
+                            <span className="form-label-description">
+                              {editingGoal.scope3Goal > 0 &&
+                                currentEmissions.scope3 > 0 &&
+                                `${((1 - editingGoal.scope3Goal / currentEmissions.scope3) * 100).toFixed(1)}% de réduction`}
+                            </span>
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max={currentEmissions.scope3}
+                            className="form-control"
+                            value={editingGoal.scope3Goal}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value) || 0;
+                              setEditingGoal({ ...editingGoal, scope3Goal: value });
+                            }}
+                          />
+                          <small
+                            className={`form-hint ${
+                              editingGoal.scope3Goal >= currentEmissions.scope3 &&
+                              editingGoal.scope3Goal > 0
+                                ? "text-danger"
+                                : ""
+                            }`}
+                          >
+                            {editingGoal.scope3Goal >= currentEmissions.scope3 &&
+                            editingGoal.scope3Goal > 0
+                              ? "L'objectif doit être inférieur aux émissions actuelles"
+                              : "Émissions actuelles: " + currentEmissions.scope3 + " tCO₂e"}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="mb-3">
-                      <label className="form-label">Objectif Scope 2 (tCO₂e)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        max={currentEmissions.scope2 - 0.01}
-                        className={`form-control ${validationErrors.scope2Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"
-                        value={newGoal.scope2Goal}
-                        onChange={(e) => handleGoalChange("scope2Goal", e.target.value)}
-                        required={selectedScopes.scope2}
-                      />
-                      {validationErrors.scope2Goal ? (
-                        <div className="invalid-feedback">{validationErrors.scope2Goal}</div>
-                      ) : (
-                        <small className="form-hint">
-                          Votre objectif doit être inférieur aux émissions actuelles (
-                          {currentEmissions.scope2} tCO₂e)
-                        </small>
-                      )}
+                      <label className="form-label">Description</label>
+                      <textarea
+                        className="form-control"
+                        rows="3"
+                        value={editingGoal.description || ""}
+                        onChange={(e) =>
+                          setEditingGoal({ ...editingGoal, description: e.target.value })
+                        }
+                      ></textarea>
                     </div>
-                  )}
 
-                  {selectedScopes.scope3 && (
-                    <div className="mb-3">
-                      <label className="form-label">Objectif Scope 3 (tCO₂e)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        max={currentEmissions.scope3 - 0.01}
-                        className={`form-control ${validationErrors.scope3Goal ? "is-invalid" : ""}`}
-                        placeholder="Émissions cibles en tCO₂e"
-                        value={newGoal.scope3Goal}
-                        onChange={(e) => handleGoalChange("scope3Goal", e.target.value)}
-                        required={selectedScopes.scope3}
-                      />
-                      {validationErrors.scope3Goal ? (
-                        <div className="invalid-feedback">{validationErrors.scope3Goal}</div>
-                      ) : (
-                        <small className="form-hint">
-                          Votre objectif doit être inférieur aux émissions actuelles (
-                          {currentEmissions.scope3} tCO₂e)
-                        </small>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="mb-3">
-                    <label className="form-label">Description (Optionnel)</label>
-                    <textarea
-                      className="form-control"
-                      rows="3"
-                      placeholder="Décrivez votre stratégie de réduction"
-                      value={newGoal.description}
-                      onChange={(e) => handleGoalChange("description", e.target.value)}
-                    ></textarea>
-                  </div>
-
-                  {(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3) && (
                     <div className="alert alert-info" role="alert">
                       <div className="d-flex">
                         <div>
                           <IconInfoCircle className="icon alert-icon" />
                         </div>
                         <div>
-                          <h4 className="alert-title">Aperçu de l'objectif</h4>
+                          <h4 className="alert-title">Aperçu de l'objectif modifié</h4>
                           <div className="text-muted">
-                            Objectif total: {calculateTotalGoal()} tCO₂e
+                            Objectif total: {editingGoal.totalGoal.toFixed(2)} tCO₂e
                           </div>
                           <div className="text-muted">
-                            Réduction potentielle: {calculatePotentialReduction().amount} tCO₂e (
-                            {calculatePotentialReduction().percentage}%)
+                            Réduction potentielle: {(currentEmissions.total - editingGoal.totalGoal).toFixed(2)} tCO₂e (
+                            {currentEmissions.total > 0
+                              ? ((1 - editingGoal.totalGoal / currentEmissions.total) * 100).toFixed(1)
+                              : 0.0}%)
                           </div>
                           <div className="text-muted mt-2">
                             <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos
@@ -1191,247 +1509,26 @@ const GoalsPage = () => {
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-link link-secondary"
-                    onClick={() => setShowAddModal(false)}
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary ms-auto"
-                    disabled={!(selectedScopes.scope1 || selectedScopes.scope2 || selectedScopes.scope3)}
-                  >
-                    <IconPlus className="icon" />
-                    Ajouter l'objectif
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showEditModal && editingGoal && (
-        <div
-          className="modal modal-blur show"
-          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          tabIndex="-1"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Modifier l'objectif de réduction d'émissions</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowEditModal(false)}
-                ></button>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-link link-secondary"
+                      onClick={() => setShowEditModal(false)}
+                    >
+                      Annuler
+                    </button>
+                    <button type="submit" className="btn btn-primary ms-auto">
+                      <IconCheck className="icon" />
+                      Mettre à jour l'objectif
+                    </button>
+                  </div>
+                </form>
               </div>
-              <form onSubmit={handleUpdateGoal}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Nom de l'objectif</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editingGoal.name}
-                      onChange={(e) => setEditingGoal({ ...editingGoal, name: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Année cible</label>
-                    <input
-                      type="number"
-                      min={new Date().getFullYear()}
-                      max={new Date().getFullYear() + 30}
-                      className="form-control"
-                      value={editingGoal.year}
-                      onChange={(e) =>
-                        setEditingGoal({
-                          ...editingGoal,
-                          year: parseInt(e.target.value) || new Date().getFullYear(),
-                        })
-                      }
-                      required
-                    />
-                  </div>
-
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <div className="mb-3">
-                        <label className="form-label">
-                          Objectif Scope 1 (tCO₂e)
-                          <span className="form-label-description">
-                            {editingGoal.scope1Goal > 0 &&
-                              currentEmissions.scope1 > 0 &&
-                              `${((1 - editingGoal.scope1Goal / currentEmissions.scope1) * 100).toFixed(1)}% de réduction`}
-                          </span>
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={currentEmissions.scope1}
-                          className="form-control"
-                          value={editingGoal.scope1Goal}
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value) || 0;
-                            setEditingGoal({ ...editingGoal, scope1Goal: value });
-                          }}
-                        />
-                        <small
-                          className={`form-hint ${
-                            editingGoal.scope1Goal >= currentEmissions.scope1 &&
-                            editingGoal.scope1Goal > 0
-                              ? "text-danger"
-                              : ""
-                          }`}
-                        >
-                          {editingGoal.scope1Goal >= currentEmissions.scope1 &&
-                          editingGoal.scope1Goal > 0
-                            ? "L'objectif doit être inférieur aux émissions actuelles"
-                            : "Émissions actuelles: " + currentEmissions.scope1 + " tCO₂e"}
-                        </small>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <div className="mb-3">
-                        <label className="form-label">
-                          Objectif Scope 2 (tCO₂e)
-                          <span className="form-label-description">
-                            {editingGoal.scope2Goal > 0 &&
-                              currentEmissions.scope2 > 0 &&
-                              `${((1 - editingGoal.scope2Goal / currentEmissions.scope2) * 100).toFixed(1)}% de réduction`}
-                          </span>
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={currentEmissions.scope2}
-                          className="form-control"
-                          value={editingGoal.scope2Goal}
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value) || 0;
-                            setEditingGoal({ ...editingGoal, scope2Goal: value });
-                          }}
-                        />
-                        <small
-                          className={`form-hint ${
-                            editingGoal.scope2Goal >= currentEmissions.scope2 &&
-                            editingGoal.scope2Goal > 0
-                              ? "text-danger"
-                              : ""
-                          }`}
-                        >
-                          {editingGoal.scope2Goal >= currentEmissions.scope2 &&
-                          editingGoal.scope2Goal > 0
-                            ? "L'objectif doit être inférieur aux émissions actuelles"
-                            : "Émissions actuelles: " + currentEmissions.scope2 + " tCO₂e"}
-                        </small>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <div className="mb-3">
-                        <label className="form-label">
-                          Objectif Scope 3 (tCO₂e)
-                          <span className="form-label-description">
-                            {editingGoal.scope3Goal > 0 &&
-                              currentEmissions.scope3 > 0 &&
-                              `${((1 - editingGoal.scope3Goal / currentEmissions.scope3) * 100).toFixed(1)}% de réduction`}
-                          </span>
-                        </label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={currentEmissions.scope3}
-                          className="form-control"
-                          value={editingGoal.scope3Goal}
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value) || 0;
-                            setEditingGoal({ ...editingGoal, scope3Goal: value });
-                          }}
-                        />
-                        <small
-                          className={`form-hint ${
-                            editingGoal.scope3Goal >= currentEmissions.scope3 &&
-                            editingGoal.scope3Goal > 0
-                              ? "text-danger"
-                              : ""
-                          }`}
-                        >
-                          {editingGoal.scope3Goal >= currentEmissions.scope3 &&
-                          editingGoal.scope3Goal > 0
-                            ? "L'objectif doit être inférieur aux émissions actuelles"
-                            : "Émissions actuelles: " + currentEmissions.scope3 + " tCO₂e"}
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Description</label>
-                    <textarea
-                      className="form-control"
-                      rows="3"
-                      value={editingGoal.description || ""}
-                      onChange={(e) =>
-                        setEditingGoal({ ...editingGoal, description: e.target.value })
-                      }
-                    ></textarea>
-                  </div>
-
-                  <div className="alert alert-info" role="alert">
-                    <div className="d-flex">
-                      <div>
-                        <IconInfoCircle className="icon alert-icon" />
-                      </div>
-                      <div>
-                        <h4 className="alert-title">Aperçu de l'objectif modifié</h4>
-                        <div className="text-muted">
-                          Objectif total: {editingGoal.totalGoal.toFixed(2)} tCO₂e
-                        </div>
-                        <div className="text-muted">
-                          Réduction potentielle: {(currentEmissions.total - editingGoal.totalGoal).toFixed(2)} tCO₂e (
-                          {currentEmissions.total > 0
-                            ? ((1 - editingGoal.totalGoal / currentEmissions.total) * 100).toFixed(1)
-                            : 0.0}%)
-                        </div>
-                        <div className="text-muted mt-2">
-                          <strong>Statut de l'objectif:</strong> L'objectif sera atteint lorsque vos
-                          émissions actuelles seront inférieures ou égales à la valeur cible.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-link link-secondary"
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    Annuler
-                  </button>
-                  <button type="submit" className="btn btn-primary ms-auto">
-                    <IconCheck className="icon" />
-                    Mettre à jour l'objectif
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
