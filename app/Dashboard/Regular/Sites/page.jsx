@@ -111,13 +111,14 @@ const SitesPage = () => {
             Monitor and analyze the environmental impact of websites
           </div>
         </div>
-        <button
+        <a 
+        href="/Dashboard/Regular/calculator"
           className="btn btn-primary ms-auto d-flex align-items-center gap-2"
        
         >
           <IconCalculator size={18} />
           Calculate New Site
-        </button>
+        </a>
       </div>
 
       <div className="card">

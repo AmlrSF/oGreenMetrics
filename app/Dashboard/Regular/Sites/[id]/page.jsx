@@ -40,11 +40,17 @@ const page = () => {
               <div className="card">
                 <div className="card-body">
                   <div className="d-flex align-items-center">
-                    <div className={`avatar ${result?.green ? "bg-green-lt" : "bg-red-lt"}`}>
+                    <div
+                      className={`avatar ${
+                        result?.green ? "bg-green-lt" : "bg-red-lt"
+                      }`}
+                    >
                       <IconCpu size={24} />
                     </div>
                     <div className="ms-3">
-                      <div className="font-weight-medium">Rating {result?.rating}</div>
+                      <div className="font-weight-medium">
+                        Rating {result?.rating}
+                      </div>
                       <div className="text-muted">
                         {result?.green ? "Eco-friendly" : "Needs improvement"}
                       </div>
@@ -123,7 +129,9 @@ const page = () => {
                           <IconThermometer size={24} />
                         </div>
                         <div className="ms-3">
-                          <div className="font-weight-medium">Energy Consumption</div>
+                          <div className="font-weight-medium">
+                            Energy Consumption
+                          </div>
                           <div className="text-muted">
                             {result?.statistics?.energy.toFixed(4)} kWh
                           </div>
@@ -134,9 +142,16 @@ const page = () => {
                           <IconBattery3 size={24} />
                         </div>
                         <div className="ms-3">
-                          <div className="font-weight-medium">Adjusted Bytes</div>
+                          <div className="font-weight-medium">
+                            Adjusted Bytes
+                          </div>
                           <div className="text-muted">
-                            {(result?.statistics?.adjustedBytes / 1024 / 1024).toFixed(2)} MB
+                            {(
+                              result?.statistics?.adjustedBytes /
+                              1024 /
+                              1024
+                            ).toFixed(2)}{" "}
+                            MB
                           </div>
                         </div>
                       </div>
@@ -152,9 +167,14 @@ const page = () => {
                           <IconCloud size={24} />
                         </div>
                         <div className="ms-3">
-                          <div className="font-weight-medium">CO2 Renewable</div>
+                          <div className="font-weight-medium">
+                            CO2 Renewable
+                          </div>
                           <div className="text-muted">
-                            {result?.statistics?.co2?.renewable?.grams.toFixed(2)}g
+                            {result?.statistics?.co2?.renewable?.grams.toFixed(
+                              2
+                            )}
+                            g
                           </div>
                         </div>
                       </div>
@@ -165,7 +185,8 @@ const page = () => {
                         <div className="ms-3">
                           <div className="font-weight-medium">CO2 Volume</div>
                           <div className="text-muted">
-                            {result?.statistics?.co2?.grid?.litres.toFixed(2)} litres
+                            {result?.statistics?.co2?.grid?.litres.toFixed(2)}{" "}
+                            litres
                           </div>
                         </div>
                       </div>
@@ -175,6 +196,56 @@ const page = () => {
               </div>
             </div>
           </div>
+
+          {/* Breakdown Cards */}
+          <div className="row row-cards mt-4">
+            {result?.breakdown &&
+              Object.entries(result.breakdown).map(([type, stats]) => (
+                <div className="col-sm-6 col-lg-3 mb-3" key={type}>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h4 className="card-title text-capitalize">{type}</h4>
+                        <span className="badge bg-purple-lt text-uppercase">
+                          {type}
+                        </span>
+                      </div>
+                      <div className="text-muted">📦 Count: {stats.count}</div>
+                      <div className="text-muted">
+                        💾 Size: {stats.sizeKB} KB
+                      </div>
+                      <div className="text-muted">🌿 CO₂: {stats.co2g} g</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {result?.suggestions?.length > 0 && (
+            <div className="card mt-4">
+              <div className="card-header">
+                <h3 className="card-title">Suggestions</h3>
+              </div>
+              <div className="card-body table-responsive">
+                <table className="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Suggestion</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.suggestions.map((suggestion, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{suggestion}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

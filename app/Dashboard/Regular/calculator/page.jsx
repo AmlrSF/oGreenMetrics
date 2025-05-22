@@ -26,6 +26,7 @@ function WebsiteCalculator() {
   const [visits, setVisits] = useState(10000);
   const [counter, setCounter] = useState(1);
   const [copied, setCopied] = useState(false);
+  const [results, setResults] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState("dark");
   const increment = () => {
     if (counter < 10000) {
@@ -90,7 +91,26 @@ function WebsiteCalculator() {
         `http://localhost:4000/carbon?url=${encodedUrl}`
       );
       const data = await response.json();
-      setResult(data);
+
+      if (response.ok) {
+        setResult(data);
+        const response = await fetch(
+          "http://localhost:4000/carbon-calculator",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ url }),
+          }
+        );
+
+        const DetailsData = await response.json();
+
+        console.log(DetailsData);
+
+        setResults(DetailsData);
+      }
     } catch (err) {
       setError("Failed to calculate website carbon footprint");
     } finally {
@@ -99,25 +119,35 @@ function WebsiteCalculator() {
   };
 
   const SaveSiteDetails = async () => {
-    if (!result) {
+    if (!result && !results) {
       alert("Please calculate the carbon footprint first.");
       return;
     }
-    setSaving(true);
-    try {
-      await fetch("http://localhost:4000/site", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user?._id,
-          ...result,
-        }),
-      });
-      setShowSave(false);
-    } catch (err) {
-      alert("Error saving site details: " + err.message);
-    } finally {
-      setSaving(false);
+
+    if (user?._id) {
+      let AllResult = {
+        breakdown: results?.breakdown,
+        suggestions: results?.suggestions,
+        userId: user?._id,
+        ...result,
+      };
+
+      setSaving(true);
+
+      try {
+        await fetch("http://localhost:4000/site", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...AllResult,
+          }),
+        });
+        setShowSave(false);
+      } catch (err) {
+        alert("Error saving site details: " + err.message);
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -130,6 +160,7 @@ function WebsiteCalculator() {
         });
         const UseData = await UserReponse.json();
         if (UseData?.user) {
+          //console.log(UseData?.user);
           setUser(UseData?.user);
         }
       } catch (error) {
@@ -236,7 +267,7 @@ function WebsiteCalculator() {
       </div>
 
       <AnimatePresence>
-        {result && (
+        {result && results && (
           <motion.div
             key="results"
             initial={{ opacity: 0, y: 40 }}
@@ -354,11 +385,13 @@ function WebsiteCalculator() {
                           page.
                         </span>
                       </div>
-                      {/* 
+
                       <div className="  rounded p-4">
-                        <div className="d-flex 
+                        <div
+                          className="d-flex 
                         align-items-center justify-content-center 
-                        gap-4 mb-4">
+                        gap-4 mb-4"
+                        >
                           <button
                             onClick={decrement}
                             className="bg-primary rounded-2 border-0 f d-flex justify-content-center align-items-center 
@@ -370,8 +403,8 @@ function WebsiteCalculator() {
                           </button>
 
                           <div
-                            className="bg-secondary px-4 py-2 rounded shadow-sm text-center"
-                            style={{ minWidth: 150, }}
+                            className=" px-4 py-2 rounded shadow-sm text-center"
+                            style={{ minWidth: 150 }}
                           >
                             <div className="text-muted small mb-1">
                               Number of Users
@@ -383,7 +416,7 @@ function WebsiteCalculator() {
 
                           <button
                             onClick={increment}
-                        className="bg-primary rounded-2 border-0 f d-flex justify-content-center align-items-center 
+                            className="bg-primary rounded-2 border-0 f d-flex justify-content-center align-items-center 
                              fw-bold"
                             style={{ width: 40, height: 40 }}
                             disabled={counter === 10000}
@@ -397,10 +430,12 @@ function WebsiteCalculator() {
                             Total CO₂ Emissions
                           </div>
                           <div className="fs-2 fw-bold text-primary">
-                            {formatCO2(counter * result?.statistics?.co2?.grid?.grams )}
+                            {formatCO2(
+                              counter * result?.statistics?.co2?.grid?.grams
+                            )}
                           </div>
                         </div>
-                      </div> */}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -520,10 +555,9 @@ function WebsiteCalculator() {
                     </div>
                   </div>
                 </motion.div>
-
                 {showSave && (
                   <button
-                    className="btn btn-success  mt-4 float-end"
+                    className="btn btn-success mt-4 float-end"
                     onClick={SaveSiteDetails}
                     disabled={saving}
                   >
@@ -535,6 +569,7 @@ function WebsiteCalculator() {
                     Save to my dashboard
                   </button>
                 )}
+
                 {!showSave && (
                   <div className="alert alert-success mt-4 mb-0">
                     Site carbon data saved!
