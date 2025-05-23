@@ -155,11 +155,6 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
         });
       }
 
-     
-
-      
-
-      // Emissions by Category Chart
       if (emissionsByCategoryChartRef.current && activeTab === "overview") {
         const categoryData = {
           labels: ["Combustion de carburant", "Processus de production", "Transport", "Chauffage et refroidissement"],
