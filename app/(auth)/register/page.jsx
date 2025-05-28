@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import VerificationRequired from "@/components/VerificationRequired";
 
-
 const SignupPage = () => {
   const { push } = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -35,25 +34,58 @@ const SignupPage = () => {
     setCurrentStep(currentStep - 1);
   };
 
+  const validatePassword = (password) => {
+    const minLength = password.length >= 8;
+    const hasNumber = /\d/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+    
+    return {
+      isValid: minLength && hasNumber && hasLowercase && hasUppercase,
+      errors: [
+        !minLength && "Le mot de passe doit contenir au moins 8 caractères",
+        !hasNumber && "Le mot de passe doit contenir au moins un chiffre",
+        !hasLowercase && "Le mot de passe doit contenir au moins une lettre minuscule",
+        !hasUppercase && "Le mot de passe doit contenir au moins une lettre majuscule"
+      ].filter(Boolean)
+    };
+  };
+
   const validateStep1 = () => {
     if (!formData.prenom || !formData.nom || !formData.email || !formData.mot_de_passe || !formData.confirmPassword) {
       setError("Veuillez remplir tous les champs obligatoires");
       return false;
     }
+    
+    const passwordValidation = validatePassword(formData.mot_de_passe);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors.join(", "));
+      return false;
+    }
+    
     if (formData.mot_de_passe !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas");
       return false;
     }
+    
     setError("");
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const passwordValidation = validatePassword(formData.mot_de_passe);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors.join(", "));
+      return;
+    }
+    
     if (formData.mot_de_passe !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas");
       return;
     }
+    
     try {
       const userResponse = await fetch("http://localhost:4000/register", {
         method: "POST",
@@ -114,11 +146,11 @@ const SignupPage = () => {
     }
   };
 
-  const naviagteToLoginPage = ()=>{
+  const naviagteToLoginPage = () => {
     push("/login");
   }
 
-  if(success)
+  if (success)
     return <VerificationRequired naviagteToLoginPage={naviagteToLoginPage} />
 
   return (
@@ -193,18 +225,18 @@ const SignupPage = () => {
               <form onSubmit={handleSubmit}>
                 {currentStep === 1 && (
                   <div id="account-type">
-               <h2 className="d-flex align-items-center small fw-medium mb-3">
-                  <div
-                    className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 stepper-active"
-                    style={{ width: "24px", height: "24px", fontSize: "12px" }}
-                  >
-                    1
-                  </div>
-                  Choisissez votre type de compte
-                </h2>
+                    <h2 className="d-flex align-items-center small fw-medium mb-3">
+                      <div
+                        className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 stepper-active"
+                        style={{ width: "24px", height: "24px", fontSize: "12px" }}
+                      >
+                        1
+                      </div>
+                      Choisissez votre type de compte
+                    </h2>
 
                     <div className="d-flex flex-column flex-md-row gap-3 mb-4">
-                    <button
+                      <button
                         type="button"
                         className={`btn ${accountType === "régulier" ? "btn-success" : "btn-outline-secondary"} flex-grow-1 py-3`}
                         onClick={() => handleAccountTypeChange("régulier")}
@@ -233,15 +265,15 @@ const SignupPage = () => {
 
                 {currentStep === 2 && (
                   <div id="personal-info">
-                   <h2 className="d-flex align-items-center small fw-medium mb-3">
-                    <div
-                      className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 stepper-active"
-                      style={{ width: "24px", height: "24px", fontSize: "12px" }}
-                    >
-                      1
-                    </div>
-                    Choisissez votre type de compte
-                  </h2>
+                    <h2 className="d-flex align-items-center small fw-medium mb-3">
+                      <div
+                        className="d-flex align-items-center justify-content-center text-white rounded-circle me-2 stepper-active"
+                        style={{ width: "24px", height: "24px", fontSize: "12px" }}
+                      >
+                        2
+                      </div>
+                      Informations personnelles
+                    </h2>
 
                     <div className="row g-3 mb-4">
                       <div className="col-md-6">
@@ -310,6 +342,23 @@ const SignupPage = () => {
                           >
                             <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
                           </button>
+                        </div>
+                        <div className="mt-2 small">
+                          <p className="mb-1">Le mot de passe doit contenir :</p>
+                          <ul className="list-unstyled ms-3">
+                            <li className={formData.mot_de_passe.length >= 8 ? "text-success" : "text-muted"}>
+                              ✓ Au moins 8 caractères
+                            </li>
+                            <li className={/\d/.test(formData.mot_de_passe) ? "text-success" : "text-muted"}>
+                              ✓ Au moins un chiffre
+                            </li>
+                            <li className={/[a-z]/.test(formData.mot_de_passe) ? "text-success" : "text-muted"}>
+                              ✓ Au moins une lettre minuscule
+                            </li>
+                            <li className={/[A-Z]/.test(formData.mot_de_passe) ? "text-success" : "text-muted"}>
+                              ✓ Au moins une lettre majuscule
+                            </li>
+                          </ul>
                         </div>
                       </div>
 

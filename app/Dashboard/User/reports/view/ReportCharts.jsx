@@ -7,8 +7,6 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
   // Chart refs
   const emissionsBySourceChartRef = useRef(null);
   const scopeDistributionChartRef = useRef(null);
-  const emissionIntensityChartRef = useRef(null);
-  const carbonFootprintChartRef = useRef(null);
   const emissionsByCategoryChartRef = useRef(null);
   const scope1BreakdownChartRef = useRef(null);
   const fuelTypeChartRef = useRef(null);
@@ -157,75 +155,6 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
         });
       }
 
-      // Emission Intensity Chart
-      if (emissionIntensityChartRef.current && activeTab === "overview") {
-        const intensityData = [
-          { name: "Fabrication", value: emissionTotals.total * 0.4 / 100 },
-          { name: "Opérations de bureau", value: emissionTotals.total * 0.15 / 100 },
-          { name: "Transport", value: emissionTotals.total * 0.25 / 100 },
-          { name: "Chauffage et refroidissement", value: emissionTotals.total * 0.2 / 100 },
-        ];
-
-        newCharts.emissionIntensity = new Chart(emissionIntensityChartRef.current, {
-          type: "bar",
-          data: {
-            labels: intensityData.map(d => d.name),
-            datasets: [
-              {
-                label: "Intensité des émissions (tCO₂ par unité)",
-                data: intensityData.map(d => d.value),
-                backgroundColor: ["#328E6E", "#67AE6E", "#90C67C", "#E1EEBC"],
-                borderWidth: 1,
-              },
-            ],
-          },
-          options: {
-            ...chartOptions,
-            plugins: {
-              ...chartOptions.plugins,
-              title: {
-                display: true,
-                text: "Intensité des émissions par activité",
-              },
-            },
-          },
-        });
-      }
-
-      // Carbon Footprint Comparison Chart
-      if (carbonFootprintChartRef.current && activeTab === "overview") {
-        const comparisonData = {
-          labels: ["Your Company", "Industry Average", "Best in Class"],
-          values: [emissionTotals.total, emissionTotals.total * 1.3, emissionTotals.total * 0.7],
-        };
-
-        newCharts.carbonFootprint = new Chart(carbonFootprintChartRef.current, {
-          type: "bar",
-          data: {
-            labels: comparisonData.labels,
-            datasets: [
-              {
-                label: "Carbon Footprint (tCO₂)",
-                data: comparisonData.values,
-                backgroundColor: ["#67AE6E", "#90C67C", "#E1EEBC"],
-                borderWidth: 1,
-              },
-            ],
-          },
-          options: {
-            ...chartOptions,
-            plugins: {
-              ...chartOptions.plugins,
-              title: {
-                display: true,
-                text: "Carbon Footprint Comparison",
-              },
-            },
-          },
-        });
-      }
-
-      // Emissions by Category Chart
       if (emissionsByCategoryChartRef.current && activeTab === "overview") {
         const categoryData = {
           labels: ["Combustion de carburant", "Processus de production", "Transport", "Chauffage et refroidissement"],
@@ -623,30 +552,8 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
                   </div>
                 </div>
               </div>
-              <div className="col-md-6 mt-3">
-                <div className="card">
-                  <div className="card-header">
-                    <h3 className="card-title">Intensité des émissions par activité</h3>
-                  </div>
-                  <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="emissionIntensityChart" ref={emissionIntensityChartRef}></canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-6 mt-3">
-                <div className="card">
-                  <div className="card-header">
-                    <h3 className="card-title">Comparaison de l'empreinte carbone</h3>
-                  </div>
-                  <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="carbonFootprintChart" ref={carbonFootprintChartRef}></canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              
+              
               <div className="col-12 mt-3">
                 <div className="card">
                   <div className="card-header">
@@ -693,9 +600,7 @@ const ReportCharts = ({ report, activeTab, calculateTotalEmissions, getScope1Det
                     <h3 className="card-title">Intensité des Émissions de Carburant</h3>
                   </div>
                   <div className="card-body">
-                    <div style={{ height: "300px" }}>
-                      <canvas id="fuelEmissionIntensityChart" ref={fuelEmissionIntensityChartRef}></canvas>
-                    </div>
+                     
                   </div>
                 </div>
               </div>
