@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { getInitials } from "@/lib/Utils";
 import { useRouter } from "next/navigation";
 import { IconBell, IconX, IconUser, IconBuilding } from "@tabler/icons-react";
@@ -12,16 +12,9 @@ const Navbar = ({ user, isAdmin }) => {
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [loading, setLoading] = useState(false);
-  const lastFetchTimeRef = useRef(0); // Use ref instead of state
 
   const fetchNotifications = useCallback(
-    async (userId, force = false) => { 
-      const currentTime = Date.now();
-      if (!force && currentTime - lastFetchTimeRef.current < 1) { 
-        return;
-      }
-
-      lastFetchTimeRef.current = currentTime; // Update ref instead of state
+    async (userId) => { 
       setLoading(true);
 
       try {
@@ -57,7 +50,7 @@ const Navbar = ({ user, isAdmin }) => {
         setLoading(false);
       }
     },
-    [isAdmin] // Removed lastFetchTime from dependencies
+    [isAdmin]
   );
 
   const handleDeleteNotification = async (notificationId, e) => {
@@ -127,15 +120,16 @@ const Navbar = ({ user, isAdmin }) => {
 
   const toggleNotifications = () => {
     if (!showNotifications) {
-      fetchNotifications(user?._id, true);
+      fetchNotifications(user?._id);
     }
     setShowNotifications(!showNotifications);
   };
 
   useEffect(() => {
     if (user?._id || isAdmin) {
-      fetchNotifications(user?._id, true);
+      fetchNotifications(user?._id);
 
+      // Refresh notifications every 30 seconds
       const intervalId = setInterval(() => {
         fetchNotifications(user?._id);
       }, 30000);
@@ -213,7 +207,14 @@ const Navbar = ({ user, isAdmin }) => {
               >
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h6 className="mb-0">Notifications</h6>
-                 </div>
+                  <button 
+                    className="btn btn-sm btn-outline-secondary" 
+                    onClick={() => fetchNotifications(user?._id)}
+                    disabled={loading}
+                  >
+                    {loading ? "Actualisation..." : "Actualiser"}
+                  </button>
+                </div>
 
                 {allNotifications.length === 0 ? (
                   <p className="text-muted">Aucune notification</p>
