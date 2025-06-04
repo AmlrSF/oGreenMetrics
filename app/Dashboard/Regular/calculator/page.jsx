@@ -27,7 +27,7 @@ function WebsiteCalculator() {
   const [visits, setVisits] = useState(10000);
   const [counter, setCounter] = useState(1);
   const [copied, setCopied] = useState(false);
-  const [results, setResults] = useState(null);
+  const [results, setDetailedResults] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState("dark");
   const increment = () => {
     if (counter < 10000) {
@@ -110,7 +110,7 @@ function WebsiteCalculator() {
 
         console.log(DetailsData);
 
-        setResults(DetailsData);
+        setDetailedResults(DetailsData);
       }
     } catch (err) {
       setError("Failed to calculate website carbon footprint");

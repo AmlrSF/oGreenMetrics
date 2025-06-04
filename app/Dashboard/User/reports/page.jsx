@@ -434,7 +434,7 @@ const Reporting = () => {
         </div>
       )}
 
-      <div className="py-2 mb-4 d-flex   border-b justify-content-center align-items-center">
+      <div className="py-2 mb-4 d-flex border-b justify-content-center align-items-center">
         <div>
           <h3 className="fs-1 mb-0 fw-bold" style={{ color: "#263589" }}>
             {" "}
