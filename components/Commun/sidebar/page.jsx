@@ -36,8 +36,9 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
       
       setItems(
         menuItems.filter(
-          (item) => item.label !== "Profil" &&
-           item.label !== "Paramètres"
+ 
+          (item) => item.label !== "Profile"  
+ 
         )
       );
     } 
@@ -49,21 +50,27 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
       
       setItems(
         filteredMenuItems.filter(
-          (item) => item.label !== "Profil" && item.label !== "Paramètres"
+ 
+          (item) => item.label !== "Profile" 
+ 
         )
       );
     } 
     else if (user?.role === "entreprise") {
       setItems(
         userMenuItems.filter(
-          (item) => item.label !== "Profil" && item.label !== "Paramètres"
+ 
+          (item) => item.label !== "Profile" 
+ 
         )
       );
     } 
     else if (user?.role === "régulier") {
       setItems(
         websiteMenuItems.filter(
-          (item) => item.label !== "Profil" && item.label !== "Paramètres"
+ 
+          (item) => item.label !== "Profile" 
+ 
         )
       );
     } 
@@ -297,7 +304,9 @@ const Sidebar = ({ user, isCollapsed, setIsCollapsed }) => {
           className="p-2"
         >
           <ul className="nav flex-column gap-2 mb-3">
-            {["Profil", "Paramètres"].map((label) => {
+ 
+            {["Profile" ].map((label) => {
+ 
               const item = (user?.role == "Admin" ? menuItems : user?.role == "entreprise" ? userMenuItems : websiteMenuItems).find(
                 (i) => i.label === label
               );
