@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,7 +27,7 @@ function WebsiteCalculator() {
   const [visits, setVisits] = useState(10000);
   const [counter, setCounter] = useState(1);
   const [copied, setCopied] = useState(false);
-  const [results, setResults] = useState(null);
+  const [results, setDetailedResults] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState("dark");
   const increment = () => {
     if (counter < 10000) {
@@ -109,7 +110,7 @@ function WebsiteCalculator() {
 
         console.log(DetailsData);
 
-        setResults(DetailsData);
+        setDetailedResults(DetailsData);
       }
     } catch (err) {
       setError("Failed to calculate website carbon footprint");
@@ -218,16 +219,16 @@ function WebsiteCalculator() {
               <div className="d-flex align-items-center">
                 <div className="col-9">
                   <h2 className="mb-0 fw-bold" style={{ color: "#000" }}>
-                    Website Carbon Calculator
+                    Calculateur de Carbone pour Site Web
                   </h2>
                   <div className="text-muted mb-2">
-                    Calculate your website's carbon footprint
+                    Calculez l'empreinte carbone de votre site web
                   </div>
                 </div>
                 <div className="col-3 text-end sm:block hidden">
                   <div className="badge bg-green-lt d-inline-flex align-items-center p-2">
                     <IconLeaf className="icon " />
-                    Eco-friendly tool
+                    Outil éco-responsable
                   </div>
                 </div>
               </div>
@@ -236,7 +237,7 @@ function WebsiteCalculator() {
                   <input
                     type="url"
                     className="form-control"
-                    placeholder="Enter website URL"
+                    placeholder="Entrez l'URL du site web"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     required
@@ -251,7 +252,7 @@ function WebsiteCalculator() {
                     ) : (
                       <IconSearch className="icon me-2" />
                     )}
-                    Calculate
+                    Calculer
                   </button>
                 </div>
               </form>
@@ -304,15 +305,15 @@ function WebsiteCalculator() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <h3 className="mb-1 fw-bold" style={{ color: "#fff" }}>
-                        Hurrah! This web page achieves a carbon rating of{" "}
+                        Hourra ! Cette page web obtient une note carbone de{" "}
                         <span className="fw-bold">{result?.rating}</span>
                       </h3>
                       <div className="mb-1">
-                        This is cleaner than{" "}
+                        C'est plus propre qu{" "}
                         <span className="badge bg-cyan-lt text-cyan me-1">
                           {((result?.cleanerThan || 0) * 100)?.toFixed(0)}%
                         </span>
-                        of all web pages globally.
+                        de toutes les pages web dans le monde.
                       </div>
                       <div className="d-flex align-items-center gap-2">
                         <span className="fw-bold" style={{ color: "#fff" }}>
@@ -347,10 +348,10 @@ function WebsiteCalculator() {
                           onClick={() => {
                             navigator.clipboard.writeText(url);
                           }}
-                          className="btn btn-light btn-sm"
+                          className="btn btn-light rounded-2 btn-sm"
                           title="Copy URL"
                         >
-                          <IconCopy className="icon me-1" /> Copy URL
+                          <IconCopy className="icon me-1" /> Copier l’URL
                         </button>
                       </div>
                     </div>
@@ -381,8 +382,7 @@ function WebsiteCalculator() {
                           {formatCO2(result?.statistics?.co2?.grid?.grams)}
                         </span>
                         <span className="ms-2 mb-0 fs-5">
-                          of CO₂ is produced every time someone visits this web
-                          page.
+                          de CO₂ sont émis à chaque visite de cette page web.
                         </span>
                       </div>
 
@@ -407,7 +407,7 @@ function WebsiteCalculator() {
                             style={{ minWidth: 150 }}
                           >
                             <div className="text-muted small mb-1">
-                              Number of Users
+                              Nombre d’utilisateurs
                             </div>
                             <div className="fs-3 fw-bold text-primary">
                               {counter}
@@ -427,7 +427,7 @@ function WebsiteCalculator() {
 
                         <div className="bg-light-lt rounded p-4 text-center">
                           <div className="text-muted mb-2">
-                            Total CO₂ Emissions
+                            Émissions totales de CO₂
                           </div>
                           <div className="fs-2 fw-bold text-primary">
                             {formatCO2(
@@ -455,15 +455,16 @@ function WebsiteCalculator() {
                           size={30}
                         />
                         <span className="fs-5 fw-bold">
-                          This web page appears to be running on{" "}
+                          Cette page web semble fonctionner grâce à{" "}
                           <span className="badge bg-green-lt text-green fs-5">
-                            sustainable energy
+                            une énergie durable
                           </span>
                         </span>
                       </div>
                     </div>
                   </div>
                 </motion.div>
+
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -473,7 +474,7 @@ function WebsiteCalculator() {
                   <div className="card shadow" style={{ borderRadius: 20 }}>
                     <div className="card-body p-4">
                       <h3 className="mb-4 fw-bold">
-                        Add this badge to your website
+                        Ajoutez ce badge à votre site web
                       </h3>
 
                       <div className="mb-4">
@@ -486,7 +487,7 @@ function WebsiteCalculator() {
                             }`}
                             onClick={() => setSelectedTheme("dark")}
                           >
-                            Dark theme
+                            Thème sombre
                           </button>
                           <button
                             className={`btn ${
@@ -496,35 +497,64 @@ function WebsiteCalculator() {
                             }`}
                             onClick={() => setSelectedTheme("light")}
                           >
-                            Light theme
+                            Thème clair
                           </button>
                         </div>
 
                         <div className="p-4 bg-light rounded-3 mb-3">
                           <div className="">
                             {selectedTheme === "dark" ? (
-                              <div className="bg-dark d-inline-flex align-items-center px-4 py-2 rounded-pill gap-2">
-                                <span className="text-cyan">
-                                  {formatCO2(
-                                    result?.statistics?.co2?.grid?.grams
-                                  )}{" "}
-                                  of CO₂/view
-                                </span>
-                                <span className="text-white fw-semibold">
-                                  Website Carbon
-                                </span>
+                              <div
+                                className="bg-dark  d-inline-flex 
+                                align-items-center py-2 px-4 rounded-4 gap-3"
+                                style={{
+                                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                                }}
+                              >
+                                <Image
+                                  src="/logoImage.png"
+                                  width={75}
+                                  height={75}
+                                  alt="Logo Empreinte Carbone"
+                                  className="me-1"
+                                />
+                                <div className="d-flex flex-column  align-items-center justify-content-center">
+                                  <span className="text-cyan fw-medium">
+                                    {formatCO2(
+                                      result?.statistics?.co2?.grid?.grams
+                                    )}{" "}
+                                    de CO₂/visite
+                                  </span>
+                                  <span className="text-white fw-semibold">
+                                    Empreinte Carbone
+                                  </span>
+                                </div>
                               </div>
                             ) : (
-                              <div className="bg-white d-inline-flex align-items-center px-4 py-2 rounded-pill gap-2 border">
-                                <span className="text-primary">
-                                  {formatCO2(
-                                    result?.statistics?.co2?.grid?.grams
-                                  )}{" "}
-                                  of CO₂/view
-                                </span>
-                                <span className="text-dark fw-semibold">
-                                  Website Carbon
-                                </span>
+                              <div
+                                className="bg-white d-inline-flex align-items-center py-2 px-4 rounded-4 gap-3 border"
+                                style={{
+                                  boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                                }}
+                              >
+                                <Image
+                                  src="/logoImage.png"
+                                  width={75}
+                                  height={75}
+                                  alt="Logo Empreinte Carbone"
+                                  className="me-1"
+                                />
+                                <div className="d-flex flex-column  align-items-center justify-content-center">
+                                  <span className="text-primary fw-medium">
+                                    {formatCO2(
+                                      result?.statistics?.co2?.grid?.grams
+                                    )}{" "}
+                                    de CO₂/visite
+                                  </span>
+                                  <span className="text-dark fw-semibold">
+                                    Empreinte Carbone
+                                  </span>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -540,7 +570,7 @@ function WebsiteCalculator() {
                             ) : (
                               <IconCode size={18} />
                             )}
-                            {copied ? "Copied!" : "Copy badge code"}
+                            {copied ? "Copié !" : "Copier le code du badge"}
                           </button>
                         </div>
                       </div>
@@ -548,8 +578,9 @@ function WebsiteCalculator() {
                       <div className="alert alert-info mb-0 d-flex align-items-center gap-2">
                         <IconAlertCircle size={20} />
                         <span>
-                          Add this code to your website's footer or any other
-                          location where you want to display the badge.
+                          Ajoutez ce code dans le pied de page de votre site web
+                          ou à tout autre endroit où vous souhaitez afficher le
+                          badge.
                         </span>
                       </div>
                     </div>
@@ -566,13 +597,13 @@ function WebsiteCalculator() {
                     ) : (
                       <IconCheck className="icon me-2" />
                     )}
-                    Save to my dashboard
+                    Enregistrer dans mon tableau de bord
                   </button>
                 )}
 
                 {!showSave && (
                   <div className="alert alert-success mt-4 mb-0">
-                    Site carbon data saved!
+                    Données carbone du site enregistrées !
                   </div>
                 )}
               </div>
