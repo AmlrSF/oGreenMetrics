@@ -214,11 +214,11 @@ const Page = () => {
                     <tr key={role._id || index}>
                       <td>{role.name}</td>
                       <td>
-                        {role.description.length > 30 ? (
+                        {role.description.length > 100 ? (
                           <>
                             {expandedRoleId === role._id
                               ? role.description
-                              : `${role.description.slice(0, 30)}... `}
+                              : `${role.description.slice(0, 100)}... `}
                             <button
                               className="btn btn-link p-0"
                               onClick={() =>
