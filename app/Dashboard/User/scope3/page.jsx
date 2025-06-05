@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { tabs } from "@/lib/Data";
 import DataTable from "@/components/Commun/Datatable/Datatable";
 
@@ -22,65 +22,70 @@ const Scope3 = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingIds, setDeletingIds] = useState(new Set());
-
+  const [isAutomating, setIsAutomating] = useState(false);
+  const automationIntervalRef = useRef(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const UserReponse = await fetch("http://localhost:4000/auth", {
+        const UserResponse = await fetch("http://localhost:4000/auth", {
           method: "POST",
           credentials: "include",
         });
-        const UseData = await UserReponse.json();
+        const UserData = await UserResponse.json();
 
-        if (UseData?.user) {
+        if (UserData?.user) {
           const CompanyResponse = await fetch(
-            `http://localhost:4000/GetCompanyByOwnerID/${UseData?.user?._id}`,
+            `http://localhost:4000/GetCompanyByOwnerID/${UserData?.user?._id}`,
             {
               method: "GET",
             }
           );
 
           const CompanyData = await CompanyResponse.json();
-
           setCompany(CompanyData?.data);
 
-          if(CompanyData?.Data?._id){
+          if (CompanyData?.data?._id) {
             const response = await fetch(
-              `http://localhost:4000/transport/${Company?._id}`,
+              `http://localhost:4000/transport/${CompanyData?.data?._id}`,
               {
                 method: "GET",
               }
             );
             const data = await response.json();
-  
+
             if (response.ok) {
-              setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
+              setTableData((prev) => ({ ...prev, transport: data?.data }));
             }
-            
           }
-          
         } else {
           console.log("User not found");
         }
       } catch (error) {
-        console.log(error);
+        console.log("Error fetching user:", error);
       }
     };
 
     fetchUser();
-  
   }, []);
 
   useEffect(() => {
-    if(Company?._id){
+    if (Company?._id) {
       fetchData();
     }
-
   }, [activeTab, Company]);
 
+  // Cleanup automation interval on component unmount
+  useEffect(() => {
+    return () => {
+      if (automationIntervalRef.current) {
+        clearInterval(automationIntervalRef.current);
+      }
+    };
+  }, []);
+
   const fetchData = async () => {
-    if(Company){
+    if (Company) {
       try {
         const response = await fetch(
           `http://localhost:4000/${activeTab}/${Company?._id}`,
@@ -89,14 +94,11 @@ const Scope3 = () => {
           }
         );
         const data = await response.json();
-  
-        console.log(data);
-
         if (response.ok) {
           setTableData((prev) => ({ ...prev, [activeTab]: data?.data }));
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error(`Error fetching data for ${activeTab}:`, error);
       }
     }
   };
@@ -122,7 +124,6 @@ const Scope3 = () => {
         body: JSON.stringify(newFormData),
       });
 
-      const responseData = await response.json();
       await fetchData();
       toggleModal(false);
       setIsEditing(false);
@@ -137,20 +138,19 @@ const Scope3 = () => {
 
   const handleDelete = async (id) => {
     if (deletingIds.has(id)) return;
-    
-    setDeletingIds(prev => new Set([...prev, id]));
-    
+
+    setDeletingIds((prev) => new Set([...prev, id]));
+
     try {
       const response = await fetch(`http://localhost:4000/${activeTab}/${id}`, {
         method: "DELETE",
       });
 
-      const responseData = await response.json();
       await fetchData();
     } catch (error) {
       console.error("Error deleting:", error);
     } finally {
-      setDeletingIds(prev => {
+      setDeletingIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(id);
         return newSet;
@@ -183,10 +183,13 @@ const Scope3 = () => {
     }
   };
 
+  const onAdd = () => {
+    toggleModal(true);
+  };
+
   const handleTabClick = async (tabId, e) => {
     e.preventDefault();
     setActiveTab(tabId);
-    console.log(tabId);
   };
 
   const handleInputChange = (e) => {
@@ -198,17 +201,15 @@ const Scope3 = () => {
     const currentTab = tabs[activeTab];
 
     return currentTab?.fields.map((field, index) => {
-      // Cas spécial pour le type de transport avec options dynamiques
       if (
-        (field.name === "type" || field.name === "sousType") &&
-        (activeTab === "transport" ||
-          activeTab === "businessTravel" ||
-          activeTab === "biens-services") &&
+        field.name === "type" &&
+        (activeTab === "transport" || activeTab === "businessTravel") &&
         field.dynamicOptions
       ) {
-        const transportMode = formData.mode || formData.type;
-        const availableOptions = transportMode
-          ? field.dynamicOptions[transportMode] || []
+        // Use 'mode' for transport and businessTravel
+        const selectorField = formData.mode;
+        const availableOptions = selectorField
+          ? field.dynamicOptions[selectorField] || []
           : [];
 
         return (
@@ -220,7 +221,38 @@ const Scope3 = () => {
               onChange={handleInputChange}
               value={formData[field.name] || ""}
               required={field.required}
-              disabled={!transportMode}
+              disabled={!selectorField}
+            >
+              <option value="">{field.placeholder}</option>
+              {availableOptions.map((option, idx) => (
+                <option key={idx} value={option.value}>
+                  {option?.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      } else if (
+        field.name === "sousType" &&
+        activeTab === "biens-services" &&
+        field.dynamicOptions
+      ) {
+        // Use 'type' for biens-services
+        const selectorField = formData.type;
+        const availableOptions = selectorField
+          ? field.dynamicOptions[selectorField] || []
+          : [];
+
+        return (
+          <div className="mb-3" key={index}>
+            <label className="form-label">{field?.label}</label>
+            <select
+              className="form-select"
+              name={field.name}
+              onChange={handleInputChange}
+              value={formData[field.name] || ""}
+              required={field.required}
+              disabled={!selectorField}
             >
               <option value="">{field.placeholder}</option>
               {availableOptions.map((option, idx) => (
@@ -235,7 +267,10 @@ const Scope3 = () => {
 
       return (
         <div className="mb-3" key={index}>
-          <label className="form-label">{field?.label}{field?.required ? <span className="fs-2 text-danger">*</span> : "" }</label>
+          <label className="form-label">
+            {field?.label}
+            {field?.required ? <span className="fs-2 text-danger">*</span> : ""}
+          </label>
           {field.type === "select" ? (
             <select
               className="form-select"
@@ -245,7 +280,7 @@ const Scope3 = () => {
               required={field.required}
             >
               <option value="">{field.placeholder}</option>
-              {field.options.map((option, idx) => (
+              {field.options?.map((option, idx) => (
                 <option key={idx} value={option.value}>
                   {option?.label}
                 </option>
@@ -278,21 +313,141 @@ const Scope3 = () => {
     });
   };
 
+  const generateRandomData = () => {
+    const currentTab = tabs[activeTab];
+    const randomData = {};
+
+    currentTab?.fields.forEach((field) => {
+      if (field.type === "select") {
+        if (
+          (field.name === "mode" || field.name === "type") &&
+          field.options?.length > 0
+        ) {
+          const randomIndex = Math.floor(Math.random() * field.options.length);
+          randomData[field.name] = field.options[randomIndex].value;
+        } else if (
+          field.name === "type" &&
+          field.dynamicOptions &&
+          randomData.mode
+        ) {
+          const options = field.dynamicOptions[randomData.mode] || [];
+          if (options.length > 0) {
+            const randomIndex = Math.floor(Math.random() * options.length);
+            randomData[field.name] = options[randomIndex].value;
+          }
+        } else if (
+          field.name === "sousType" &&
+          field.dynamicOptions &&
+          randomData.type &&
+          activeTab === "biens-services"
+        ) {
+          const options = field.dynamicOptions[randomData.type] || [];
+          if (options.length > 0) {
+            const randomIndex = Math.floor(Math.random() * options.length);
+            randomData[field.name] = options[randomIndex].value;
+          }
+        } else if (field.options?.length > 0) {
+          const randomIndex = Math.floor(Math.random() * field.options.length);
+          randomData[field.name] = field.options[randomIndex].value;
+        }
+      } else if (field.type === "number") {
+        const min = field.min || 1;
+        const max = 1000;
+        randomData[field.name] = Math.floor(Math.random() * (max - min) + min);
+      } else if (field.type === "textarea") {
+        const texts = [
+          "Description du produit",
+          "Information additionnelle",
+          "Détails sur la consommation",
+          "Notes importantes",
+          "Commentaires",
+        ];
+        randomData[field.name] = texts[Math.floor(Math.random() * texts.length)];
+      } else {
+        if (
+          field.name === "name" ||
+          field.name === "titre" ||
+          field.name === "purpose" ||
+          field.name === "nomBus"
+        ) {
+          const names = [
+            "Produit A",
+            "Service B",
+            "Matériel C",
+            "Consulting D",
+            "Logistique E",
+            "Transport F",
+            "Bus G",
+          ];
+          randomData[field.name] =
+            names[Math.floor(Math.random() * names.length)];
+        } else if (field.name === "depart" || field.name === "destination") {
+          const locations = ["Paris", "Lyon", "Marseille", "Toulouse", "Nice"];
+          randomData[field.name] =
+            locations[Math.floor(Math.random() * locations.length)];
+        } else if (field.name === "matricule") {
+          randomData[field.name] = `MAT-${Math.floor(Math.random() * 10000)}`;
+        } else {
+          randomData[field.name] = `Valeur ${Math.floor(Math.random() * 100)}`;
+        }
+      }
+    });
+
+    return randomData;
+  };
+
+  const submitRandomData = async () => {
+    if (!Company?._id) return;
+
+    const randomData = generateRandomData();
+    const newData = { ...randomData, company_id: Company._id, scopeType };
+
+    try {
+      const response = await fetch(`http://localhost:4000/${activeTab}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newData),
+      });
+
+      await fetchData();
+    } catch (error) {
+      console.error("Error adding automated data:", error);
+    }
+  };
+
+  const toggleAutomation = () => {
+    if (isAutomating) {
+      if (automationIntervalRef.current) {
+        clearInterval(automationIntervalRef.current);
+        automationIntervalRef.current = null;
+      }
+      setIsAutomating(false);
+    } else {
+      setIsAutomating(true);
+      submitRandomData();
+
+      automationIntervalRef.current = setInterval(() => {
+        submitRandomData();
+      }, 3000);
+    }
+  };
+
   return (
-    <div className="container-xl ">
+    <div className="container-xl">
       <div
-        className="py-2 mb-4 d-flex 
-      border-b  justify-content-start align-items-center"
+        className="py-2 mb-4 d-flex border-b justify-content-start align-items-center"
       >
         <div>
           <h1 className="fs-1 fw-bold" style={{ color: "#263589" }}>
             Scope 3
           </h1>
           <p>
-            <strong className="text-primary">Émissions indirectes</strong>{" "}
-            issues des activités de la chaîne de valeur de l’organisation,
-            telles que l’achat de biens, les déplacements professionnels,
-            l’utilisation des produits vendus, etc.
+            <strong className="text-primary">Émissions indirectes</strong> issues
+            des activités de la chaîne de valeur de l'organisation, telles que
+            l'achat de biens, les déplacements professionnels, l'utilisation des
+            produits vendus, etc.
           </p>
         </div>
       </div>
@@ -305,7 +460,7 @@ const Scope3 = () => {
                 <a
                   href={`#${tab?.id}`}
                   className={`nav-link text-bold text-primary ${
-                    activeTab === tab?.id ? "active 0" : ""
+                    activeTab === tab?.id ? "active" : ""
                   }`}
                   onClick={(e) => handleTabClick(tab?.id, e)}
                 >
@@ -322,12 +477,31 @@ const Scope3 = () => {
             headers={tabs[activeTab]?.headers}
             data={tableData[activeTab] || []}
             activeTab={activeTab}
-            tab={tabs[[activeTab]]}
+            tab={tabs[activeTab]}
             onDelete={handleDelete}
             onUpdate={handleUpdate}
-            onAdd={() => toggleModal(true)}
+            onAdd={onAdd}
             deletingIds={deletingIds}
-            
+            rightContent={
+              <div className="d-flex gap-2">
+                <button className="btn btn-primary" onClick={onAdd}>
+                  Ajouter
+                </button>
+                <button
+                  className={`btn ${isAutomating ? "btn-danger" : "btn-success"}`}
+                  onClick={toggleAutomation}
+                >
+                  {isAutomating ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Arrêter
+                    </>
+                  ) : (
+                    "Automatiser"
+                  )}
+                </button>
+              </div>
+            }
           />
         </div>
       </div>
@@ -344,7 +518,6 @@ const Scope3 = () => {
                   type="button"
                   className="btn-close"
                   onClick={() => toggleModal(false)}
-                  
                 ></button>
               </div>
               <form onSubmit={handleSubmit}>
@@ -358,8 +531,8 @@ const Scope3 = () => {
                   >
                     Annuler
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="btn btn-primary ms-auto"
                     disabled={isSubmitting}
                   >
@@ -368,8 +541,10 @@ const Scope3 = () => {
                         <span className="spinner-border spinner-border-sm me-2" />
                         {isEditing ? "Mise à jour..." : "Ajout..."}
                       </span>
+                    ) : isEditing ? (
+                      "Mettre à jour"
                     ) : (
-                      isEditing ? "Mettre à jour" : "Ajouter"
+                      "Ajouter"
                     )}
                   </button>
                 </div>

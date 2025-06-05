@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { IconPlus, IconSearch, IconPencil, IconTrash, IconInfoCircle,IconArrowRight,IconArrowLeft  } from "@tabler/icons-react";
+import React, { useState, useEffect, useRef } from "react";
+import { IconPlus, IconSearch, IconPencil, IconTrash, IconInfoCircle, IconArrowRight, IconArrowLeft, IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
 
 const Scope2 = () => {
   const [activeTab, setActiveTab] = useState("electricity");
@@ -18,6 +18,8 @@ const Scope2 = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [expandedItems, setExpandedItems] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAutomating, setIsAutomating] = useState(false);
+  const automationIntervalRef = useRef(null);
 
   const [scope2Data, setScope2Data] = useState({
     electricity: { yearlyConsumption: 0, emissions: 0, country: null },
@@ -169,6 +171,15 @@ const Scope2 = () => {
     }
   }, [activeTab, company]);
 
+  // Cleanup automation on unmount
+  useEffect(() => {
+    return () => {
+      if (automationIntervalRef.current) {
+        clearInterval(automationIntervalRef.current);
+      }
+    };
+  }, []);
+
   const fetchScope2Data = async () => {
     try {
       const [electricityRes, heatingRes, coolingRes] = await Promise.all([
@@ -204,6 +215,10 @@ const Scope2 = () => {
     setCurrentPage(1);
     setSearchTerm("");
     setExpandedItems(new Set());
+    // Stop automation when changing tabs
+    if (isAutomating) {
+      stopAutomation();
+    }
   };
 
   const toggleModal = (
@@ -395,6 +410,113 @@ const Scope2 = () => {
     return items;
   };
 
+  // Automation functions
+  const generateRandomData = () => {
+    if (!company || !company._id) {
+      alert("Company information not available. Please refresh and try again.");
+      stopAutomation();
+      return;
+    }
+
+    let requestData;
+
+    if (activeTab === "electricity") {
+      const yearlyConsumption = Math.floor(Math.random() * 100000) + 50000; // Random between 50,000 and 150,000 kWh
+      requestData = {
+        yearlyConsumption,
+        country: company.country,
+        company_id: company._id,
+      };
+    } else if (activeTab === "heating") {
+      const heaterTypes = ["Electric Heating", "District Heating"];
+      const heaterName = `Heater-${Math.floor(Math.random() * 1000)}`;
+      const heaterType = heaterTypes[Math.floor(Math.random() * heaterTypes.length)];
+      const energy = Math.floor(Math.random() * 10000) + 5000; // Random between 5,000 and 15,000 kWh
+      requestData = {
+        name: heaterName,
+        type: heaterType,
+        energy,
+        company_id: company._id,
+      };
+    } else if (activeTab === "cooling") {
+      const coolerTypes = ["Electric Cooling", "District Cooling"];
+      const coolerName = `Cooler-${Math.floor(Math.random() * 1000)}`;
+      const coolerType = coolerTypes[Math.floor(Math.random() * coolerTypes.length)];
+      const energy = Math.floor(Math.random() * 8000) + 3000; // Random between 3,000 and 11,000 kWh
+      requestData = {
+        name: coolerName,
+        type: coolerType,
+        energy,
+        company_id: company._id,
+      };
+    }
+
+    addAutomatedData(requestData);
+  };
+
+  const addAutomatedData = async (requestData) => {
+    try {
+      let endpoint;
+
+      if (activeTab === "electricity") {
+        endpoint = "http://localhost:4000/energy-consumption";
+      } else if (activeTab === "heating") {
+        endpoint = "http://localhost:4000/heating";
+      } else if (activeTab === "cooling") {
+        endpoint = "http://localhost:4000/cooling";
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(requestData),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || `HTTP Error: ${response.status}`);
+      }
+
+      await fetchScope2Data();
+    } catch (err) {
+      console.error("Erreur d'automatisation :", err);
+      stopAutomation();
+      alert(`Échec de l'automatisation : ${err.message}`);
+    }
+  };
+
+  const startAutomation = () => {
+    setIsAutomating(true);
+    
+    // Generate data immediately once
+    generateRandomData();
+    
+    // Then set up interval for continuous generation
+    automationIntervalRef.current = setInterval(() => {
+      generateRandomData();
+    }, 3000); // Generate data every 3 seconds
+  };
+
+  const stopAutomation = () => {
+    if (automationIntervalRef.current) {
+      clearInterval(automationIntervalRef.current);
+      automationIntervalRef.current = null;
+    }
+    setIsAutomating(false);
+  };
+
+  const toggleAutomation = () => {
+    if (isAutomating) {
+      stopAutomation();
+    } else {
+      startAutomation();
+    }
+  };
+
   const renderTable = () => {
     if (error) {
       return (
@@ -453,22 +575,34 @@ const Scope2 = () => {
               <span className="input-group-text">
                 <IconSearch size={16} />
               </span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Rechercher..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+              <input type="text" className="form-control" placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => toggleModal(true)}
-          >
-            <IconPlus className="mr-2" size={16} /> Ajouter
-          </button>
+          <div className="d-flex gap-2">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => toggleModal(true)}
+            >
+              <IconPlus className="mr-2" size={16} /> Ajouter
+            </button>
+            <button
+              type="button"
+              className={`btn ${isAutomating ? 'btn-danger' : 'btn-success'}`}
+              onClick={toggleAutomation}
+            >
+              {isAutomating ? (
+                <>
+                  <IconPlayerStop className="mr-2" size={16} /> Stop
+                </>
+              ) : (
+                <>
+                  <IconPlayerPlay className="mr-2" size={16} /> Automatiser
+                </>
+              )}
+            </button>
+          </div>
         </div>
         <div className="table-responsive">
           <table className="table table-vcenter card-table">
@@ -595,37 +729,29 @@ const Scope2 = () => {
         </div>
         {(activeTab === "heating" || activeTab === "cooling") && totalItems > itemsPerPage && (
           <nav className="d-flex justify-content-center mt-4">
-  <ul className="pagination">
-    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-      <button
-        className="page-link"
-        onClick={() => setCurrentPage(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        <IconArrowRight size={16} />
-      </button>
-    </li>
-    {[...Array(totalPages).keys()].map((page) => (
-      <li
-        key={page + 1}
-        className={`page-item ${currentPage === page + 1 ? "active" : ""}`}
-      >
-        <button className="page-link" onClick={() => setCurrentPage(page + 1)}>
-          {page + 1}
-        </button>
-      </li>
-    ))}
-    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-      <button
-        className="page-link"
-        onClick={() => setCurrentPage(currentPage + 1)}
-        disabled={currentPage === totalPages}
-      >
-        <IconArrowLeft size={16} />
-      </button>
-    </li>
-  </ul>
-</nav>
+            <ul className="pagination">
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                  <IconArrowLeft size={16} />
+                </button>
+              </li>
+              {[...Array(totalPages).keys()].map((page) => (
+                <li
+                  key={page + 1}
+                  className={`page-item ${currentPage === page + 1 ? "active" : ""}`}
+                >
+                  <button className="page-link" onClick={() => setCurrentPage(page + 1)}>
+                    {page + 1}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+                  <IconArrowRight size={16} />
+                </button>
+              </li>
+            </ul>
+          </nav>
         )}
       </div>
     );
@@ -641,12 +767,7 @@ const Scope2 = () => {
               {field.label}
               {field.required && <span className="text-danger">*</span>}
             </label>
-            <select
-              className="form-select"
-              name={field.name}
-              value={company?.country || ""}
-              disabled={true}
-            >
+            <select className="form-select" name={field.name} value={company?.country || ""} disabled={true}>
               <option value={company?.country || ""}>{company?.country || "Chargement..."}</option>
             </select>
             <small className="form-text text-muted">
@@ -663,12 +784,12 @@ const Scope2 = () => {
             {field.required && <span className="text-danger">*</span>}
           </label>
           {field.type === "select" ? (
-            <select
-              className="form-select"
-              name={field.name}
-              onChange={handleInputChange}
-              value={formData[field.name] || ""}
-              required={field.required}
+            <select 
+              className="form-select" 
+              name={field.name} 
+              onChange={handleInputChange} 
+              value={formData[field.name] || ""} 
+              required={field.required} 
               disabled={field.disabled}
             >
               <option value="" disabled>
@@ -840,7 +961,7 @@ const Scope2 = () => {
                     <button
                       type="button"
                       className="btn btn-danger ms-auto"
-                      onClick={() => handleDelete(confirmDelete.recordId || confirmDelete._id, confirmDelete._id)}
+                      onClick={() => handleDelete(confirmDelete.recordId || confirmDelete._id, confirmDelete.recordId ? confirmDelete._id : null)}
                       disabled={deletingIds.has(confirmDelete._id)}
                     >
                       {deletingIds.has(confirmDelete._id) ? (
@@ -864,4 +985,3 @@ const Scope2 = () => {
 };
 
 export default Scope2;
- 

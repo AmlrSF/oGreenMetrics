@@ -190,13 +190,10 @@ const Navbar = ({ user, isAdmin }) => {
                 <IconBell size={18} style={{ color: "#8ebe21" }} />
               </div>
               {totalUnreadCount > 0 && (
-                <span className="badge bg-danger position-absolute top-0 end-0">
+                <span className="badge bg-white position-absolute top-0 end-0">
                   {totalUnreadCount}
                 </span>
-              )}
-              <span className="d-none d-sm-inline-block text-white fw-medium ms-2 pe-2">
-                Notifications
-              </span>
+              )} 
             </div>
 
             {showNotifications && (
