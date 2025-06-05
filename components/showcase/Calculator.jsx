@@ -86,7 +86,7 @@ const Calculator = () => {
                     className="form-control"
                   />
                   <button
-                    className="btn btn-light border-black border-1 border"
+                    className="btn btn-light border-black border-1"
                     type="submit"
                     disabled={loading}
                   >
@@ -142,7 +142,7 @@ const Calculator = () => {
                           className="card shadow-lg mb-4"
                           style={{
                             borderRadius: "30px",
-                            background: "#1900e1",
+                            background: "#fffff",
                             color: "#fff",
                           }}
                         >
@@ -164,51 +164,27 @@ const Calculator = () => {
                               {result?.rating || "A"}
                             </div>
                             <div style={{ flex: 1 }}>
-                              <h3 className="mb-1 text-left fw-bold text-white">
-                                Hurrah! This web page achieves a carbon rating
-                                of{" "}
+                              <h3 className="mb-1 text-left fw-bold text-black">
+                               Cette page web obtient une note carbone de {" "}
                                 <span className="fw-bold">
                                   {result?.rating}
                                 </span>
                               </h3>
-                              <div className="mb-1 text-left text-white">
-                                This is cleaner than{" "}
+                              <div className="mb-1 text-left text-black">
+                               C'est plus propre que{" "}
                                 <span className="badge bg-cyan-lt text-cyan me-1">
                                   {((result?.cleanerThan || 0) * 100).toFixed(0)}%
                                 </span>{" "}
-                                of all web pages globally.
+                               de toutes les pages Web à l’échelle mondiale.
                               </div>
-                              <div className="d-flex align-items-center gap-2">
-                                <span className="fw-bold text-white">A+</span>
-                                <div
-                                  className="progress"
-                                  style={{
-                                    height: 10,
-                                    width: 120,
-                                    background: "rgba(255,255,255,0.3)",
-                                    borderRadius: 8,
-                                  }}
-                                >
-                                  <div
-                                    className="progress-bar bg-success"
-                                    style={{
-                                      width: `${Math.max(
-                                        5,
-                                        100 * (result?.cleanerThan || 0)
-                                      )}%`,
-                                    }}
-                                  ></div>
-                                </div>
-                                <span className="text-white fw-semibold">F</span>
-                              </div>
+                             
 
-                              <p className="text-left">
-                                Please{" "}
+                              <p className="text-left text-black">
+                                S'il vous plaît{" "}
                                 <a href="/login" className="fw-bold text-black">
                                   log in
                                 </a>{" "}
-                                to view CO₂ emission details.
-                              </p>
+                                  pour afficher les détails des émissions de CO₂.                              </p>
                             </div>
                           </div>
                         </div>

@@ -940,12 +940,12 @@ const GoalsPage = () => {
                               <tr key={goal._id}>
                                 <td>
                                   <span
-                                    className="avatar avatar-md text-white me-2"
-                                    style={{ backgroundColor: "#263589" }}
+                                    className="avatar avatar-md text-white me-1"
+                                    style={{ backgroundColor: "#263589", verticalAlign: "middle" }}
                                   >
                                     {goal.name.charAt(0)}
                                   </span>
-                                  {goal.name}
+                                  <span style={{ verticalAlign: "middle" }}>{goal.name}</span>
                                 </td>
                                 <td>{goal.year}</td>
                                 <td>
