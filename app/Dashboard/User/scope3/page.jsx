@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { tabs } from "@/lib/Data";
 import DataTable from "@/components/Commun/Datatable/Datatable";
+import * as XLSX from "xlsx";
+import { IconUpload } from "@tabler/icons-react";
 
 const Scope3 = () => {
   const [activeTab, setActiveTab] = useState("transport");
@@ -24,6 +26,11 @@ const Scope3 = () => {
   const [deletingIds, setDeletingIds] = useState(new Set());
   const [isAutomating, setIsAutomating] = useState(false);
   const automationIntervalRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [uploadedData, setUploadedData] = useState([]);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -180,6 +187,14 @@ const Scope3 = () => {
       setFormData({});
       setIsEditing(false);
       setEditingId(null);
+    }
+  };
+
+  const toggleUploadModal = (isOpen) => {
+    setIsUploadModalOpen(isOpen);
+    if (!isOpen) {
+      setUploadedData([]);
+      setUploadError(null);
     }
   };
 
@@ -434,6 +449,106 @@ const Scope3 = () => {
     }
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadError(null);
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Get first worksheet
+        const worksheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[worksheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        if (jsonData.length === 0) {
+          setUploadError("Le fichier Excel ne contient aucune donnée.");
+          return;
+        }
+        
+        setUploadedData(jsonData);
+      } catch (error) {
+        console.error("Error parsing Excel file:", error);
+        setUploadError("Erreur lors de l'analyse du fichier Excel. Veuillez vous assurer qu'il s'agit d'un fichier Excel valide.");
+      }
+    };
+    
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleBulkUpload = async () => {
+    if (!Company?._id || uploadedData.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      // Loop through each row and submit it
+      for (const row of uploadedData) {
+        const formattedData = { ...row, company_id: Company._id, scopeType };
+        
+        await fetch(`http://localhost:4000/${activeTab}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formattedData),
+        });
+      }
+      
+      await fetchData();
+      toggleUploadModal(false);
+      alert(`${uploadedData.length} enregistrement(s) importé(s) avec succès.`);
+    } catch (error) {
+      console.error("Error importing Excel data:", error);
+      setUploadError("Erreur lors de l'importation des données. Veuillez vérifier la console pour plus de détails.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const renderUploadedDataPreview = () => {
+    if (uploadedData.length === 0) return null;
+    
+    return (
+      <div className="mt-3">
+        <h6>Aperçu des données ({uploadedData.length} élément(s))</h6>
+        <div className="table-responsive" style={{maxHeight: '200px', overflowY: 'auto'}}>
+          <table className="table table-sm table-bordered">
+            <thead>
+              <tr>
+                {Object.keys(uploadedData[0]).map((key) => (
+                  <th key={key}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {uploadedData.slice(0, 5).map((item, index) => (
+                <tr key={index}>
+                  {Object.keys(uploadedData[0]).map((key) => (
+                    <td key={key}>{String(item[key])}</td>
+                  ))}
+                </tr>
+              ))}
+              {uploadedData.length > 5 && (
+                <tr>
+                  <td colSpan={Object.keys(uploadedData[0]).length} className="text-center">
+                    ...et {uploadedData.length - 5} élément(s) supplémentaire(s)
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container-xl">
       <div
@@ -500,6 +615,13 @@ const Scope3 = () => {
                     "Automatiser"
                   )}
                 </button>
+                <button
+                  className="btn btn-info d-flex align-items-center gap-2"
+                  onClick={() => toggleUploadModal(true)}
+                >
+                  <IconUpload size={16} />
+                  Importer Excel
+                </button>
               </div>
             }
           />
@@ -549,6 +671,80 @@ const Scope3 = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isUploadModalOpen && (
+        <div
+          className="modal show"
+          tabIndex="-1"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-lg" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  Importer des données depuis Excel
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => toggleUploadModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">
+                    Sélectionner un fichier Excel (.xlsx, .xls)
+                  </label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept=".xlsx, .xls"
+                    onChange={handleFileUpload}
+                    ref={fileInputRef}
+                  />
+                  <small className="form-text text-muted">
+                    Assurez-vous que votre fichier Excel contient des colonnes correspondant aux champs de {tabs[activeTab]?.label}.
+                  </small>
+                </div>
+
+                {uploadError && (
+                  <div className="alert alert-danger" role="alert">
+                    {uploadError}
+                  </div>
+                )}
+
+                {renderUploadedDataPreview()}
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-link link-secondary"
+                  onClick={() => toggleUploadModal(false)}
+                  disabled={isUploading}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary ms-auto"
+                  onClick={handleBulkUpload}
+                  disabled={isUploading || uploadedData.length === 0}
+                >
+                  {isUploading ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Importation...
+                    </span>
+                  ) : (
+                    "Importer les données"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
