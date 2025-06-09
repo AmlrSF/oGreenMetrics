@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { IconPlus, IconSearch, IconPencil, IconTrash,IconArrowRight,IconArrowLeft } from "@tabler/icons-react";
+import React, { useState, useEffect, useRef } from "react";
+import { IconPlus, IconSearch, IconPencil, IconTrash, IconArrowRight, IconArrowLeft, IconPlayerStop, IconPlayerPlay, IconUpload } from "@tabler/icons-react";
+import * as XLSX from 'xlsx';
 
 const Scope1 = () => {
   const [activeTab, setActiveTab] = useState("Combustion de carburant");
@@ -21,10 +22,22 @@ const Scope1 = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingIds, setDeletingIds] = useState(new Set());
   const [expandedItems, setExpandedItems] = useState(new Set());
+  const [automating, setAutomating] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadedData, setUploadedData] = useState([]);
+  const [uploadError, setUploadError] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const automationIntervalRef = useRef(null);
   const itemsPerPage = 3;
 
   useEffect(() => {
     fetchData();
+    return () => {
+      if (automationIntervalRef.current) {
+        clearInterval(automationIntervalRef.current);
+      }
+    };
   }, [activeTab]);
 
   const fetchData = async () => {
@@ -70,12 +83,25 @@ const Scope1 = () => {
     setSearchTerm("");
     setFuelFilter("all");
     setExpandedItems(new Set());
+    // Stop automation if active when changing tabs
+    if (automating) {
+      stopAutomation();
+    }
   };
 
   const toggleModal = (isOpen, mode = "add", item = null) => {
     setIsModalOpen(isOpen);
     setModalMode(mode);
     setEditingItem(item);
+  };
+
+  const toggleUploadModal = (isOpen) => {
+    setIsUploadModalOpen(isOpen);
+    setUploadedData([]);
+    setUploadError(null);
+    if (!isOpen && fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleAdd = async (e) => {
@@ -232,6 +258,213 @@ const Scope1 = () => {
         newSet.delete(id);
         return newSet;
       });
+    }
+  };
+
+  // Excel file handling
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    setUploadError(null);
+    setUploadedData([]);
+    
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Get the first worksheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        // Validate data format based on active tab
+        if (activeTab === "Combustion de carburant") {
+          if (!validateFuelCombustionData(jsonData)) {
+            setUploadError("Le format du fichier Excel ne correspond pas aux données requises pour la combustion de carburant.");
+            return;
+          }
+        } else {
+          if (!validateProductionData(jsonData)) {
+            setUploadError("Le format du fichier Excel ne correspond pas aux données requises pour la production de produits.");
+            return;
+          }
+        }
+        
+        setUploadedData(jsonData);
+      } catch (error) {
+        console.error("Error parsing Excel file:", error);
+        setUploadError("Erreur lors de l'analyse du fichier Excel. Assurez-vous que le format est correct.");
+      }
+    };
+    
+    reader.onerror = () => {
+      setUploadError("Erreur lors de la lecture du fichier.");
+    };
+    
+    reader.readAsArrayBuffer(file);
+  };
+
+  const validateFuelCombustionData = (data) => {
+    if (!Array.isArray(data) || data.length === 0) return false;
+    
+    // Check if at least the first item has the required fields
+    const requiredFields = ['nom', 'modele', 'typeDeCarburant', 'quantite'];
+    const firstItem = data[0];
+    
+    return requiredFields.every(field => 
+      Object.prototype.hasOwnProperty.call(firstItem, field)
+    );
+  };
+
+  const validateProductionData = (data) => {
+    if (!Array.isArray(data) || data.length === 0) return false;
+    
+    // Check if at least the first item has the required fields
+    const requiredFields = ['nom', 'ligneDeProduction', 'quantite'];
+    const firstItem = data[0];
+    
+    return requiredFields.every(field => 
+      Object.prototype.hasOwnProperty.call(firstItem, field)
+    );
+  };
+
+  const handleBulkUpload = async () => {
+  if (isUploading || uploadedData.length === 0) return;
+  setIsUploading(true);
+  setUploadError(null);
+
+  try {
+    const endpoint =
+      activeTab === "Combustion de carburant"
+        ? "http://localhost:4000/fuelcombustion"
+        : "http://localhost:4000/production";
+
+    // Process each item in uploadedData individually
+    const payloadKey = activeTab === "Combustion de carburant" ? "machines" : "products";
+    for (const item of uploadedData) {
+      const payload = { [payloadKey]: [item] };
+      const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to upload item "${item.nom}": ${response.status} - ${errorText}`);
+      }
+    }
+
+    toggleUploadModal(false);
+    fetchData();
+  } catch (error) {
+    console.error("Error uploading data:", error);
+    setUploadError(error.message);
+  } finally {
+    setIsUploading(false);
+  }
+};
+
+  // Random data generation functions
+  const generateRandomMachine = () => {
+    const fuelTypes = ["Natural Gas", "Diesel", "Gasoline", "Coal"];
+    const machineNames = [ "Compresseur", "Générateur", "Moteur industriel", "Chaudière", "Turbine", "Excavatrice", "Chariot élévateur", "Broyeur", "Pompe à carburant", "Groupe électrogène"];
+    const machineModels = [ "XC-2000", "PowerGen 5500", "TurboMax", "HD-500", "EcoFuel 3.0", "Industrial Pro", "HeavyDuty 9000", "LightCraft V8", "SuperFlow 2500", "Série Performance"];
+    
+    return {
+      nom: machineNames[Math.floor(Math.random() * machineNames.length)],
+      typeDeCarburant: fuelTypes[Math.floor(Math.random() * fuelTypes.length)],
+      modele: machineModels[Math.floor(Math.random() * machineModels.length)],
+      quantite: Math.floor(Math.random() * 1000) + 50,
+    };
+  };
+
+  const generateRandomProduct = () => {
+    const productNames = ["Acier galvanisé","Béton armé","Pièce moulée","Composant électronique","Panneau solaire","Textile industriel","Matériau composite","Film plastique","Produit chimique","Alliage métallique"];
+    const productionLines = ["Ligne A","Assemblage principal","Unité de fabrication 3","Zone de production B","Chaîne automatisée","Unité de moulage","Ligne de traitement thermique","Secteur de finition","Usine pilote","Atelier central"];
+    
+    return {
+      nom: productNames[Math.floor(Math.random() * productNames.length)],
+      ligneDeProduction: productionLines[Math.floor(Math.random() * productionLines.length)],
+      quantite: Math.floor(Math.random() * 5000) + 100,
+    };
+  };
+
+  // Function to add random data
+  const addRandomData = async () => {
+    if (activeTab === "Combustion de carburant") {
+      const newMachine = generateRandomMachine();
+      const payload = { machines: [newMachine] };
+      
+      try {
+        const response = await fetch("http://localhost:4000/fuelcombustion", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error("Failed to add automated fuel combustion");
+        fetchData();
+      } catch (error) {
+        console.error("Error in automation:", error);
+        stopAutomation();
+        setError("Automation stopped due to an error: " + error.message);
+      }
+    } else {
+      const newProduct = generateRandomProduct();
+      const payload = { products: [newProduct] };
+      
+      try {
+        const response = await fetch("http://localhost:4000/production", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error("Failed to add automated production");
+        fetchData();
+      } catch (error) {
+        console.error("Error in automation:", error);
+        stopAutomation();
+        setError("Automation stopped due to an error: " + error.message);
+      }
+    }
+  };
+
+  // Start automation
+  const startAutomation = () => {
+    setAutomating(true);
+    // Add one item immediately
+    addRandomData();
+    // Then set up an interval to add more
+    automationIntervalRef.current = setInterval(() => {
+      addRandomData();
+    }, 5000); // Add a new item every 5 seconds
+  };
+
+  // Stop automation
+  const stopAutomation = () => {
+    if (automationIntervalRef.current) {
+      clearInterval(automationIntervalRef.current);
+      automationIntervalRef.current = null;
+    }
+    setAutomating(false);
+  };
+
+  // Toggle automation
+  const toggleAutomation = () => {
+    if (automating) {
+      stopAutomation();
+    } else {
+      startAutomation();
     }
   };
 
@@ -473,38 +706,75 @@ const Scope1 = () => {
 
         {items.length > itemsPerPage && (
           <nav className="d-flex justify-content-center mt-4">
-  <ul className="pagination">
-    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-      <button
-        className="page-link"
-        onClick={() => setCurrentPage(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        <IconArrowLeft size={16} />
-      </button>
-    </li>
-    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-      <li
-        key={page}
-        className={`page-item ${currentPage === page ? "active" : ""}`}
-      >
-        <button className="page-link" onClick={() => setCurrentPage(page)}>
-          {page}
-        </button>
-      </li>
-    ))}
-    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-      <button
-        className="page-link"
-        onClick={() => setCurrentPage(currentPage + 1)}
-        disabled={currentPage === totalPages}
-      >
-        <IconArrowRight size={16} />
-      </button>
-    </li>
-  </ul>
-</nav>
+            <ul className="pagination">
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <IconArrowLeft size={16} />
+                </button>
+              </li>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <li
+                  key={page}
+                  className={`page-item ${currentPage === page ? "active" : ""}`}
+                >
+                  <button className="page-link" onClick={() => setCurrentPage(page)}>
+                    {page}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  <IconArrowRight size={16} />
+                </button>
+              </li>
+            </ul>
+          </nav>
         )}
+      </div>
+    );
+  };
+
+  const renderUploadedDataPreview = () => {
+    if (uploadedData.length === 0) return null;
+    
+    return (
+      <div className="mt-3">
+        <h6>Aperçu des données ({uploadedData.length} élément(s))</h6>
+        <div className="table-responsive" style={{maxHeight: '200px', overflowY: 'auto'}}>
+          <table className="table table-sm table-bordered">
+            <thead>
+              <tr>
+                {Object.keys(uploadedData[0]).map((key) => (
+                  <th key={key}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {uploadedData.slice(0, 5).map((item, index) => (
+                <tr key={index}>
+                  {Object.keys(uploadedData[0]).map((key) => (
+                    <td key={key}>{String(item[key])}</td>
+                  ))}
+                </tr>
+              ))}
+              {uploadedData.length > 5 && (
+                <tr>
+                  <td colSpan={Object.keys(uploadedData[0]).length} className="text-center">
+                    ...et {uploadedData.length - 5} élément(s) supplémentaire(s)
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };
@@ -591,20 +861,48 @@ const Scope1 = () => {
                   />
                 </div>
               </div>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => toggleModal(true, "add")}
-              >
-                <IconPlus className="mr-2" size={16} />
-                Ajouter
-              </button>
+              <div className="d-flex gap-2">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => toggleModal(true, "add")}
+                >
+                  <IconPlus className="me-1" size={16} />
+                  Ajouter
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-info"
+                  onClick={() => toggleUploadModal(true)}
+                >
+                  <IconUpload className="me-1" size={16} />
+                  Importer Excel
+                </button>
+                <button
+                  type="button"
+                  className={`btn ${automating ? 'btn-danger' : 'btn-success'}`}
+                  onClick={toggleAutomation}
+                >
+                  {automating ? (
+                    <>
+                      <IconPlayerStop className="me-1" size={16} />
+                      Stop
+                    </>
+                  ) : (
+                    <>
+                      <IconPlayerPlay className="me-1" size={16} />
+                      Automatiser
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
             {renderTable()}
           </div>
         </div>
       </div>
 
+      {/* Add/Edit Modal */}
       {isModalOpen && (
         <div
           className="modal show"
@@ -722,6 +1020,84 @@ const Scope1 = () => {
         </div>
       )}
 
+      {/* File Upload Modal */}
+      {isUploadModalOpen && (
+        <div
+          className="modal show"
+          tabIndex="-1"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-lg" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  Importer des données depuis Excel
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => toggleUploadModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">
+                    Sélectionner un fichier Excel (.xlsx, .xls)
+                  </label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept=".xlsx, .xls"
+                    onChange={handleFileUpload}
+                    ref={fileInputRef}
+                  />
+                  <small className="form-text text-muted">
+                    {activeTab === "Combustion de carburant"
+                      ? "Le fichier doit contenir les colonnes: nom, modele, typeDeCarburant, quantite"
+                      : "Le fichier doit contenir les colonnes: nom, ligneDeProduction, quantite"}
+                  </small>
+                </div>
+
+                {uploadError && (
+                  <div className="alert alert-danger" role="alert">
+                    {uploadError}
+                  </div>
+                )}
+
+                {renderUploadedDataPreview()}
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-link link-secondary"
+                  onClick={() => toggleUploadModal(false)}
+                  disabled={isUploading}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary ms-auto"
+                  onClick={handleBulkUpload}
+                  disabled={isUploading || uploadedData.length === 0}
+                >
+                  {isUploading ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Importation...
+                    </span>
+                  ) : (
+                    "Importer les données"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
       {confirmDelete && (
         <div
           className="modal show"

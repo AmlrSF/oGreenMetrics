@@ -11,15 +11,15 @@ const DataTable = ({
   onUpdate,
   onAdd,
   deletingIds,
+  rightContent,
 }) => {
   const [filteredData, setFilteredData] = useState(data);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDate, setSortDate] = useState("newest");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 3;
   const [expandedRoleId, setExpandedRoleId] = useState(null);
-  //console.log(data);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -84,17 +84,16 @@ const DataTable = ({
     });
 
     setFilteredData(result);
-  }, [data, searchTerm, sortDate, selectedCategory]);
+  }, [data, searchTerm, sortDate, selectedCategory, tab?.id]);
 
   return (
     <div className="card">
       <div className="card-header">
         <div
-          className="d-flex flex-col flex-wrap sm:flex-row justify-content-between 
-          w-full align-items-start sm:align-items-center gap-3"
+          className="d-flex flex-col flex-wrap sm:flex-row justify-content-between w-full align-items-start sm:align-items-center gap-3"
         >
           <div className="d-flex flex-wrap gap-2">
-            <div className="input-icon " style={{ width: "350px" }}>
+            <div className="input-icon" style={{ width: "350px" }}>
               <span className="input-icon-addon">
                 <IconSearch size={16} />
               </span>
@@ -110,7 +109,7 @@ const DataTable = ({
             <div className="d-flex align-items-center gap-2">
               {categories.length > 0 && (
                 <select
-                  className="form-select "
+                  className="form-select"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   style={{ width: "150px" }}
@@ -125,7 +124,7 @@ const DataTable = ({
               )}
 
               <select
-                className="form-select "
+                className="form-select"
                 value={sortDate}
                 style={{ width: "150px" }}
                 onChange={(e) => setSortDate(e.target.value)}
@@ -135,9 +134,13 @@ const DataTable = ({
               </select>
             </div>
           </div>
-          <button className="btn btn-primary" onClick={onAdd}>
-            Ajouter un nouveau
-          </button>
+          {rightContent ? (
+            rightContent
+          ) : (
+            <button className="btn btn-primary" onClick={onAdd}>
+              Ajouter
+            </button>
+          )}
         </div>
       </div>
 
@@ -182,34 +185,36 @@ const DataTable = ({
                         <td className="text-secondary" key={colIndex}>
                           <span
                             className={
-                              header === "Emissions" ? "badge bg-purple-lt" : ""
+                              header.toLowerCase() === "emissions"
+                                ? "badge bg-purple-lt"
+                                : ""
                             }
                           >
-                            {header.toLowerCase() === "emissions" ? (
-                              `${cellValue} ${tab.unit1}/${tab.unit2}`
-                            ) : shouldTruncate && cellValue?.length > 20 ? (
-                              <>
-                                {expandedRoleId === `${row._id}-${header}`
-                                  ? cellValue
-                                  : `${cellValue.slice(0, 15)}... `}
-                                <button
-                                  className="btn btn-link p-0"
-                                  onClick={() =>
-                                    setExpandedRoleId(
-                                      expandedRoleId === `${row._id}-${header}`
-                                        ? null
-                                        : `${row._id}-${header}`
-                                    )
-                                  }
-                                >
+                            {header.toLowerCase() === "emissions"
+                              ? `${cellValue} ${tab.unit1}/${tab.unit2}`
+                              : shouldTruncate && cellValue?.length > 20 ? (
+                                <>
                                   {expandedRoleId === `${row._id}-${header}`
-                                    ? "Voir moins"
-                                    : "Voir plus"}
-                                </button>
-                              </>
-                            ) : (
-                              cellValue
-                            )}
+                                    ? cellValue
+                                    : `${cellValue.slice(0, 15)}... `}
+                                  <button
+                                    className="btn btn-link p-0"
+                                    onClick={() =>
+                                      setExpandedRoleId(
+                                        expandedRoleId === `${row._id}-${header}`
+                                          ? null
+                                          : `${row._id}-${header}`
+                                      )
+                                    }
+                                  >
+                                    {expandedRoleId === `${row._id}-${header}`
+                                      ? "Voir moins"
+                                      : "Voir plus"}
+                                  </button>
+                                </>
+                              ) : (
+                                cellValue
+                              )}
                           </span>
                         </td>
                       );

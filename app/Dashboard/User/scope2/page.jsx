@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { IconPlus, IconSearch, IconPencil, IconTrash, IconInfoCircle,IconArrowRight,IconArrowLeft  } from "@tabler/icons-react";
+import React, { useState, useEffect, useRef } from "react";
+import { IconPlus, IconSearch, IconPencil, IconTrash, IconInfoCircle, IconArrowRight, IconArrowLeft, IconPlayerPlay, IconPlayerStop, IconFileUpload } from "@tabler/icons-react";
+import * as XLSX from "xlsx";
 
 const Scope2 = () => {
   const [activeTab, setActiveTab] = useState("electricity");
@@ -18,6 +19,13 @@ const Scope2 = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [expandedItems, setExpandedItems] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAutomating, setIsAutomating] = useState(false);
+  const automationIntervalRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [excelData, setExcelData] = useState([]);
+  const [isProcessingExcel, setIsProcessingExcel] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   const [scope2Data, setScope2Data] = useState({
     electricity: { yearlyConsumption: 0, emissions: 0, country: null },
@@ -47,6 +55,7 @@ const Scope2 = () => {
           disabled: true,
         },
       ],
+      excelFields: ["yearlyConsumption"],
     },
     heating: {
       id: "heating",
@@ -79,6 +88,7 @@ const Scope2 = () => {
           required: true,
         },
       ],
+      excelFields: ["name", "type", "energy"],
     },
     cooling: {
       id: "cooling",
@@ -111,6 +121,7 @@ const Scope2 = () => {
           required: true,
         },
       ],
+      excelFields: ["name", "type", "energy"],
     },
   };
 
@@ -169,6 +180,15 @@ const Scope2 = () => {
     }
   }, [activeTab, company]);
 
+  // Cleanup automation on unmount
+  useEffect(() => {
+    return () => {
+      if (automationIntervalRef.current) {
+        clearInterval(automationIntervalRef.current);
+      }
+    };
+  }, []);
+
   const fetchScope2Data = async () => {
     try {
       const [electricityRes, heatingRes, coolingRes] = await Promise.all([
@@ -204,6 +224,10 @@ const Scope2 = () => {
     setCurrentPage(1);
     setSearchTerm("");
     setExpandedItems(new Set());
+    // Stop automation when changing tabs
+    if (isAutomating) {
+      stopAutomation();
+    }
   };
 
   const toggleModal = (
@@ -226,6 +250,15 @@ const Scope2 = () => {
       }
       setEditId(null);
       setEditRecordId(null);
+    }
+  };
+
+  const toggleUploadModal = (isOpen) => {
+    setIsUploadModalOpen(isOpen);
+    setExcelData([]);
+    setUploadError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
     }
   };
 
@@ -395,6 +428,227 @@ const Scope2 = () => {
     return items;
   };
 
+  // Automation functions
+  const generateRandomData = () => {
+    if (!company || !company._id) {
+      alert("Company information not available. Please refresh and try again.");
+      stopAutomation();
+      return;
+    }
+
+    let requestData;
+
+    if (activeTab === "electricity") {
+      const yearlyConsumption = Math.floor(Math.random() * 100000) + 50000; // Random between 50,000 and 150,000 kWh
+      requestData = {
+        yearlyConsumption,
+        country: company.country,
+        company_id: company._id,
+      };
+    } else if (activeTab === "heating") {
+      const heaterTypes = ["Electric Heating", "District Heating"];
+      const heaterName = `Heater-${Math.floor(Math.random() * 1000)}`;
+      const heaterType = heaterTypes[Math.floor(Math.random() * heaterTypes.length)];
+      const energy = Math.floor(Math.random() * 10000) + 5000; // Random between 5,000 and 15,000 kWh
+      requestData = {
+        name: heaterName,
+        type: heaterType,
+        energy,
+        company_id: company._id,
+      };
+    } else if (activeTab === "cooling") {
+      const coolerTypes = ["Electric Cooling", "District Cooling"];
+      const coolerName = `Cooler-${Math.floor(Math.random() * 1000)}`;
+      const coolerType = coolerTypes[Math.floor(Math.random() * coolerTypes.length)];
+      const energy = Math.floor(Math.random() * 8000) + 3000; // Random between 3,000 and 11,000 kWh
+      requestData = {
+        name: coolerName,
+        type: coolerType,
+        energy,
+        company_id: company._id,
+      };
+    }
+
+    addAutomatedData(requestData);
+  };
+
+  const addAutomatedData = async (requestData) => {
+    try {
+      let endpoint;
+
+      if (activeTab === "electricity") {
+        endpoint = "http://localhost:4000/energy-consumption";
+      } else if (activeTab === "heating") {
+        endpoint = "http://localhost:4000/heating";
+      } else if (activeTab === "cooling") {
+        endpoint = "http://localhost:4000/cooling";
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(requestData),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || `HTTP Error: ${response.status}`);
+      }
+
+      await fetchScope2Data();
+    } catch (err) {
+      console.error("Erreur d'automatisation :", err);
+      stopAutomation();
+      alert(`Échec de l'automatisation : ${err.message}`);
+    }
+  };
+
+  const startAutomation = () => {
+    setIsAutomating(true);
+    
+    // Generate data immediately once
+    generateRandomData();
+    
+    // Then set up interval for continuous generation
+    automationIntervalRef.current = setInterval(() => {
+      generateRandomData();
+    }, 3000); // Generate data every 3 seconds
+  };
+
+  const stopAutomation = () => {
+    if (automationIntervalRef.current) {
+      clearInterval(automationIntervalRef.current);
+      automationIntervalRef.current = null;
+    }
+    setIsAutomating(false);
+  };
+
+  const toggleAutomation = () => {
+    if (isAutomating) {
+      stopAutomation();
+    } else {
+      startAutomation();
+    }
+  };
+
+  // Excel handling functions
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        // Process and validate the data
+        const processedData = processExcelData(jsonData);
+        setExcelData(processedData);
+        setUploadError(null);
+      } catch (error) {
+        console.error("Error processing Excel file:", error);
+        setUploadError("Erreur lors du traitement du fichier Excel. Vérifiez le format du fichier.");
+      }
+      
+      // Reset the file input
+      e.target.value = null;
+    };
+    
+    reader.readAsArrayBuffer(file);
+  };
+
+  const processExcelData = (data) => {
+    const currentTabConfig = tabs[activeTab];
+    const requiredFields = currentTabConfig.excelFields;
+    
+    return data.map(row => {
+      const processedRow = { ...row };
+      
+      // Convert numeric fields from strings if needed
+      if (activeTab === "electricity" && processedRow.yearlyConsumption) {
+        processedRow.yearlyConsumption = Number(processedRow.yearlyConsumption);
+      } else if ((activeTab === "heating" || activeTab === "cooling") && processedRow.energy) {
+        processedRow.energy = Number(processedRow.energy);
+      }
+      
+      // Add validation status
+      const missingFields = requiredFields.filter(field => {
+        return processedRow[field] === undefined || processedRow[field] === null || processedRow[field] === "";
+      });
+      
+      processedRow.isValid = missingFields.length === 0;
+      processedRow.errors = missingFields.length > 0 ? 
+        `Champs manquants: ${missingFields.join(", ")}` : "";
+      
+      return processedRow;
+    });
+  };
+
+  const handleBulkUpload = async () => {
+    if (!company || !company._id) {
+      alert("Company information not available. Please refresh and try again.");
+      return;
+    }
+    
+    setIsProcessingExcel(true);
+    const validData = excelData.filter(row => row.isValid);
+    
+    try {
+      for (const row of validData) {
+        let requestData = {
+          ...row,
+          company_id: company._id,
+        };
+        
+        if (activeTab === "electricity") {
+          requestData.country = company.country;
+        }
+        
+        let endpoint;
+        
+        if (activeTab === "electricity") {
+          endpoint = "http://localhost:4000/energy-consumption";
+        } else if (activeTab === "heating") {
+          endpoint = "http://localhost:4000/heating";
+        } else if (activeTab === "cooling") {
+          endpoint = "http://localhost:4000/cooling";
+        }
+        
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(requestData),
+          credentials: "include",
+        });
+        
+        if (!response.ok) {
+          const result = await response.json();
+          throw new Error(result.message || `HTTP Error: ${response.status}`);
+        }
+      }
+      
+      await fetchScope2Data();
+      toggleUploadModal(false);
+      alert(`${validData.length} éléments importés avec succès.`);
+    } catch (error) {
+      console.error("Error importing Excel data:", error);
+      setUploadError(`Échec de l'importation: ${error.message}`);
+    } finally {
+      setIsProcessingExcel(false);
+    }
+  };
+
   const renderTable = () => {
     if (error) {
       return (
@@ -462,13 +716,37 @@ const Scope2 = () => {
               />
             </div>
           </div>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => toggleModal(true)}
-          >
-            <IconPlus className="mr-2" size={16} /> Ajouter
-          </button>
+          <div className="d-flex gap-2">
+            <button
+              type="button"
+              className="btn btn-info"
+              onClick={() => toggleUploadModal(true)}
+            >
+              <IconFileUpload className="mr-2" size={16} /> Import Excel
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => toggleModal(true)}
+            >
+              <IconPlus className="mr-2" size={16} /> Ajouter
+            </button>
+            <button
+              type="button"
+              className={`btn ${isAutomating ? 'btn-danger' : 'btn-success'}`}
+              onClick={toggleAutomation}
+            >
+              {isAutomating ? (
+                <>
+                  <IconPlayerStop className="mr-2" size={16} /> Stop
+                </>
+              ) : (
+                <>
+                  <IconPlayerPlay className="mr-2" size={16} /> Automatiser
+                </>
+              )}
+            </button>
+          </div>
         </div>
         <div className="table-responsive">
           <table className="table table-vcenter card-table">
@@ -595,37 +873,29 @@ const Scope2 = () => {
         </div>
         {(activeTab === "heating" || activeTab === "cooling") && totalItems > itemsPerPage && (
           <nav className="d-flex justify-content-center mt-4">
-  <ul className="pagination">
-    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-      <button
-        className="page-link"
-        onClick={() => setCurrentPage(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        <IconArrowRight size={16} />
-      </button>
-    </li>
-    {[...Array(totalPages).keys()].map((page) => (
-      <li
-        key={page + 1}
-        className={`page-item ${currentPage === page + 1 ? "active" : ""}`}
-      >
-        <button className="page-link" onClick={() => setCurrentPage(page + 1)}>
-          {page + 1}
-        </button>
-      </li>
-    ))}
-    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-      <button
-        className="page-link"
-        onClick={() => setCurrentPage(currentPage + 1)}
-        disabled={currentPage === totalPages}
-      >
-        <IconArrowLeft size={16} />
-      </button>
-    </li>
-  </ul>
-</nav>
+            <ul className="pagination">
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                  <IconArrowLeft size={16} />
+                </button>
+              </li>
+              {[...Array(totalPages).keys()].map((page) => (
+                <li
+                  key={page + 1}
+                  className={`page-item ${currentPage === page + 1 ? "active" : ""}`}
+                >
+                  <button className="page-link" onClick={() => setCurrentPage(page + 1)}>
+                    {page + 1}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+                  <IconArrowRight size={16} />
+                </button>
+              </li>
+            </ul>
+          </nav>
         )}
       </div>
     );
@@ -641,12 +911,7 @@ const Scope2 = () => {
               {field.label}
               {field.required && <span className="text-danger">*</span>}
             </label>
-            <select
-              className="form-select"
-              name={field.name}
-              value={company?.country || ""}
-              disabled={true}
-            >
+            <select className="form-select" name={field.name} value={company?.country || ""} disabled={true}>
               <option value={company?.country || ""}>{company?.country || "Chargement..."}</option>
             </select>
             <small className="form-text text-muted">
@@ -663,12 +928,12 @@ const Scope2 = () => {
             {field.required && <span className="text-danger">*</span>}
           </label>
           {field.type === "select" ? (
-            <select
-              className="form-select"
-              name={field.name}
-              onChange={handleInputChange}
-              value={formData[field.name] || ""}
-              required={field.required}
+            <select 
+              className="form-select" 
+              name={field.name} 
+              onChange={handleInputChange} 
+              value={formData[field.name] || ""} 
+              required={field.required} 
               disabled={field.disabled}
             >
               <option value="" disabled>
@@ -769,6 +1034,126 @@ const Scope2 = () => {
     );
   };
 
+  const renderUploadedDataPreview = () => {
+    if (excelData.length === 0) return null;
+    
+    return (
+      <div className="mt-3">
+        <h6>Aperçu des données ({excelData.length} élément(s))</h6>
+        <div className="table-responsive" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+          <table className="table table-sm table-bordered">
+            <thead>
+              <tr>
+                {tabs[activeTab].excelFields.map((field) => (
+                  <th key={field}>{field}</th>
+                ))}
+                {activeTab === "electricity" && <th>Pays</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {excelData.slice(0, 5).map((item, index) => (
+                <tr key={index} className={item.isValid ? "" : "bg-light-danger"}>
+                  {tabs[activeTab].excelFields.map((field) => (
+                    <td key={field}>{String(item[field] || "")}</td>
+                  ))}
+                  {activeTab === "electricity" && (
+                    <td>{company?.country || "Défini par l'entreprise"}</td>
+                  )}
+                </tr>
+              ))}
+              {excelData.length > 5 && (
+                <tr>
+                  <td colSpan={tabs[activeTab].excelFields.length + (activeTab === "electricity" ? 1 : 0)} className="text-center">
+                    ...et {excelData.length - 5} élément(s) supplémentaire(s)
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  const renderUploadModal = () => {
+    if (!isUploadModalOpen) return null;
+    
+    return (
+      <div
+        className="modal show"
+        tabIndex="-1"
+        style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">
+                Importer des données depuis Excel
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => toggleUploadModal(false)}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <label className="form-label">
+                  Sélectionner un fichier Excel (.xlsx, .xls)
+                </label>
+                <input
+                  type="file"
+                  className="form-control"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileUpload}
+                  ref={fileInputRef}
+                />
+                <small className="form-text text-muted">
+                  Le fichier doit contenir les colonnes : {tabs[activeTab].excelFields.join(", ")}
+                  {activeTab === "electricity" && " (le pays est défini automatiquement par l'entreprise)"}
+                </small>
+              </div>
+
+              {uploadError && (
+                <div className="alert alert-danger" role="alert">
+                  {uploadError}
+                </div>
+              )}
+
+              {renderUploadedDataPreview()}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-link link-secondary"
+                onClick={() => toggleUploadModal(false)}
+                disabled={isProcessingExcel}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary ms-auto"
+                onClick={handleBulkUpload}
+                disabled={isProcessingExcel || excelData.length === 0 || excelData.every(row => !row.isValid)}
+              >
+                {isProcessingExcel ? (
+                  <span>
+                    <span className="spinner-border spinner-border-sm me-2" />
+                    Importation...
+                  </span>
+                ) : (
+                  "Importer les données"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container-xl">
       <div
@@ -804,6 +1189,7 @@ const Scope2 = () => {
         <div className="card-body p-0">
           <div className="tab-content">{renderTable()}</div>
           {renderModal()}
+          {renderUploadModal()}
           {confirmDelete && (
             <div
               className="modal show"
@@ -840,7 +1226,7 @@ const Scope2 = () => {
                     <button
                       type="button"
                       className="btn btn-danger ms-auto"
-                      onClick={() => handleDelete(confirmDelete.recordId || confirmDelete._id, confirmDelete._id)}
+                      onClick={() => handleDelete(confirmDelete.recordId || confirmDelete._id, confirmDelete.recordId ? confirmDelete._id : null)}
                       disabled={deletingIds.has(confirmDelete._id)}
                     >
                       {deletingIds.has(confirmDelete._id) ? (
@@ -864,4 +1250,3 @@ const Scope2 = () => {
 };
 
 export default Scope2;
- 
