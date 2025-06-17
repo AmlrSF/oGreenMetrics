@@ -10,10 +10,11 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
-    { href: "#home", label: "Accueil" },
-    { href: "#services", label: "Services" },
-    { href: "#about", label: "À propos" },
-    { href: "#contact", label: "Contact" },
+    { href: "/", label: "Accueil" },
+    { href: "/Services", label: "Services" },
+    { href: "/About", label: "À propos" },
+    { href: "/Contact", label: "Contact" },
+    { href: "/Testimonials", label: "Testimonials" },
   ];
 
   const menuVariants = {
@@ -36,7 +37,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="position-relative mb-5 bg-white
+    <div className="position-relative bg-white
      shadow
      ">
       <nav className="container">

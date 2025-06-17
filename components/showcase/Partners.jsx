@@ -14,12 +14,12 @@ const Partners = () => {
   ]
   
   return (
-    <section className="container h-50 d-flex gap-10 h-100 
-      justify-content-center flex-column align-items-center ">
-      <h2 className="text-center my-8 text-fs-2 font-bold mb-10">Nos partenaires</h2>
+    <section className="container
+    text-center py-5">
+      <h2 className="text-center my-8 fs-1 font-bold mb-10">Nos partenaires</h2>
       
-      <div className="d-flex gap-5  h-100 mt-5
-      justify-content-center align-items-center">
+      <div className="d-flex 
+      justify-content-center gap-5 mt-5 align-items-center">
         {partners.map((partner, index) => (
           <div className="mb-0 h-full" key={index}>
             <Image 

@@ -11,6 +11,7 @@ const Page = () => {
   const [currentFilter, setCurrentFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [error1, setError1] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roles, setRoles] = useState([]);
@@ -154,6 +155,8 @@ const Page = () => {
   const handleAddUser = async (e) => {
     e.preventDefault();
 
+    if (!newUser.AdminRoles) return setError("Veuillez ajouter un rôle");
+
     if (isSubmitting) return;
 
     setIsSubmitting(true);
@@ -167,8 +170,17 @@ const Page = () => {
         body: JSON.stringify(newUser),
       });
 
-      const data = await response.json();
-      setError(data?.error);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log(errorData.error);
+        
+        setError(errorData.error || "Failed to register user");
+        return;
+      }
+
+
+    
       if (response.ok) {
         const response = await fetch("http://localhost:4000/InviteUser", {
           method: "POST",
@@ -177,7 +189,6 @@ const Page = () => {
           },
           body: JSON.stringify(newUser),
         });
-        const data = await response.json();
 
         fetchUsers();
         setIsModalOpen(false);
@@ -193,7 +204,7 @@ const Page = () => {
       setError("Failed to create user");
     } finally {
       setIsSubmitting(false);
-      setError(null);
+     
     }
   };
 
@@ -496,6 +507,7 @@ const Page = () => {
               </div>
               <form onSubmit={handleAddUser}>
                 <div className="modal-body">
+                  <span className="text-danger">{error}</span>
                   <div className="mb-3">
                     <label className="form-label">
                       Email<span className="text-red fs-2">*</span>
@@ -510,7 +522,6 @@ const Page = () => {
                       }
                       required
                     />
-                    <span className="text-danger">{error}</span>
                   </div>
                   <div className="mb-3">
                     <label className="form-label">

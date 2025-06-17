@@ -2,8 +2,9 @@ import React from "react";
 import {
   IconStarFilled,
   IconStarHalfFilled,
-  IconStar
+  IconStar,
 } from "@tabler/icons-react";
+import { Navbar, Footer } from "@/components/showcase";
 
 const Testimonials = () => {
   const testimonials = [
@@ -37,32 +38,20 @@ const Testimonials = () => {
 
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <IconStarFilled
-          key={`star-${i}`}
-          className="text-yellow"
-          size={16}
-        />
+        <IconStarFilled key={`star-${i}`} className="text-yellow" size={16} />
       );
     }
 
     if (hasHalfStar) {
       stars.push(
-        <IconStarHalfFilled
-          key="half-star"
-          className="text-yellow"
-          size={16}
-        />
+        <IconStarHalfFilled key="half-star" className="text-yellow" size={16} />
       );
     }
 
     const remainingStars = 5 - Math.ceil(rating);
     for (let i = 0; i < remainingStars; i++) {
       stars.push(
-        <IconStar
-          key={`empty-star-${i}`}
-          className="text-yellow"
-          size={16}
-        />
+        <IconStar key={`empty-star-${i}`} className="text-yellow" size={16} />
       );
     }
 
@@ -70,44 +59,50 @@ const Testimonials = () => {
   };
 
   return (
-    <section className="py-4 mb-6"
-      style={{ backgroundColor: '#8ebe21', minHeight: '30vh' }}>
-      <div className="container">
-        <h2 className="text-center text-4xl font-bold text-white mb-4">
-          Témoignages
-        </h2>
+    <>
+      <Navbar />
+      <section
+        className="py-4 mb-6"
+        style={{ backgroundColor: "#8ebe21", minHeight: "30vh" }}
+      >
+        <div className="container">
+          <h2 className="text-center text-4xl font-bold text-white mb-4">
+            Témoignages
+          </h2>
 
-        <div className="row g-4">
-          {testimonials.map((testimonial, index) => (
-            <div className="col-md-4" key={index}>
-              <div className="card h-100 rounded-3 p-3 shadow-sm">
-                <div className="d-flex align-items-center mb-3">
-                  <span className="avatar me-3">
-                    <img
-                      src={testimonial.image}
-                      alt="Portrait"
-                      className="rounded-circle"
-                    />
-                  </span>
-                  <div>
-                    <h5 className="mb-0 fw-bold">{testimonial.name}</h5>
-                    <p className="mb-0 text-muted small">
-                      {testimonial.position}
-                    </p>
+          <div className="row g-4">
+            {testimonials.map((testimonial, index) => (
+              <div className="col-md-4" key={index}>
+                <div className="card h-100 rounded-3 p-3 shadow-sm">
+                  <div className="d-flex align-items-center mb-3">
+                    <span className="avatar me-3">
+                      <img
+                        src={testimonial.image}
+                        alt="Portrait"
+                        className="rounded-circle"
+                      />
+                    </span>
+                    <div>
+                      <h5 className="mb-0 fw-bold">{testimonial.name}</h5>
+                      <p className="mb-0 text-muted small">
+                        {testimonial.position}
+                      </p>
+                    </div>
                   </div>
+                  <div className="mb-3 d-flex align-items-center">
+                    {renderStars(testimonial.stars)}
+                  </div>
+                  <p className="card-text text-muted small">
+                    {testimonial.text}
+                  </p>
                 </div>
-                <div className="mb-3 d-flex align-items-center">
-                  {renderStars(testimonial.stars)}
-                </div>
-                <p className="card-text text-muted small">
-                  {testimonial.text}
-                </p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+      <Footer />
+    </>
   );
 };
 

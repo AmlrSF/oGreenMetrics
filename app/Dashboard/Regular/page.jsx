@@ -242,7 +242,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className="h1 mb-0">
-                      {calculateAverageCleanerThan()}%
+                      {calculateAverageCleanerThan() || "0"}%
                     </div>
                     <div className="d-flex mt-1">
                       <div className="text-muted">Comparaison sectorielle</div>
